@@ -1,6 +1,6 @@
 require('dotenv').config(); // Load .env file first
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require('../src/generated/prisma'); // Use custom output path from schema.prisma
 
 const prisma = new PrismaClient();
 const app = express();
