@@ -1,43 +1,33 @@
-require('dotenv').config(); // Load .env file first
+require('dotenv').config();
 const express = require('express');
-const { PrismaClient } = require('../src/generated/prisma'); // Use custom output path from schema.prisma
 
-const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(express.json()); // Middleware to parse JSON
+// Import routes
+const userRoutes = require('./routes/userRoutes');
+
+app.use(express.json()); // Middleware to parse JSON bodies
+
+// --- API routes ---
+// Mount the user routes under the /api/users path
+app.use('/api/users', userRoutes);
 
 // Health Check Route
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'UP', timestamp: new Date().toISOString(), database: 'connected' }); // Assume connected for now
+    // Basic health check - enhance later with actual DB check if needed
+    res.json({ status: 'UP', timestamp: new Date().toISOString() });
 });
 
-// --- API routes ---
 
-// ---
-
+// --- Main function and server start ---
 async function main() {
-    // Test database connection
-    try {
-        await prisma.$connect();
-        console.log("Database connection successful!");
-
-        app.listen(PORT, () => {
-            console.log(`Backend server running on http://localhost:${PORT}`);
-        });
-
-    } catch (error) {
-        console.error("Failed to connect to the database", error);
-        process.exit(1); // Exit if DB connection fails
-    }
+    app.listen(PORT, () => {
+        console.log(`Backend server running on http://localhost:${PORT}`);
+    });
 }
 
-main();
-
-// shutdown
-process.on('beforeExit', async () => {
-  console.log('Disconnecting database...');
-  await prisma.$disconnect();
-  console.log('Database disconnected.');
+main().catch((e) => {
+    console.error('Failed to start server:', e);
+    process.exit(1);
 });
