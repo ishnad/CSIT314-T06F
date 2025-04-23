@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import UserAdminUI from './components/UserAdminUI';
+import UserAdminUI from './boundaries/UserAdminUI';
 
 function App() {
   return (
