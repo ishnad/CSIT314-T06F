@@ -4,7 +4,8 @@ const userController = require('../controllers/userController');
 const router = express.Router();
 
 // Define routes for /api/users (prefix added in server.js)
-router.post('/', userController.createUserAccount); // POST /api/users maps to createUserAccount
+const createUserAccountController = new userController.CreateUserAccountController();
+router.post('/', (req, res) => createUserAccountController.create(req, res)); // POST /api/users maps to CreateUserAccountController.create
 
 // Add other user routes here later
 // router.get('/:id', userController.getUserById);
