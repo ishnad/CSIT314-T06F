@@ -36,7 +36,30 @@ class ViewUserAccountController {
     }
 }
 
+class EditUserAccountController {
+    constructor() {
+        this.userEntity = new UserEntity();
+    }
+
+    async editUserAccount(req, res) {
+        const { username, userProfile, email, status } = req.body;
+
+        try {
+            const result = await this.userEntity.editUserAccount(username, userProfile, email, status);
+            if (result.error) {
+                res.status(result.error.status).json({ error: result.error.error });
+            } else {
+                res.status(200).json(result);
+            }
+        } catch (error) {
+            console.error("Error editing user:", error);
+            res.status(500).json({ error: "Failed to update user" });
+        }
+    }
+}
+
 module.exports = {
     CreateUserAccountController,
     ViewUserAccountController,
+    EditUserAccountController,
 };
