@@ -7,10 +7,12 @@ const router = express.Router();
 const createUserAccountController = new userController.CreateUserAccountController();
 const viewUserAccountController = new userController.ViewUserAccountController();
 const editUserAccountController = new userController.EditUserAccountController();
+const suspendUserAccountController = new userController.SuspendUserAccountController();
 
 router.post('/', (req, res) => createUserAccountController.createUserAccount(req, res));
 router.get('/', (req, res) => viewUserAccountController.viewUserAccount(req, res));
 router.put('/', (req, res) => editUserAccountController.editUserAccount(req, res));
+router.post('/suspend', (req, res) => suspendUserAccountController.suspendUserAccount(req, res));
 
 // Add other user routes here later
 // router.get('/:id', userController.getUserById);

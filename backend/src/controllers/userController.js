@@ -58,8 +58,31 @@ class EditUserAccountController {
     }
 }
 
+class SuspendUserAccountController {
+    constructor() {
+        this.userEntity = new UserEntity();
+    }
+
+    async suspendUserAccount(req, res) {
+        const { username } = req.body;
+
+        try {
+            const success = await this.userEntity.suspendUserAccount(username);
+            if (success) {
+                res.status(200).json({ message: 'User account suspended successfully' });
+            } else {
+                res.status(500).json({ error: 'Failed to suspend user account' });
+            }
+        } catch (error) {
+            console.error("Error suspending user:", error);
+            res.status(500).json({ error: "Failed to suspend user account" });
+        }
+    }
+}
+
 module.exports = {
     CreateUserAccountController,
     ViewUserAccountController,
     EditUserAccountController,
+    SuspendUserAccountController
 };

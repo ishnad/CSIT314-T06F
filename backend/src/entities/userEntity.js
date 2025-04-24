@@ -2,6 +2,8 @@ const { PrismaClient } = require('../generated/prisma');
 const bcrypt = require('bcrypt');
 
 class UserEntity {
+    static STATUS_ACTIVE = 'active';
+    static STATUS_SUSPENDED = 'suspended';
     constructor() {
         this.prisma = new PrismaClient();
         this.SALT_ROUNDS = 10;
@@ -113,6 +115,19 @@ class UserEntity {
         });
 
         return users;
+    }
+
+    async suspendUserAccount(username) {
+        try {
+            const user = await this.prisma.userAccount.update({
+                where: { username },
+                data: { status: UserEntity.STATUS_SUSPENDED }
+            });
+            return true;
+        } catch (error) {
+            console.error("Error suspending user:", error);
+            return false;
+        }
     }
 }
 
