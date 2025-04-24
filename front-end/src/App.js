@@ -4,9 +4,7 @@ import UserAdminUI from './boundaries/UserAdminUI';
 
 function App() {
   return (
-    <div className="wire-frame-container">
-      <UserAdminUI />
-    </div>
+    <UserAdminUI />
   );
 }
 

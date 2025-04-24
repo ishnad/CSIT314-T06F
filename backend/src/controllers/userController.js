@@ -18,6 +18,25 @@ class CreateUserAccountController {
     }
 }
 
+class ViewUserAccountController {
+    constructor() {
+        this.userEntity = new UserEntity();
+    }
+
+    async viewUserAccount(req, res) {
+        const { filter, keyword } = req.query;
+
+        try {
+            const users = await this.userEntity.viewUserAccount(filter, keyword);
+            res.status(200).json(users);
+        } catch (error) {
+            console.error("Error viewing users:", error);
+            res.status(500).json({ error: "Failed to retrieve users" });
+        }
+    }
+}
+
 module.exports = {
     CreateUserAccountController,
+    ViewUserAccountController,
 };

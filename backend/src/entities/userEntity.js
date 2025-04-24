@@ -48,6 +48,25 @@ class UserEntity {
     async hashPassword(password) {
         return await bcrypt.hash(password, this.SALT_ROUNDS);
     }
+
+    async viewUserAccount(filter, keyword) {
+        const whereClause = {};
+        if (filter && keyword) {
+            whereClause[filter] = { contains: keyword };
+        }
+
+        const users = await this.prisma.userAccount.findMany({
+            where: whereClause,
+            select: {
+                username: true,
+                email: true,
+                userProfile: true,
+                status: true
+            }
+        });
+
+        return users;
+    }
 }
 
 module.exports = UserEntity;
