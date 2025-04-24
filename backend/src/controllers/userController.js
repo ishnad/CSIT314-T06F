@@ -1,69 +1,42 @@
-const { PrismaClient, UserProfile } = require('../src/generated/prisma');
-const bcrypt = require('bcrypt');
+const UserEntity = require('../entities/userEntity');
 
-const prisma = new PrismaClient(); // Instantiate Prisma Client
-const SALT_ROUNDS = 10;
-
-/**
- * Controller function to handle creating a new user account.
- * Corresponds to the 'CreateUserAccountController' in BCE.
- * @param {object} req - Express request object
- * @param {object} res - Express response object
- */
-const createUserAccount = async (req, res) => {
-    const { username, password, userProfile } = req.body;
-
-    // --- Validation ---
-    if (!username || !password || !userProfile) {
-        return res.status(400).json({ error: 'Username, password, and userProfile are required.' });
+class CreateUserAccountController {
+    constructor() {
+        this.userEntity = new UserEntity();
     }
-    if (!Object.values(UserProfile).includes(userProfile)) {
-         return res.status(400).json({
-            error: `Invalid userProfile. Must be one of: ${Object.values(UserProfile).join(', ')}`
-         });
+
+    async createUserAccount(req, res) {
+        const { username, password, userProfile } = req.body;
+
+        try {
+            const result = await this.userEntity.createUserAccount({ username, password, userProfile });
+            res.status(201).json(result);
+
+        } catch (error) {
+            console.error("Error creating user:", error);
+            res.status(result.error.status).json({ error: result.error.error });        }
     }
-    // --- End Validation ---
+}
 
-    try {
-        const existingUser = await prisma.userAccount.findUnique({
-            where: { username },
-        });
+class ViewUserAccountController {
+    constructor() {
+        this.userEntity = new UserEntity();
+    }
 
-        if (existingUser) {
-            return res.status(409).json({ error: 'Username already exists.' });
+    async viewUserAccount(req, res) {
+        const { filter, keyword } = req.query;
+
+        try {
+            const users = await this.userEntity.viewUserAccount(filter, keyword);
+            res.status(200).json(users);
+        } catch (error) {
+            console.error("Error viewing users:", error);
+            res.status(500).json({ error: "Failed to retrieve users" });
         }
-
-        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
-        // Interact with the UserAccount entity (database) via Prisma Client
-        const newUser = await prisma.userAccount.create({
-            data: {
-                username: username,
-                password: hashedPassword,
-                userProfile: userProfile,
-            },
-        });
-
-        // Prepare response (exclude sensitive data)
-        const userResponse = {
-            id: newUser.id,
-            username: newUser.username,
-            userProfile: newUser.userProfile,
-            createdAt: newUser.createdAt,
-        };
-        res.status(201).json(userResponse);
-
-    } catch (error) {
-        console.error("Error creating user:", error);
-        if (error.code === 'P2002' && error.meta?.target?.includes('username')) {
-            return res.status(409).json({ error: 'Username already exists (database constraint).' });
-        }
-        res.status(500).json({ error: 'Failed to create user account.' });
     }
-    // No finally block needed to disconnect here if prisma client is shared / managed globally
-};
+}
 
 module.exports = {
-    createUserAccount,
-    // Add other user-related controller functions here later (e.g., getUser, updateUser)
+    CreateUserAccountController,
+    ViewUserAccountController,
 };

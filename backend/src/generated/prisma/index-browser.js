@@ -122,6 +122,7 @@ exports.Prisma.UserAccountScalarFieldEnum = {
   username: 'username',
   password: 'password',
   userProfile: 'userProfile',
+  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -140,6 +141,13 @@ exports.UserProfile = exports.$Enums.UserProfile = {
   CLEANER: 'CLEANER',
   ADMIN: 'ADMIN',
   PLATFORM: 'PLATFORM'
+};
+
+exports.UserStatus = exports.$Enums.UserStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  BANNED: 'BANNED'
 };
 
 exports.Prisma.ModelName = {
