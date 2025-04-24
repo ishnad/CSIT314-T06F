@@ -23,5 +23,9 @@
   "bugs": {
     "url": "https://github.com/ruiennn03/CSIT314-T06F/issues"
   },
-  "homepage": "https://github.com/ruiennn03/CSIT314-T06F#readme"
+  "homepage": "https://github.com/ruiennn03/CSIT314-T06F#readme",
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
 }
