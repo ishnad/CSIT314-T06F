@@ -100,7 +100,13 @@ class UserEntity {
 
     async viewUserAccount(filter, keyword) {
         const whereClause = {};
-        if (filter && keyword) {
+        
+        // Special handling for userProfile filter (Cleaner/Homeowner)
+        if (filter === 'userProfile' && keyword) {
+            whereClause.userProfile = { equals: keyword };
+        }
+        // General case for other filters
+        else if (filter && keyword) {
             whereClause[filter] = { contains: keyword };
         }
 
@@ -110,7 +116,8 @@ class UserEntity {
                 username: true,
                 email: true,
                 userProfile: true,
-                status: true
+                status: true,
+                createdAt: true
             }
         });
 
@@ -128,6 +135,29 @@ class UserEntity {
             console.error("Error suspending user:", error);
             return false;
         }
+    }
+
+    async searchUserAccount(filter, keyword) {
+        if (!filter) {
+            throw new Error('Filter parameter is required for search');
+        }
+
+        const whereClause = {};
+        if (keyword) {
+            whereClause[filter] = { contains: keyword };
+        }
+
+        const users = await this.prisma.userAccount.findMany({
+            where: whereClause,
+            select: {
+                username: true,
+                email: true,
+                userProfile: true,
+                status: true
+            }
+        });
+
+        return users;
     }
 }
 
