@@ -68,6 +68,10 @@ class UserAdminUI extends React.Component {
     handleSubmit = async (e) => {
         e.preventDefault();
         const { username, password, userProfile } = this.state;
+        if (!userProfile) {
+            alert("Please select a user profile.");
+            return;
+        }
         await this.getUserInput(username, password, userProfile.toUpperCase());
     };
 
