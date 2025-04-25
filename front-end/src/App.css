@@ -1,166 +1,125 @@
-/* Full-page container to center content */
-#root {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+/* App.css - Global styles */
+* {
+  box-sizing: border-box;
   margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f5f5f5;
+  line-height: 1.6;
 }
 
-/* Dark mode for root background */
-@media (prefers-color-scheme: dark) {
-  #root {
-    background-color: #121212;
-  }
-}
-
-.wire-frame-container {
-  width: 100%;
-  max-width: 500px;
-  padding: 20px;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: relative;
-  background-color: white;
-}
-
-.form-number {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-weight: bold;
-}
-
-.wire-frame-title {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #333;
-}
-
-.create-user-form {
+.app-container {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.form-heading {
-  text-align: center;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 20px;
-}
-
-.form-group {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  width: 120px;
-  text-align: right;
-  margin-right: 10px;
-}
-
-.form-group input {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-.dropdown-container {
-  position: relative;
-  flex: 1;
-}
-
-.dropdown-button {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  text-align: left;
-  font-size: 16px;
-}
-
-.dropdown-arrow {
-  font-size: 10px;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  border: 1px solid #ccc;
-  background-color: white;
-  border-radius: 4px;
-  z-index: 10;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.dropdown-item {
-  padding: 8px;
-  cursor: pointer;
-}
-
-.dropdown-item:hover {
-  background-color: #f5f5f5;
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-.create-button {
-  background-color: #5D5CDE;
-  font-size: medium;
+.app-header {
+  background-color: #2c2c54;
   color: white;
-  border: none;
-  padding: 6px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  padding: 1rem 2rem;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.create-button:hover {
-  background-color: #4c4bb8;
+.app-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.app-content {
+  flex: 1;
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.app-footer {
+  background-color: #f0f0f0;
+  color: #666;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  border-top: 1px solid #ddd;
+}
+
+/* Message styles */
+.message {
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.message.info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.page-title {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+/* Media query for responsive design */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0.8rem 1rem;
+  }
+  
+  .app-header h1 {
+    font-size: 1.2rem;
+  }
+  
+  .app-content {
+    padding: 1rem 0.5rem;
+  }
 }
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .wire-frame-container {
-    background-color: #181818;
-    border-color: #333;
-    color: white;
-  }
-  
-  .wire-frame-title,
-  .form-heading {
+  body {
+    background-color: #121212;
     color: #e0e0e0;
   }
   
-  .form-group input,
-  .dropdown-button {
-    background-color: #333;
-    border-color: #555;
-    color: white;
+  .app-header {
+    background-color: #1a1a36;
   }
   
-  .dropdown-menu {
-    background-color: #333;
-    border-color: #555;
+  .app-footer {
+    background-color: #1e1e1e;
+    color: #aaa;
+    border-top-color: #333;
   }
   
-  .dropdown-item:hover {
-    background-color: #444;
+  .message.success {
+    background-color: #1e3b2f;
+    color: #d4edda;
+  }
+  
+  .message.error {
+    background-color: #3b1e1e;
+    color: #f8d7da;
+  }
+  
+  .message.info {
+    background-color: #1e3a3e;
+    color: #d1ecf1;
   }
 }

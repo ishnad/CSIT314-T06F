@@ -1,0 +1,108 @@
+/* Navbar.css */
+.navbar {
+  background-color: #4c4b89;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.navbar-nav {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item {
+  flex: 1;
+}
+
+.nav-link {
+  display: block;
+  padding: 1rem 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  text-align: center;
+  border: none;
+  background: none;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  width: 100%;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.nav-item.active .nav-link {
+  background-color: #5D5CDE;
+  color: white;
+  font-weight: 500;
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+}
+
+.user-greeting {
+  color: white;
+  margin-right: 15px;
+}
+
+.logout-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Media query for responsive design */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    padding: 0;
+  }
+  
+  .navbar-nav {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .navbar-user {
+    width: 100%;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+    justify-content: space-between;
+  }
+  
+  .nav-link {
+    padding: 0.8rem 1.2rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .navbar {
+    background-color: #2a2a4a;
+  }
+  
+  .logout-button {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+  
+  .logout-button:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+  }
+}
