@@ -112,10 +112,33 @@ class SearchUserAccountController {
     }
 }
 
+class VerifyLoginCredentialsController {
+    constructor() {
+        this.userEntity = new UserEntity();
+    }
+
+    async verifyLoginCredentials(req, res) {
+        const { username, password } = req.body;
+
+        try {
+            const isValid = await this.userEntity.verifyLoginCredentials({ username, password });
+            if (isValid) {
+                res.status(200).json({ message: 'Login successful' });
+            } else {
+                res.status(401).json({ error: 'Invalid credentials or not a UserAdmin' });
+            }
+        } catch (error) {
+            console.error("Error verifying login:", error);
+            res.status(500).json({ error: "Failed to verify login" });
+        }
+    }
+}
+
 module.exports = {
     CreateUserAccountController,
     ViewUserAccountController,
     EditUserAccountController,
     SuspendUserAccountController,
-    SearchUserAccountController
+    SearchUserAccountController,
+    VerifyLoginCredentialsController
 };

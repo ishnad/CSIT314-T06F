@@ -159,6 +159,23 @@ class UserEntity {
 
         return users;
     }
+
+    async verifyLoginCredentials({ username, password }) {
+        const user = await this.prisma.userAccount.findUnique({
+            where: { username },
+            select: {
+                password: true,
+                status: true,
+                userProfile: true
+            }
+        });
+
+        if (!user || user.status !== UserEntity.STATUS_ACTIVE || user.userProfile !== 'UserAdmin') {
+            return false;
+        }
+
+        return await bcrypt.compare(password, user.password);
+    }
 }
 
 module.exports = UserEntity;
