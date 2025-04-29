@@ -1,11 +1,46 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require('../generated/prisma');
 
 class UserProfileEntity {
     constructor() {
         this.prisma = new PrismaClient();
     }
 
+    validate(name, description) {
+        if (!name || !description) {
+            return {
+                status: 400,
+                error: 'Profile name and description are required'
+            };
+        }
+        return null;
+    }
+
+    async checkProfileNameExists(name) {
+        const existingProfile = await this.prisma.userProfile.findUnique({
+            where: { name },
+        });
+
+        if (existingProfile) {
+            return {
+                status: 409, // Conflict
+                error: 'Profile name already exists.'
+            };
+        }
+        return null;
+    }
+
+
     async createUserProfile(name, description) {
+        const validationError = this.validate(name, description);
+        if (validationError) {
+            return { error: validationError };
+        }
+
+        const nameExistsError = await this.checkProfileNameExists(name);
+        if (nameExistsError) {
+            return { error: nameExistsError };
+        }
+
         try {
             const profile = await this.prisma.userProfile.create({
                 data: {
@@ -13,34 +48,40 @@ class UserProfileEntity {
                     description
                 }
             });
-            return profile;
+            // Return only necessary fields, similar to userAccountEntity
+            return {
+                id: profile.id,
+                name: profile.name,
+                description: profile.description
+            };
         } catch (error) {
             console.error('Error creating user profile:', error);
-            throw error;
+            // Return structured error
+            return {
+                error: {
+                    status: 500,
+                    error: 'Failed to create user profile due to server error.'
+                }
+            };
         }
     }
 
-    async getProfileById(id) {
-        return this.prisma.userProfile.findUnique({
-            where: { id }
-        });
-    }
+    async listUserProfiles(filter, keyword) {
+        const whereClause = {};
 
-    async updateProfile(id, name, description) {
-        return this.prisma.userProfile.update({
-            where: { id },
-            data: { name, description }
-        });
-    }
+        if (filter && keyword && (filter === 'name' || filter === 'description')) {
+            whereClause[filter] = { contains: keyword, mode: 'insensitive' };
+        }
 
-    async deleteProfile(id) {
-        return this.prisma.userProfile.delete({
-            where: { id }
+        return this.prisma.userProfile.findMany({
+            where: whereClause,
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                createdAt: true
+            }
         });
-    }
-
-    async listProfiles() {
-        return this.prisma.userProfile.findMany();
     }
 }
 
