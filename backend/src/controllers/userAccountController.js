@@ -1,15 +1,15 @@
-const UserEntity = require('../entities/userEntity');
+const UserAccountEntity = require('../entities/userAccountEntity');
 
 class CreateUserAccountController {
     constructor() {
-        this.userEntity = new UserEntity();
+        this.userAccountEntity = new UserAccountEntity();
     }
 
     async createUserAccount(req, res) {
         const { username, password, userProfile } = req.body;
 
         try {
-            const result = await this.userEntity.createUserAccount({ username, password, userProfile });
+            const result = await this.userAccountEntity.createUserAccount({ username, password, userProfile });
             res.status(201).json(result);
 
         } catch (error) {
@@ -20,7 +20,7 @@ class CreateUserAccountController {
 
 class ViewUserAccountController {
     constructor() {
-        this.userEntity = new UserEntity();
+        this.userEntity = new UserAccountEntity();
     }
 
     async viewUserAccount(req, res) {
@@ -44,7 +44,7 @@ class ViewUserAccountController {
 
 class EditUserAccountController {
     constructor() {
-        this.userEntity = new UserEntity();
+        this.userEntity = new UserAccountEntity();
     }
 
     async editUserAccount(req, res) {
@@ -66,7 +66,7 @@ class EditUserAccountController {
 
 class SuspendUserAccountController {
     constructor() {
-        this.userEntity = new UserEntity();
+        this.userEntity = new UserAccountEntity();
     }
 
     async suspendUserAccount(req, res) {
@@ -88,7 +88,7 @@ class SuspendUserAccountController {
 
 class SearchUserAccountController {
     constructor() {
-        this.userEntity = new UserEntity();
+        this.userEntity = new UserAccountEntity();
     }
 
     async searchUserAccount(req, res) {
@@ -114,7 +114,7 @@ class SearchUserAccountController {
 
 class VerifyLoginCredentialsController {
     constructor() {
-        this.userEntity = new UserEntity();
+        this.userEntity = new UserAccountEntity();
     }
 
     async verifyLoginCredentials(req, res) {
@@ -134,11 +134,45 @@ class VerifyLoginCredentialsController {
     }
 }
 
+class LogoutController {
+    constructor() {
+        this.userEntity = new UserAccountEntity();
+    }
+
+    async confirmLogout(req, res) {
+        try {
+            const result = await this.userEntity.confirmLogout();
+            if (result) {
+                res.status(200).json({
+                    message: 'Logout successful',
+                    redirect: '/login'
+                });
+            } else {
+                res.status(500).json({ error: 'Failed to logout' });
+            }
+        } catch (error) {
+            console.error("Error logging out:", error);
+            res.status(500).json({ error: 'Internal server error during logout' });
+        }
+    }
+
+    async cancelLogout(req, res) {
+        try {
+            const result = this.userEntity.cancelLogout();
+            res.status(200).json({ message: 'Logout cancelled' });
+        } catch (error) {
+            console.error("Error cancelling logout:", error);
+            res.status(500).json({ error: 'Failed to cancel logout' });
+        }
+    }
+}
+
 module.exports = {
     CreateUserAccountController,
     ViewUserAccountController,
     EditUserAccountController,
     SuspendUserAccountController,
     SearchUserAccountController,
-    VerifyLoginCredentialsController
+    VerifyLoginCredentialsController,
+    LogoutController
 };
