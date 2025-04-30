@@ -1,15 +1,15 @@
 const express = require('express');
-const userController = require('../controllers/userController');
+const userAccountController = require('../controllers/userAccountController');
 
 const router = express.Router();
 
 // Define routes for /api/users (prefix added in server.js)
-const createUserAccountController = new userController.CreateUserAccountController();
-const viewUserAccountController = new userController.ViewUserAccountController();
-const editUserAccountController = new userController.EditUserAccountController();
-const suspendUserAccountController = new userController.SuspendUserAccountController();
-const searchUserAccountController = new userController.SearchUserAccountController();
-const verifyLoginCredentialsController = new userController.VerifyLoginCredentialsController();
+const createUserAccountController = new userAccountController.CreateUserAccountController();
+const viewUserAccountController = new userAccountController.ViewUserAccountController();
+const editUserAccountController = new userAccountController.EditUserAccountController();
+const suspendUserAccountController = new userAccountController.SuspendUserAccountController();
+const searchUserAccountController = new userAccountController.SearchUserAccountController();
+const verifyLoginCredentialsController = new userAccountController.VerifyLoginCredentialsController();
 
 router.post('/', (req, res) => createUserAccountController.createUserAccount(req, res));
 router.get('/', (req, res) => viewUserAccountController.viewUserAccount(req, res));

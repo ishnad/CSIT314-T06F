@@ -6,7 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Import routes
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require('./routes/userAccountRoutes');
 
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware to parse JSON bodies

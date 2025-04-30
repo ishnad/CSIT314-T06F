@@ -1,8 +1,8 @@
-const UserEntity = require('../entities/userEntity');
+const UserAccountEntity = require('../entities/userAccountEntity');
 
 class CreateUserAccountController {
     constructor() {
-        this.userEntity = new UserEntity();
+        this.userEntity = new UserAccountEntity();
     }
 
     async createUserAccount(req, res) {
@@ -20,7 +20,7 @@ class CreateUserAccountController {
 
 class ViewUserAccountController {
     constructor() {
-        this.userEntity = new UserEntity();
+        this.userEntity = new UserAccountEntity();
     }
 
     async viewUserAccount(req, res) {
@@ -44,7 +44,7 @@ class ViewUserAccountController {
 
 class EditUserAccountController {
     constructor() {
-        this.userEntity = new UserEntity();
+        this.userEntity = new UserAccountEntity();
     }
 
     async editUserAccount(req, res) {
@@ -66,7 +66,7 @@ class EditUserAccountController {
 
 class SuspendUserAccountController {
     constructor() {
-        this.userEntity = new UserEntity();
+        this.userEntity = new UserAccountEntity();
     }
 
     async suspendUserAccount(req, res) {
@@ -88,7 +88,7 @@ class SuspendUserAccountController {
 
 class SearchUserAccountController {
     constructor() {
-        this.userEntity = new UserEntity();
+        this.userEntity = new UserAccountEntity();
     }
 
     async searchUserAccount(req, res) {
@@ -114,7 +114,7 @@ class SearchUserAccountController {
 
 class VerifyLoginCredentialsController {
     constructor() {
-        this.userEntity = new UserEntity();
+        this.userEntity = new UserAccountEntity();
     }
 
     async verifyLoginCredentials(req, res) {
