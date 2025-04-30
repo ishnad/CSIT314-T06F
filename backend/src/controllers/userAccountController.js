@@ -134,11 +134,45 @@ class VerifyLoginCredentialsController {
     }
 }
 
+class LogoutController {
+    constructor() {
+        this.userEntity = new UserAccountEntity();
+    }
+
+    async confirmLogout(req, res) {
+        try {
+            const result = await this.userEntity.confirmLogout();
+            if (result) {
+                res.status(200).json({
+                    message: 'Logout successful',
+                    redirect: '/login'
+                });
+            } else {
+                res.status(500).json({ error: 'Failed to logout' });
+            }
+        } catch (error) {
+            console.error("Error logging out:", error);
+            res.status(500).json({ error: 'Internal server error during logout' });
+        }
+    }
+
+    async cancelLogout(req, res) {
+        try {
+            const result = this.userEntity.cancelLogout();
+            res.status(200).json({ message: 'Logout cancelled' });
+        } catch (error) {
+            console.error("Error cancelling logout:", error);
+            res.status(500).json({ error: 'Failed to cancel logout' });
+        }
+    }
+}
+
 module.exports = {
     CreateUserAccountController,
     ViewUserAccountController,
     EditUserAccountController,
     SuspendUserAccountController,
     SearchUserAccountController,
-    VerifyLoginCredentialsController
+    VerifyLoginCredentialsController,
+    LogoutController
 };
