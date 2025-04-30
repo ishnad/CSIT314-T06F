@@ -1,14 +1,12 @@
 const { PrismaClient } = require('../generated/prisma');
 const bcrypt = require('bcrypt');
 
-class UserAccountEntity {
+class UserEntity {
     static STATUS_ACTIVE = 'active';
     static STATUS_SUSPENDED = 'suspended';
     constructor() {
         this.prisma = new PrismaClient();
         this.SALT_ROUNDS = 10;
-        this.sessionID = null;
-        this.userID = null;
     }
 
     validate(username, userProfile, email, status) {
@@ -130,7 +128,7 @@ class UserAccountEntity {
         try {
             const user = await this.prisma.userAccount.update({
                 where: { username },
-                data: { status: UserAccountEntity.STATUS_SUSPENDED }
+                data: { status: UserEntity.STATUS_SUSPENDED }
             });
             return true;
         } catch (error) {
@@ -172,29 +170,12 @@ class UserAccountEntity {
             }
         });
 
-        if (!user || user.status !== UserAccountEntity.STATUS_ACTIVE || user.userProfile !== 'UserAdmin') {
+        if (!user || user.status !== UserEntity.STATUS_ACTIVE || user.userProfile !== 'UserAdmin') {
             return false;
         }
 
         return await bcrypt.compare(password, user.password);
     }
-
-    async confirmLogout() {
-        try {
-            // Clear session data
-            this.sessionID = null;
-            this.userID = null;
-            return true;
-        } catch (error) {
-            console.error("Error confirming logout:", error);
-            return false;
-        }
-    }
-
-    cancelLogout() {
-        // Simply return true since we're not actually logging out
-        return true;
-    }
 }
 
-module.exports = UserAccountEntity;
+module.exports = UserEntity;

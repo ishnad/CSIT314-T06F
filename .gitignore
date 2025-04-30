@@ -27,4 +27,3 @@ frontend/build/
 # IDE specific folders
 .vscode/
 .idea/
-.aider*
