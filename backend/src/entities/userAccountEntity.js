@@ -107,8 +107,9 @@ class UserAccountEntity {
         if (filter === 'userProfile' && keyword) {
             whereClause.userProfile = { equals: keyword };
         }
+        // General case for other filters
         else if (filter && keyword) {
-            whereClause[filter] = { contains: keyword, mode: 'insensitive' };
+            whereClause[filter] = { contains: keyword };
         }
 
         const users = await this.prisma.userAccount.findMany({
