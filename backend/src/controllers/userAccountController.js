@@ -6,15 +6,29 @@ class CreateUserAccountController {
     }
 
     async createUserAccount(req, res) {
-        const { username, password, userProfile } = req.body;
+        // Expect userProfileName instead of userProfile enum value
+        const { username, password, userProfileName } = req.body;
+
+        if (!userProfileName) {
+             return res.status(400).json({ error: 'userProfileName is required.' });
+        }
 
         try {
-            const result = await this.userEntity.createUserAccount({ username, password, userProfile });
-            res.status(201).json(result);
+            const result = await this.userEntity.createUserAccount({ username, password, userProfileName });
+
+            // Check if entity returned an error
+            if (result.error) {
+                 res.status(result.error.status).json({ error: result.error.error });
+            } else {
+                 res.status(201).json(result);
+            }
 
         } catch (error) {
+            // Catch unexpected errors
             console.error("Error creating user:", error);
-            res.status(result.error.status).json({ error: result.error.error });        }
+            // Avoid using 'result' in catch block as it might be undefined
+            res.status(500).json({ error: 'Failed to create user due to a server error.' });
+        }
     }
 }
 
@@ -48,10 +62,15 @@ class EditUserAccountController {
     }
 
     async editUserAccount(req, res) {
-        const { username, userProfile, email, status } = req.body;
+        // Expect userProfileName instead of userProfile enum value
+        const { username, userProfileName, email, status } = req.body;
+
+         if (!userProfileName) {
+             return res.status(400).json({ error: 'userProfileName is required.' });
+        }
 
         try {
-            const result = await this.userEntity.editUserAccount(username, userProfile, email, status);
+            const result = await this.userEntity.editUserAccount(username, userProfileName, email, status);
             if (result.error) {
                 res.status(result.error.status).json({ error: result.error.error });
             } else {
