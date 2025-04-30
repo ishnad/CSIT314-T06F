@@ -24,6 +24,11 @@ This document provides instructions on how to set up and run the backend applica
     ```
 
 ## Database Setup
+*   **Format Schema:**
+    To automatically format your `prisma/schema.prisma` file for readability and consistency:
+    ```bash
+    npx prisma format
+    ```
 
 *   **Apply Schema Migrations:**
     This command connects to the Supabase database (using the `DATABASE_URL` from `.env`), applies any pending schema migrations defined in `prisma/schema.prisma`, and generates the Prisma Client code.
@@ -46,5 +51,19 @@ This document provides instructions on how to set up and run the backend applica
     ```bash
     npm start
     ```
+
+## Running Tests
+
+This project uses Jest for unit testing. To run the tests:
+
+1.  **Ensure Development Dependencies are Installed:**
+    Make sure you have run `npm install` in the `backend` directory, as Jest is a development dependency.
+
+2.  **Run Tests:**
+    Execute the following command from the `backend` directory:
+    ```bash
+    npm test
+    ```
+    This will discover and run all test files (typically ending in `.test.js`) within the project.
 
 ## Building the Application

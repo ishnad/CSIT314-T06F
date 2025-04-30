@@ -121,8 +121,16 @@ exports.Prisma.UserAccountScalarFieldEnum = {
   id: 'id',
   username: 'username',
   password: 'password',
-  userProfile: 'userProfile',
   status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userProfileId: 'userProfileId'
+};
+
+exports.Prisma.UserProfileScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -136,13 +144,11 @@ exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 };
-exports.UserProfile = exports.$Enums.UserProfile = {
-  HOMEOWNER: 'HOMEOWNER',
-  CLEANER: 'CLEANER',
-  ADMIN: 'ADMIN',
-  PLATFORM: 'PLATFORM'
-};
 
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
 exports.UserStatus = exports.$Enums.UserStatus = {
   ACTIVE: 'ACTIVE',
   INACTIVE: 'INACTIVE',
@@ -151,7 +157,8 @@ exports.UserStatus = exports.$Enums.UserStatus = {
 };
 
 exports.Prisma.ModelName = {
-  UserAccount: 'UserAccount'
+  UserAccount: 'UserAccount',
+  UserProfile: 'UserProfile'
 };
 
 /**
