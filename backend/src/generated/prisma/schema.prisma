@@ -18,6 +18,7 @@ datasource db {
 model UserAccount {
   id        String     @id @default(cuid())
   username  String     @unique
+  email     String     @unique // Added email field, marked as unique
   password  String
   status    UserStatus @default(ACTIVE)
   createdAt DateTime   @default(now())

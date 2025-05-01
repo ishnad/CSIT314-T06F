@@ -20,9 +20,4 @@ router.get('/search', (req, res) => searchUserAccountController.searchUserAccoun
 router.post('/login', (req, res) => verifyLoginCredentialsController.verifyLoginCredentials(req, res));
 router.post('/logout', (req, res) => logoutController.confirmLogout(req, res));
 
-// Add other user routes here later
-// router.get('/:id', userController.getUserById);
-// router.put('/:id', userController.updateUser);
-// router.delete('/:id', userController.deleteUser);
-
 module.exports = router; // Export the router

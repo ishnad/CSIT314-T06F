@@ -7,6 +7,7 @@ jest.mock('../../src/generated/prisma', () => {
         userProfile: {
             findUnique: jest.fn(),
             create: jest.fn(),
+            findMany: jest.fn(),
         },
     };
     return {
@@ -148,5 +149,122 @@ describe('UserProfileEntity', () => {
         });
     });
 
+    // --- Test listUserProfiles ---
+    describe('listUserProfiles', () => {
+        const mockProfilesRaw = [
+            { id: 'p1', name: 'Admin', description: 'Admin profile', createdAt: new Date(), _count: { userAccounts: 5 } },
+            { id: 'p2', name: 'Editor', description: 'Editor profile', createdAt: new Date(), _count: { userAccounts: 10 } },
+            { id: 'p3', name: 'Viewer', description: null, createdAt: new Date(), _count: { userAccounts: 2 } },
+        ];
+         const mockProfilesExpected = [
+            { id: 'p1', name: 'Admin', description: 'Admin profile', createdAt: mockProfilesRaw[0].createdAt, userAccountCount: 5 },
+            { id: 'p2', name: 'Editor', description: 'Editor profile', createdAt: mockProfilesRaw[1].createdAt, userAccountCount: 10 },
+            { id: 'p3', name: 'Viewer', description: null, createdAt: mockProfilesRaw[2].createdAt, userAccountCount: 2 },
+        ];
 
+        beforeEach(() => {
+            // Ensure findMany is part of the mock if not already added
+            if (!mockPrismaClient.userProfile.findMany) {
+                 mockPrismaClient.userProfile.findMany = jest.fn();
+            }
+        });
+
+        it('should return a list of all user profiles with user account counts', async () => {
+            mockPrismaClient.userProfile.findMany.mockResolvedValue(mockProfilesRaw);
+
+            const result = await userProfileEntity.listUserProfiles();
+
+            expect(mockPrismaClient.userProfile.findMany).toHaveBeenCalledWith({
+                where: {},
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    createdAt: true,
+                    _count: { select: { userAccounts: true } },
+                },
+                orderBy: { name: 'asc' },
+            });
+            expect(result).toEqual(mockProfilesExpected);
+        });
+
+        it('should return a filtered list of user profiles based on keyword', async () => {
+            const keyword = 'admin';
+            const filteredRaw = [mockProfilesRaw[0]];
+            const filteredExpected = [mockProfilesExpected[0]];
+            mockPrismaClient.userProfile.findMany.mockResolvedValue(filteredRaw);
+
+            const result = await userProfileEntity.listUserProfiles({ keyword });
+
+            expect(mockPrismaClient.userProfile.findMany).toHaveBeenCalledWith({
+                where: { name: { contains: keyword, mode: 'insensitive' } },
+                 select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    createdAt: true,
+                    _count: { select: { userAccounts: true } },
+                },
+                orderBy: { name: 'asc' },
+            });
+            expect(result).toEqual(filteredExpected);
+        });
+
+         it('should handle keyword with leading/trailing whitespace', async () => {
+            const keyword = '  Editor  ';
+            const filteredRaw = [mockProfilesRaw[1]];
+            const filteredExpected = [mockProfilesExpected[1]];
+            mockPrismaClient.userProfile.findMany.mockResolvedValue(filteredRaw);
+
+            const result = await userProfileEntity.listUserProfiles({ keyword });
+
+            expect(mockPrismaClient.userProfile.findMany).toHaveBeenCalledWith({
+                where: { name: { contains: 'Editor', mode: 'insensitive' } }, // Trimmed keyword
+                 select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    createdAt: true,
+                    _count: { select: { userAccounts: true } },
+                },
+                orderBy: { name: 'asc' },
+            });
+            expect(result).toEqual(filteredExpected);
+        });
+
+        it('should return an empty list if no profiles match the keyword', async () => {
+            const keyword = 'nonexistent';
+            mockPrismaClient.userProfile.findMany.mockResolvedValue([]);
+
+            const result = await userProfileEntity.listUserProfiles({ keyword });
+
+            expect(mockPrismaClient.userProfile.findMany).toHaveBeenCalledWith({
+                where: { name: { contains: keyword, mode: 'insensitive' } },
+                 select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    createdAt: true,
+                    _count: { select: { userAccounts: true } },
+                },
+                orderBy: { name: 'asc' },
+            });
+            expect(result).toEqual([]);
+        });
+
+
+        it('should return server error if prisma findMany fails', async () => {
+            const prismaError = new Error("Database query failed");
+            const expectedError = { error: { status: 500, error: 'Failed to retrieve user profiles due to a server error.' } };
+            mockPrismaClient.userProfile.findMany.mockRejectedValue(prismaError);
+
+            // Silence console.error for this test
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await userProfileEntity.listUserProfiles();
+            consoleErrorSpy.mockRestore(); // Restore console.error
+
+            expect(result).toEqual(expectedError);
+            expect(mockPrismaClient.userProfile.findMany).toHaveBeenCalled();
+        });
+    });
 });

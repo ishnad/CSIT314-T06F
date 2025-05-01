@@ -5,17 +5,10 @@ const router = express.Router();
 
 // Instantiate controllers
 const createUserProfileController = new userProfileController.CreateUserProfileController();
+const viewUserProfileController = new userProfileController.ViewUserProfileController();
 
-// Define routes for /api/profiles (prefix added in server.js)
-
-// POST /api/profiles - Create a new user profile
 router.post('/', (req, res) => createUserProfileController.createUserProfile(req, res));
-
-// Add other profile routes later (GET, PUT, DELETE)
-// router.get('/', ...);
-// router.get('/:id', ...);
-// router.put('/:id', ...);
-// router.delete('/:id', ...);
+router.get('/', (req, res) => viewUserProfileController.listUserProfiles(req, res));
 
 
 module.exports = router; // Export the router

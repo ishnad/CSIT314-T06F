@@ -66,6 +66,52 @@ class UserProfileEntity {
         }
     }
 
+    /**
+     * Lists user profiles, optionally filtering by name, and includes user account counts.
+     * @param {object} [options] - Optional parameters.
+     * @param {string} [options.keyword] - Keyword to filter profile names (case-insensitive contains).
+     * @returns {Promise<Array<object>|object>} Array of profile objects or an error object.
+     */
+    async listUserProfiles({ keyword } = {}) {
+        try {
+            const whereClause = {};
+            if (keyword && typeof keyword === 'string' && keyword.trim() !== '') {
+                whereClause.name = {
+                    contains: keyword.trim(),
+                    mode: 'insensitive',
+                };
+            }
+
+            const profiles = await this.prisma.userProfile.findMany({
+                where: whereClause,
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    createdAt: true,
+                    _count: { // Include the count of related user accounts
+                        select: { userAccounts: true },
+                    },
+                },
+                orderBy: { // Optional: Order by name by default
+                    name: 'asc',
+                },
+            });
+
+            // Remap the result to place userAccount count at the top level for easier access
+            const profilesWithCount = profiles.map(profile => ({
+                ...profile,
+                userAccountCount: profile._count.userAccounts, // Rename _count.userAccounts
+                _count: undefined // Remove the original _count object
+            }));
+
+            return profilesWithCount;
+
+        } catch (error) {
+            console.error("Error listing user profiles:", error);
+            return { error: { status: 500, error: 'Failed to retrieve user profiles due to a server error.' } };
+        }
+    }
 }
 
 module.exports = UserProfileEntity;
