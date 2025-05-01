@@ -30,6 +30,7 @@ class UserAdminUI extends Component {
       newUser: {
         username: '',
         password: '',
+        email: '',
         userProfile: '',
       },
       response: null,
@@ -47,6 +48,12 @@ class UserAdminUI extends Component {
     // If authenticated, load users
     if (this.props.isAuthenticated) {
       this.getAllUsers();
+    } else {
+      // If not authenticated, pre-fill login form for convenience
+      this.setState({
+        loginUsername: 'admin',
+        loginPassword: 'admin123'
+      });
     }
     
     // Add event listener for dropdown
@@ -146,19 +153,24 @@ class UserAdminUI extends Component {
     try {
       this.setState({ loading: true });
       
-      // Use the actual API call
-      const res = await fetch(`http://localhost:3001/api/users/search?term=${keyword}`);
+      // Backend expects 'filter' and 'keyword'
+      const res = await fetch(`http://localhost:3001/api/users/search?filter=username&keyword=${keyword}`);
       const data = await res.json();
       
+      // Handle backend message for no users found
+      const users = data.message ? [] : data; // If message exists, it means no users found
+
       this.setState({
-        filteredUsers: data,
+        filteredUsers: users,
         loading: false,
-        message: data.length === 0 ? {
+        message: data.message ? { // Display backend message if present
+          text: data.message,
+          type: "info"
+        } : (users.length === 0 ? { // Fallback message if no users and no backend message
           text: "No users found matching your search criteria",
           type: "info"
-        } : null
+        } : null)
       });
-      
     } catch (err) {
       this.setState({
         error: err.message,
@@ -210,19 +222,37 @@ class UserAdminUI extends Component {
   };
 
   handleSaveChanges = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Ensure default form submission is prevented
     const { selectedUser, editFormData } = this.state;
-    
+    if (!selectedUser) return; // Should not happen if modal is open
+
     try {
-      // Use the actual API call
-      const res = await fetch(`http://localhost:3001/api/users/${selectedUser.id}`, {
+      // Backend expects PUT /api/users and identifies user by ID
+      // Backend expects 'userProfileName'
+      const payload = {
+        id: selectedUser.id, // Send the original user ID for identification
+        username: editFormData.username, // Send potentially updated username
+        userProfileName: editFormData.userProfile, // Send profile name with correct key
+        email: editFormData.email,
+        status: editFormData.status // Send status string (e.g., "Active")
+      };
+
+      const res = await fetch(`http://localhost:3001/api/users`, { // Use PUT /api/users endpoint
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editFormData)
+        body: JSON.stringify(payload) // Send payload
       });
-      const data = await res.json();
-      
+
+      if (!res.ok) {
+        // Handle non-2xx responses
+        const errorData = await res.json();
+        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json(); // Contains the updated user data from backend
+
       // Update local state with the response from API
+      // Backend returns { username, userProfile, email, status }
       const updatedUsers = this.state.users.map(user => {
         if (user.id === selectedUser.id) {
           return data;
@@ -272,30 +302,47 @@ class UserAdminUI extends Component {
     this.setState({ showEditModal: false });
   };
 
+  // Using Edit User endpoint (PUT /api/users) to update status
   confirmSuspend = async () => {
     const { selectedUser } = this.state;
     if (!selectedUser) return;
-    
+
+    // Compare against uppercase 'ACTIVE' from backend enum
+    // Set newStatus to the title-case string the backend expects for the update payload
+    const newStatus = selectedUser.status === 'ACTIVE' ? 'Suspended' : 'Active';
+    const actionVerb = newStatus === 'Suspended' ? 'suspend' : 'activate';
+
     const confirmAction = window.confirm(
-      selectedUser.status === 'Active'
-        ? `Are you sure you want to suspend ${selectedUser.username}?`
-        : `Are you sure you want to activate ${selectedUser.username}?`
+      `Are you sure you want to ${actionVerb} ${selectedUser.username}?`
     );
-    
+
     if (!confirmAction) return;
-    
+
     try {
-      // Use the actual API call
-      const newStatus = selectedUser.status === 'Active' ? 'Suspended' : 'Active';
-      
-      const res = await fetch(`http://localhost:3001/api/users/${selectedUser.id}/status`, {
+      // Prepare payload for the PUT /api/users endpoint
+      // We need id, username, userProfileName, email, and the new status
+      const payload = {
+        id: selectedUser.id, // Send the user ID for identification
+        username: selectedUser.username, // Keep username (backend might use it for checks or logging)
+        userProfileName: selectedUser.userProfile, // Send current profile name
+        email: selectedUser.email, // Send current email
+        status: newStatus // Send the new status
+      };
+
+      const res = await fetch(`http://localhost:3001/api/users`, { // Use the edit endpoint
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify(payload)
       });
-      
-      const data = await res.json();
-      
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json(); // Backend returns the updated user
+
+      // Update local state
       const updatedUsers = this.state.users.map(user => {
         if (user.id === selectedUser.id) {
           return data;
@@ -340,7 +387,7 @@ class UserAdminUI extends Component {
   };
 
   // CreateUser methods
-  createUser = async (username, password, userProfile) => {
+  createUser = async (username, password, userProfile, email) => {
     try {
       // Use the actual API call
       const res = await fetch('http://localhost:3001/api/users', {
@@ -348,14 +395,21 @@ class UserAdminUI extends Component {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          username, 
-          password, 
-          userProfile 
+        body: JSON.stringify({
+          username,
+          password,
+          email,
+          userProfileName: userProfile
         }),
       });
-      const data = await res.json();
-      
+
+      if (!res.ok) {
+         // Handle non-2xx responses specifically for create user
+        const errorData = await res.json();
+        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json(); // Contains the created user data
       this.setState({ 
         response: data,
         message: {
@@ -364,11 +418,13 @@ class UserAdminUI extends Component {
         },
         newUser: {
           username: '',
+          username: '',
           password: '',
+          email: '',
           userProfile: ''
         }
       });
-      
+
       // Refresh the user list
       this.getAllUsers();
       
@@ -418,12 +474,17 @@ class UserAdminUI extends Component {
 
   handleCreateUserSubmit = async (e) => {
     e.preventDefault();
-    const { username, password, userProfile } = this.state.newUser;
+    const { username, password, email, userProfile } = this.state.newUser; // Include email
     if (!userProfile) {
       alert("Please select a user profile.");
       return;
     }
-    await this.createUser(username, password, userProfile.toUpperCase());
+    if (!email || !email.includes('@')) { // Basic email validation
+        alert("Please enter a valid email address.");
+        return;
+    }
+    // Pass email to createUser
+    await this.createUser(username, password, userProfile, email);
   };
 
   // Shared methods
@@ -563,11 +624,13 @@ class UserAdminUI extends Component {
           <button onClick={this.getEditInputs} className="edit-button">
             Edit User
           </button>
-          <button 
-            onClick={this.confirmSuspend} 
-            className={selectedUser.status === 'Active' ? 'suspend-button' : 'activate-button'}
+          <button
+            onClick={this.confirmSuspend}
+            // Compare against uppercase 'ACTIVE' from backend enum
+            className={selectedUser.status === 'ACTIVE' ? 'suspend-button' : 'activate-button'}
           >
-            {selectedUser.status === 'Active' ? 'Suspend User' : 'Activate User'}
+            {/* Compare against uppercase 'ACTIVE' but display title-case */}
+            {selectedUser.status === 'ACTIVE' ? 'Suspend User' : 'Activate User'}
           </button>
         </div>
       </div>
@@ -691,6 +754,18 @@ class UserAdminUI extends Component {
               id="new-username"
               name="username"
               value={newUser.username}
+              onChange={this.handleNewUserInputChange}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="new-email">Email:</label>
+            <input
+              type="email"
+              id="new-email"
+              name="email"
+              value={newUser.email}
               onChange={this.handleNewUserInputChange}
               required
             />

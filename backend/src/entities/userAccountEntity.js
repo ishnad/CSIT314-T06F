@@ -1,20 +1,18 @@
-const { PrismaClient } = require('../generated/prisma');
+const { PrismaClient, UserStatus } = require('../generated/prisma');
 const bcrypt = require('bcrypt');
 
 class UserAccountEntity {
-    static STATUS_ACTIVE = 'active';
-    static STATUS_SUSPENDED = 'suspended';
     constructor() {
         this.prisma = new PrismaClient();
         this.SALT_ROUNDS = 10;
     }
 
-    // Validation might need adjustment depending on how profile is passed (name vs id)
-    validateEditInput(username, userProfileName, email, status) {
-        if (!username || !userProfileName || !email || !status) {
+    // Validation updated to include ID and check status format later
+    validateEditInput(id, username, userProfileName, email, status) {
+        if (!id || !username || !userProfileName || !email || !status) {
             return {
                 status: 400,
-                error: 'All fields are required'
+                error: 'ID, username, userProfileName, email, and status are required'
             };
         }
         
@@ -28,11 +26,24 @@ class UserAccountEntity {
         return null;
     }
 
-    async editUserAccount(username, userProfileName, email, status) {
-        const validationError = this.validateEditInput(username, userProfileName, email, status);
-        if (validationError) {
-            return { error: validationError };
+    // Updated signature to accept ID first
+    async editUserAccount(id, username, userProfileName, email, status) {
+        // Basic validation first (presence of fields)
+        if (!id || !username || !userProfileName || !email || !status) {
+             return { error: { status: 400, error: 'ID, username, userProfileName, email, and status are required' } };
         }
+         // Validate email format
+        if (!email.includes('@')) {
+            return { error: { status: 400, error: 'Invalid email format' } };
+        }
+
+        // Validate and convert status to uppercase enum value
+        const validStatuses = Object.values(UserStatus); // Get ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'BANNED']
+        const upperCaseStatus = status.toUpperCase();
+        if (!validStatuses.includes(upperCaseStatus)) {
+             return { error: { status: 400, error: `Invalid status value. Must be one of: ${validStatuses.join(', ')}` } };
+        }
+
 
         try {
             // Find the profile ID based on the provided name
@@ -45,19 +56,34 @@ class UserAccountEntity {
                 return { error: { status: 404, error: `User profile '${userProfileName}' not found.` } };
             }
 
+            // Check if the new username conflicts with another existing user (if username is being changed)
+            const currentUser = await this.prisma.userAccount.findUnique({ where: { id } });
+            if (!currentUser) {
+                 // This case should ideally not happen if ID is valid, but good to check
+                 return { error: { status: 404, error: 'User to update not found.' } };
+            }
+            if (username !== currentUser.username) {
+                const existingUserWithNewUsername = await this.prisma.userAccount.findUnique({ where: { username } });
+                if (existingUserWithNewUsername) {
+                    return { error: { status: 409, error: 'New username already exists.' } };
+                }
+            }
+
+
             const updatedUser = await this.prisma.userAccount.update({
-                where: { username },
+                where: { id },
                 data: {
-                    userProfileId: profile.id, // Link using the found profile ID
+                    username,
+                    userProfileId: profile.id,
                     email,
-                    status
+                    status: upperCaseStatus
                 },
-                include: { userProfile: true } // Include the related profile data
+                include: { userProfile: true }
             });
 
             return {
                 username: updatedUser.username,
-                userProfile: updatedUser.userProfile.name, // Return profile name
+                userProfile: updatedUser.userProfile.name,
                 email: updatedUser.email,
                 status: updatedUser.status
             };
@@ -72,10 +98,17 @@ class UserAccountEntity {
         }
     }
 
-    // Updated to accept userProfileName instead of enum value
-    async createUserAccount({ username, password, userProfileName }) {
+    // Updated to accept userProfileName and email
+    async createUserAccount({ username, password, email, userProfileName }) {
         if (!userProfileName) {
              return { error: { status: 400, error: 'User profile name is required.' } };
+        }
+        if (!email) { // validation for email
+             return { error: { status: 400, error: 'Email is required.' } };
+        }
+        // Basic email format check
+        if (!email.includes('@')) {
+            return { error: { status: 400, error: 'Invalid email format.' } };
         }
         const usernameError = await this.checkUsernameExists(username);
         if (usernameError) {
@@ -97,16 +130,18 @@ class UserAccountEntity {
         const newUser = await this.prisma.userAccount.create({
             data: {
                 username,
+                email,
                 password: hashedPassword,
-                userProfileId: profile.id, // Link using the found profile ID
+                userProfileId: profile.id,
             },
-            include: { userProfile: true } // Include the related profile data
+            include: { userProfile: true }
         });
 
         return {
             id: newUser.id,
             username: newUser.username,
-            userProfile: newUser.userProfile.name, // Return profile name
+            email: newUser.email,
+            userProfile: newUser.userProfile.name,
             createdAt: newUser.createdAt,
         };
     }
@@ -153,9 +188,10 @@ class UserAccountEntity {
         const users = await this.prisma.userAccount.findMany({
             where: whereClause,
             select: {
+                id: true,
                 username: true,
                 email: true,
-                userProfile: { select: { name: true } }, // Select profile name
+                userProfile: { select: { name: true } },
                 status: true,
                 createdAt: true
             }
@@ -170,9 +206,16 @@ class UserAccountEntity {
 
     async suspendUserAccount(username) {
         try {
-            const user = await this.prisma.userAccount.update({
+            // Find user by username first to ensure it exists
+            const userExists = await this.prisma.userAccount.findUnique({ where: { username } });
+            if (!userExists) {
+                 console.error(`Suspend failed: User '${username}' not found.`);
+                 return false;
+            }
+
+            await this.prisma.userAccount.update({
                 where: { username },
-                data: { status: UserAccountEntity.STATUS_SUSPENDED }
+                data: { status: UserStatus.SUSPENDED }
             });
             return true;
         } catch (error) {
@@ -213,6 +256,7 @@ class UserAccountEntity {
         const users = await this.prisma.userAccount.findMany({
             where: whereClause,
             select: {
+                id: true,
                 username: true,
                 email: true,
                 userProfile: { select: { name: true } }, // Select profile name
@@ -238,8 +282,8 @@ class UserAccountEntity {
             }
         });
 
-        // Check status and if the related profile exists and is named 'UserAdmin'
-        if (!user || user.status !== UserAccountEntity.STATUS_ACTIVE || !user.userProfile || user.userProfile.name !== 'UserAdmin') {
+        // Check status using the imported enum and if the related profile exists and is named 'UserAdmin'
+        if (!user || user.status !== UserStatus.ACTIVE || !user.userProfile || user.userProfile.name !== 'UserAdmin') {
             return false;
         }
 

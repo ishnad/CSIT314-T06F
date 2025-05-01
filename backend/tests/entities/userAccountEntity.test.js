@@ -1,9 +1,17 @@
 const UserAccountEntity = require('../../src/entities/userAccountEntity');
-const { PrismaClient } = require('../../src/generated/prisma');
+// Import the mocked UserStatus along with PrismaClient
+const { PrismaClient, UserStatus: mockUserStatus } = require('../../src/generated/prisma');
 const bcrypt = require('bcrypt');
 
 // --- Mock Dependencies ---
 jest.mock('../../src/generated/prisma', () => {
+    // Define mockUserStatus INSIDE the factory function
+    const mockUserStatus = {
+        ACTIVE: 'ACTIVE',
+        INACTIVE: 'INACTIVE',
+        SUSPENDED: 'SUSPENDED',
+        BANNED: 'BANNED',
+    };
     const mockPrisma = {
         userAccount: {
             findUnique: jest.fn(),
@@ -17,6 +25,7 @@ jest.mock('../../src/generated/prisma', () => {
     };
     return {
         PrismaClient: jest.fn(() => mockPrisma),
+        UserStatus: mockUserStatus, // Provide the mocked enum
     };
 });
 
@@ -41,7 +50,8 @@ describe('UserAccountEntity', () => {
 
     // --- Test createUserAccount ---
     describe('createUserAccount', () => {
-        const userData = { username: 'newUser', password: 'password123', userProfileName: 'HomeOwner' };
+        // Add email to the test data
+        const userData = { username: 'newUser', password: 'password123', email: 'new@test.com', userProfileName: 'HomeOwner' };
         const mockProfile = { id: 'profile-id-1' };
         const hashedPassword = 'hashedPassword123';
         const createdUser = {
@@ -67,23 +77,37 @@ describe('UserAccountEntity', () => {
             expect(mockPrismaClient.userAccount.create).toHaveBeenCalledWith({
                 data: {
                     username: userData.username,
+                    email: userData.email, // Ensure email is included in the create call data
                     password: hashedPassword,
                     userProfileId: mockProfile.id,
                 },
                 include: { userProfile: true },
             });
+            // Expect email in the returned result
             expect(result).toEqual({
                 id: createdUser.id,
                 username: createdUser.username,
+                email: createdUser.email, // Add email expectation
                 userProfile: createdUser.userProfile.name,
                 createdAt: createdUser.createdAt,
             });
         });
 
         it('should return error if user profile name is missing', async () => {
-            const result = await userAccountEntity.createUserAccount({ username: 'test', password: 'pw' }); // Missing userProfileName
+            // Missing userProfileName, but include email
+            const result = await userAccountEntity.createUserAccount({ username: 'test', password: 'pw', email: 'test@email.com' });
             expect(result).toEqual({ error: { status: 400, error: 'User profile name is required.' } });
+            // It should NOT check username because profile name validation fails first
             expect(mockPrismaClient.userAccount.findUnique).not.toHaveBeenCalled();
+            expect(mockPrismaClient.userProfile.findUnique).not.toHaveBeenCalled();
+            expect(mockPrismaClient.userAccount.create).not.toHaveBeenCalled();
+        });
+
+        // Add a test specifically for missing email
+        it('should return error if email is missing', async () => {
+            const result = await userAccountEntity.createUserAccount({ username: 'test', password: 'pw', userProfileName: 'HomeOwner' }); // Missing email
+            expect(result).toEqual({ error: { status: 400, error: 'Email is required.' } });
+            expect(mockPrismaClient.userAccount.findUnique).not.toHaveBeenCalled(); // Should fail before checking username
             expect(mockPrismaClient.userProfile.findUnique).not.toHaveBeenCalled();
             expect(mockPrismaClient.userAccount.create).not.toHaveBeenCalled();
         });
@@ -91,9 +115,11 @@ describe('UserAccountEntity', () => {
         it('should return error if username already exists', async () => {
             mockPrismaClient.userAccount.findUnique.mockResolvedValue({ id: 'existing-user' }); // Username exists
 
+            // Pass full userData including email
             const result = await userAccountEntity.createUserAccount(userData);
 
             expect(result).toEqual({ error: { status: 409, error: 'Username already exists.' } });
+            // It should check email validity first, then username
             expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({ where: { username: userData.username } });
             expect(mockPrismaClient.userProfile.findUnique).not.toHaveBeenCalled();
             expect(mockPrismaClient.userAccount.create).not.toHaveBeenCalled();
@@ -103,9 +129,11 @@ describe('UserAccountEntity', () => {
             mockPrismaClient.userAccount.findUnique.mockResolvedValue(null); // Username doesn't exist
             mockPrismaClient.userProfile.findUnique.mockResolvedValue(null); // Profile doesn't exist
 
+            // Pass full userData including email
             const result = await userAccountEntity.createUserAccount(userData);
 
             expect(result).toEqual({ error: { status: 404, error: `User profile '${userData.userProfileName}' not found.` } });
+            // It should check email validity, then username, then profile
             expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({ where: { username: userData.username } });
             expect(mockPrismaClient.userProfile.findUnique).toHaveBeenCalledWith({ where: { name: userData.userProfileName }, select: { id: true } });
             expect(mockPrismaClient.userAccount.create).not.toHaveBeenCalled();
@@ -114,8 +142,10 @@ describe('UserAccountEntity', () => {
 
     // --- Test editUserAccount ---
     describe('editUserAccount', () => {
-        const editData = { username: 'testUser', userProfileName: 'Cleaner', email: 'edit@test.com', status: 'ACTIVE' };
+        const userId = 'user-id-to-edit'; // Define a dummy ID for tests
+        const editData = { username: 'testUser', userProfileName: 'Cleaner', email: 'edit@test.com', status: 'Active' }; // Use title-case status as sent from frontend
         const mockProfile = { id: 'profile-id-cleaner' };
+        const mockCurrentUser = { id: userId, username: 'oldUsername', email: 'old@test.com', status: 'ACTIVE' }; // Mock for username conflict check
         const updatedUser = {
             username: editData.username,
             userProfile: { name: editData.userProfileName },
@@ -123,19 +153,28 @@ describe('UserAccountEntity', () => {
             status: editData.status,
         };
 
-        it('should edit a user successfully', async () => {
+        it('should edit a user successfully (username not changed)', async () => {
+            // Mock the findUnique calls for profile and current user check
             mockPrismaClient.userProfile.findUnique.mockResolvedValue(mockProfile);
+            // Mock finding the user by ID (username is the same as mockCurrentUser.username)
+            mockPrismaClient.userAccount.findUnique.mockResolvedValueOnce(mockCurrentUser);
             mockPrismaClient.userAccount.update.mockResolvedValue(updatedUser);
 
-            const result = await userAccountEntity.editUserAccount(editData.username, editData.userProfileName, editData.email, editData.status);
+            // Call with the correct signature (id, username, profileName, email, status)
+            // Use mockCurrentUser.username to simulate no username change
+            const result = await userAccountEntity.editUserAccount(userId, mockCurrentUser.username, editData.userProfileName, editData.email, editData.status);
 
             expect(mockPrismaClient.userProfile.findUnique).toHaveBeenCalledWith({ where: { name: editData.userProfileName }, select: { id: true } });
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({ where: { id: userId } }); // Check find by ID
+            // Username conflict check should NOT have been called
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledTimes(1);
             expect(mockPrismaClient.userAccount.update).toHaveBeenCalledWith({
-                where: { username: editData.username },
+                where: { id: userId }, // Update using ID
                 data: {
+                    username: mockCurrentUser.username, // Use original username
                     userProfileId: mockProfile.id,
                     email: editData.email,
-                    status: editData.status,
+                    status: 'ACTIVE', // Expect uppercase status in DB call
                 },
                 include: { userProfile: true },
             });
@@ -147,46 +186,131 @@ describe('UserAccountEntity', () => {
             });
         });
 
-        it('should return validation error for invalid input', async () => {
-            const result = await userAccountEntity.editUserAccount('test', 'Prof', 'invalid-email', 'ACTIVE');
-            expect(result).toEqual({ error: { status: 400, error: 'Invalid email format' } });
+        it('should edit a user successfully (username changed)', async () => {
+            // Mock the findUnique calls for profile and current user check
+            mockPrismaClient.userProfile.findUnique.mockResolvedValue(mockProfile);
+            // Mock finding the user by ID
+            mockPrismaClient.userAccount.findUnique.mockResolvedValueOnce(mockCurrentUser);
+             // Mock the username conflict check (return null, no conflict)
+            mockPrismaClient.userAccount.findUnique.mockResolvedValueOnce(null);
+            mockPrismaClient.userAccount.update.mockResolvedValue(updatedUser);
+
+            // Call with the correct signature (id, username, profileName, email, status)
+            // Use editData.username (different from mockCurrentUser.username)
+            const result = await userAccountEntity.editUserAccount(userId, editData.username, editData.userProfileName, editData.email, editData.status);
+
+            expect(mockPrismaClient.userProfile.findUnique).toHaveBeenCalledWith({ where: { name: editData.userProfileName }, select: { id: true } });
+            // Check find by ID and find by new username
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({ where: { id: userId } });
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({ where: { username: editData.username } });
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledTimes(2);
+            expect(mockPrismaClient.userAccount.update).toHaveBeenCalledWith({
+                where: { id: userId }, // Update using ID
+                data: {
+                    username: editData.username, // Include username in update data
+                    userProfileId: mockProfile.id,
+                    email: editData.email,
+                    status: 'ACTIVE', // Expect uppercase status in DB call
+                },
+                include: { userProfile: true },
+            });
+            expect(result).toEqual({
+                username: updatedUser.username,
+                userProfile: updatedUser.userProfile.name,
+                email: updatedUser.email,
+                status: updatedUser.status,
+            });
+        });
+
+        it('should return validation error for invalid input (missing fields)', async () => {
+            // Call without ID
+            const result = await userAccountEntity.editUserAccount(null, 'test', 'Prof', 'email@valid.com', 'Active');
+            expect(result).toEqual({ error: { status: 400, error: 'ID, username, userProfileName, email, and status are required' } });
             expect(mockPrismaClient.userProfile.findUnique).not.toHaveBeenCalled();
             expect(mockPrismaClient.userAccount.update).not.toHaveBeenCalled();
         });
 
-         it('should return error if user profile does not exist', async () => {
-            mockPrismaClient.userProfile.findUnique.mockResolvedValue(null); // Profile doesn't exist
+         it('should return validation error for invalid email format', async () => {
+            // Call with ID but invalid email
+            const result = await userAccountEntity.editUserAccount(userId, 'test', 'Prof', 'invalid-email', 'Active');
+            expect(result).toEqual({ error: { status: 400, error: 'Invalid email format' } });
+            expect(mockPrismaClient.userProfile.findUnique).not.toHaveBeenCalled(); // Fails before profile check
+            expect(mockPrismaClient.userAccount.update).not.toHaveBeenCalled();
+        });
 
-            const result = await userAccountEntity.editUserAccount(editData.username, editData.userProfileName, editData.email, editData.status);
+         it('should return error if user profile does not exist', async () => {
+            // Reset findUnique mocks specifically for this test
+            mockPrismaClient.userAccount.findUnique.mockReset();
+            // Mock findUnique for user check by ID to return a user
+            mockPrismaClient.userAccount.findUnique.mockResolvedValueOnce(mockCurrentUser);
+            // Mock profile check to return null
+            mockPrismaClient.userProfile.findUnique.mockResolvedValue(null);
+
+            // Call with correct signature
+            const result = await userAccountEntity.editUserAccount(userId, editData.username, editData.userProfileName, editData.email, editData.status);
 
             expect(result).toEqual({ error: { status: 404, error: `User profile '${editData.userProfileName}' not found.` } });
+            // UserAccount findUnique should NOT be called because profile check fails first
+            expect(mockPrismaClient.userAccount.findUnique).not.toHaveBeenCalled();
             expect(mockPrismaClient.userProfile.findUnique).toHaveBeenCalledWith({ where: { name: editData.userProfileName }, select: { id: true } });
             expect(mockPrismaClient.userAccount.update).not.toHaveBeenCalled();
         });
 
         it('should return error if prisma update fails', async () => {
             const prismaError = new Error("DB error");
+            // Reset findUnique mocks specifically for this test
+            mockPrismaClient.userAccount.findUnique.mockReset();
+            // Mock findUnique for user check by ID -> success
+            mockPrismaClient.userAccount.findUnique.mockResolvedValueOnce(mockCurrentUser);
+            // Mock findUnique for username conflict check -> null (no conflict)
+            mockPrismaClient.userAccount.findUnique.mockResolvedValueOnce(null);
+            // Mock profile check -> success
             mockPrismaClient.userProfile.findUnique.mockResolvedValue(mockProfile);
+            // Mock update -> reject
             mockPrismaClient.userAccount.update.mockRejectedValue(prismaError);
 
             // Silence console.error for this specific test case
             const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-            const result = await userAccountEntity.editUserAccount(editData.username, editData.userProfileName, editData.email, editData.status);
+            // Call with correct signature
+            const result = await userAccountEntity.editUserAccount(userId, editData.username, editData.userProfileName, editData.email, editData.status);
             consoleErrorSpy.mockRestore(); // Restore console.error
 
             expect(result).toEqual({ error: { status: 500, error: "Failed to update user" } });
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({ where: { id: userId } }); // Check find by ID
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({ where: { username: editData.username } }); // Check find by username
             expect(mockPrismaClient.userProfile.findUnique).toHaveBeenCalled();
             expect(mockPrismaClient.userAccount.update).toHaveBeenCalled();
+        });
+
+        it('should return error if new username already exists', async () => {
+            // Reset findUnique mocks specifically for this test
+            mockPrismaClient.userAccount.findUnique.mockReset();
+            // Mock finding the user by ID -> success
+            mockPrismaClient.userAccount.findUnique.mockResolvedValueOnce(mockCurrentUser);
+            // Mock the username conflict check -> return an existing user
+            mockPrismaClient.userAccount.findUnique.mockResolvedValueOnce({ id: 'other-user-id', username: editData.username });
+            // Mock profile check -> success (though it won't be reached)
+            mockPrismaClient.userProfile.findUnique.mockResolvedValue(mockProfile);
+
+
+             // Call with the correct signature (id, username, profileName, email, status)
+            const result = await userAccountEntity.editUserAccount(userId, editData.username, editData.userProfileName, editData.email, editData.status);
+
+            expect(result).toEqual({ error: { status: 409, error: 'New username already exists.' } });
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({ where: { id: userId } });
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({ where: { username: editData.username } });
+            expect(mockPrismaClient.userAccount.update).not.toHaveBeenCalled();
         });
     });
 
     // --- Test viewUserAccount ---
     describe('viewUserAccount', () => {
         const mockUsers = [
-            { username: 'user1', email: 'u1@a.com', userProfile: { name: 'HomeOwner' }, status: 'ACTIVE', createdAt: new Date() },
-            { username: 'user2', email: 'u2@b.com', userProfile: { name: 'Cleaner' }, status: 'ACTIVE', createdAt: new Date() },
+            { id: 'id1', username: 'user1', email: 'u1@a.com', userProfile: { name: 'HomeOwner' }, status: 'ACTIVE', createdAt: new Date() },
+            { id: 'id2', username: 'user2', email: 'u2@b.com', userProfile: { name: 'Cleaner' }, status: 'ACTIVE', createdAt: new Date() },
         ];
-        const expectedMappedUsers = mockUsers.map(u => ({ ...u, userProfile: u.userProfile.name }));
+        // Update expected mapped users to include ID
+        const expectedMappedUsers = mockUsers.map(u => ({ id: u.id, username: u.username, email: u.email, userProfile: u.userProfile.name, status: u.status, createdAt: u.createdAt }));
 
         it('should return all users if no filter/keyword provided', async () => {
             mockPrismaClient.userAccount.findMany.mockResolvedValue(mockUsers);
@@ -196,10 +320,10 @@ describe('UserAccountEntity', () => {
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: {}, // Empty where clause
                 select: {
-                    username: true, email: true, userProfile: { select: { name: true } }, status: true, createdAt: true
+                    id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true, createdAt: true
                 }
             });
-            expect(result).toEqual(expectedMappedUsers);
+            expect(result).toEqual(expectedMappedUsers); // Compare with updated expected users
         });
 
         it('should filter by username', async () => {
@@ -210,10 +334,10 @@ describe('UserAccountEntity', () => {
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: { username: { contains: 'user1', mode: 'insensitive' } },
                 select: {
-                    username: true, email: true, userProfile: { select: { name: true } }, status: true, createdAt: true
+                    id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true, createdAt: true
                 }
             });
-            expect(result).toEqual([expectedMappedUsers[0]]);
+            expect(result).toEqual([expectedMappedUsers[0]]); // Compare with updated expected users
         });
 
         it('should filter by userProfile name', async () => {
@@ -224,10 +348,10 @@ describe('UserAccountEntity', () => {
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: { userProfile: { name: { equals: 'Cleaner' } } },
                 select: {
-                    username: true, email: true, userProfile: { select: { name: true } }, status: true, createdAt: true
+                    id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true, createdAt: true
                 }
             });
-             expect(result).toEqual([expectedMappedUsers[1]]);
+             expect(result).toEqual([expectedMappedUsers[1]]); // Compare with updated expected users
         });
 
          it('should filter by status', async () => {
@@ -238,10 +362,10 @@ describe('UserAccountEntity', () => {
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: { status: { equals: 'ACTIVE' } },
                 select: {
-                    username: true, email: true, userProfile: { select: { name: true } }, status: true, createdAt: true
+                    id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true, createdAt: true
                 }
             });
-             expect(result).toEqual(expectedMappedUsers);
+             expect(result).toEqual(expectedMappedUsers); // Compare with updated expected users
         });
 
         it('should handle empty results correctly', async () => {
@@ -257,21 +381,42 @@ describe('UserAccountEntity', () => {
     // --- Test suspendUserAccount ---
     describe('suspendUserAccount', () => {
         const username = 'userToSuspend';
+        const mockUserToSuspend = { id: 'suspend-id', username: username, status: 'ACTIVE' };
 
         it('should suspend a user successfully', async () => {
+            // Mock findUnique to find the user first
+            mockPrismaClient.userAccount.findUnique.mockResolvedValue(mockUserToSuspend);
             mockPrismaClient.userAccount.update.mockResolvedValue({ username, status: 'SUSPENDED' }); // Simulate successful update
 
             const result = await userAccountEntity.suspendUserAccount(username);
 
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({ where: { username } });
             expect(mockPrismaClient.userAccount.update).toHaveBeenCalledWith({
                 where: { username },
-                data: { status: UserAccountEntity.STATUS_SUSPENDED },
+                data: { status: mockUserStatus.SUSPENDED }, // Use mocked enum value
             });
             expect(result).toBe(true);
         });
 
+        it('should return false if user is not found', async () => {
+            // Reset findUnique mocks specifically for this test
+            mockPrismaClient.userAccount.findUnique.mockReset();
+            mockPrismaClient.userAccount.findUnique.mockResolvedValue(null); // User not found
+
+            // Silence console.error for this specific test case
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await userAccountEntity.suspendUserAccount(username);
+            consoleErrorSpy.mockRestore(); // Restore console.error
+
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({ where: { username } });
+            expect(mockPrismaClient.userAccount.update).not.toHaveBeenCalled(); // Update should not be called
+            expect(result).toBe(false);
+        });
+
         it('should return false if prisma update fails', async () => {
             const prismaError = new Error("DB error");
+            // Mock findUnique to find the user first
+            mockPrismaClient.userAccount.findUnique.mockResolvedValue(mockUserToSuspend);
             mockPrismaClient.userAccount.update.mockRejectedValue(prismaError);
 
              // Silence console.error for this specific test case
@@ -279,9 +424,10 @@ describe('UserAccountEntity', () => {
             const result = await userAccountEntity.suspendUserAccount(username);
             consoleErrorSpy.mockRestore(); // Restore console.error
 
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({ where: { username } });
             expect(mockPrismaClient.userAccount.update).toHaveBeenCalledWith({
                 where: { username },
-                data: { status: UserAccountEntity.STATUS_SUSPENDED },
+                data: { status: mockUserStatus.SUSPENDED }, // Use mocked enum value
             });
             expect(result).toBe(false);
         });
@@ -290,10 +436,11 @@ describe('UserAccountEntity', () => {
     // --- Test searchUserAccount ---
     describe('searchUserAccount', () => {
          const mockUsers = [
-            { username: 'searchUser1', email: 's1@a.com', userProfile: { name: 'HomeOwner' }, status: 'ACTIVE' },
-            { username: 'searchUser2', email: 's2@b.com', userProfile: { name: 'Cleaner' }, status: 'ACTIVE' },
+            { id: 'sid1', username: 'searchUser1', email: 's1@a.com', userProfile: { name: 'HomeOwner' }, status: 'ACTIVE' },
+            { id: 'sid2', username: 'searchUser2', email: 's2@b.com', userProfile: { name: 'Cleaner' }, status: 'ACTIVE' },
         ];
-        const expectedMappedUsers = mockUsers.map(u => ({ username: u.username, email: u.email, userProfile: u.userProfile.name, status: u.status }));
+        // Update expected mapped users to include ID
+        const expectedMappedUsers = mockUsers.map(u => ({ id: u.id, username: u.username, email: u.email, userProfile: u.userProfile.name, status: u.status }));
 
 
         it('should search by username (contains, insensitive)', async () => {
@@ -303,9 +450,9 @@ describe('UserAccountEntity', () => {
 
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: { username: { contains: 'searchUser', mode: 'insensitive' } },
-                select: { username: true, email: true, userProfile: { select: { name: true } }, status: true }
+                select: { id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true }
             });
-            expect(result).toEqual([expectedMappedUsers[0]]);
+            expect(result).toEqual([expectedMappedUsers[0]]); // Compare with updated expected users
         });
 
         it('should search by userProfile name (contains, insensitive)', async () => {
@@ -315,9 +462,9 @@ describe('UserAccountEntity', () => {
 
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: { userProfile: { name: { contains: 'clean', mode: 'insensitive' } } },
-                 select: { username: true, email: true, userProfile: { select: { name: true } }, status: true }
+                 select: { id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true }
             });
-            expect(result).toEqual([expectedMappedUsers[1]]);
+            expect(result).toEqual([expectedMappedUsers[1]]); // Compare with updated expected users
         });
 
          it('should search by status (equals)', async () => {
@@ -327,9 +474,9 @@ describe('UserAccountEntity', () => {
 
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: { status: { equals: 'ACTIVE' } },
-                 select: { username: true, email: true, userProfile: { select: { name: true } }, status: true }
+                 select: { id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true }
             });
-            expect(result).toEqual(expectedMappedUsers);
+            expect(result).toEqual(expectedMappedUsers); // Compare with updated expected users
         });
 
         it('should throw error if filter is missing', async () => {
@@ -342,7 +489,7 @@ describe('UserAccountEntity', () => {
              await userAccountEntity.searchUserAccount('userProfile', ''); // Empty keyword
              expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                  where: { userProfile: { isNot: null } }, // Checks if profile relation exists
-                 select: { username: true, email: true, userProfile: { select: { name: true } }, status: true }
+                 select: { id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true }
              });
         });
 
@@ -352,7 +499,7 @@ describe('UserAccountEntity', () => {
              // Current implementation results in an empty where clause for non-profile fields when keyword is empty
              expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                  where: {},
-                 select: { username: true, email: true, userProfile: { select: { name: true } }, status: true }
+                 select: { id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true }
              });
         });
     });
@@ -363,12 +510,11 @@ describe('UserAccountEntity', () => {
         const mockUser = {
             username: loginData.username,
             password: 'hashedAdminPassword',
-            status: 'active', // Use lowercase to match UserAccountEntity.STATUS_ACTIVE
+            status: 'ACTIVE', // Use uppercase to match UserStatus enum
             userProfile: { name: 'UserAdmin' }, // Correct profile
         };
         const mockUserWrongProfile = { ...mockUser, userProfile: { name: 'HomeOwner' } };
-        // Ensure INACTIVE also matches potential enum/static definition if needed, assuming uppercase for now
-        const mockUserInactive = { ...mockUser, status: 'INACTIVE' };
+        const mockUserInactive = { ...mockUser, status: 'INACTIVE' }; // Use uppercase
 
         it('should return true for valid admin credentials', async () => {
             mockPrismaClient.userAccount.findUnique.mockResolvedValue(mockUser);

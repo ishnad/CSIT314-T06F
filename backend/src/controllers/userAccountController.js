@@ -6,15 +6,19 @@ class CreateUserAccountController {
     }
 
     async createUserAccount(req, res) {
-        // Expect userProfileName instead of userProfile enum value
-        const { username, password, userProfileName } = req.body;
+        // Expect userProfileName and email
+        const { username, password, email, userProfileName } = req.body;
 
         if (!userProfileName) {
              return res.status(400).json({ error: 'userProfileName is required.' });
         }
+        if (!email) { // check for email
+             return res.status(400).json({ error: 'Email is required.' });
+        }
 
         try {
-            const result = await this.userEntity.createUserAccount({ username, password, userProfileName });
+            // Pass email to the entity method
+            const result = await this.userEntity.createUserAccount({ username, password, email, userProfileName });
 
             // Check if entity returned an error
             if (result.error) {
@@ -62,15 +66,24 @@ class EditUserAccountController {
     }
 
     async editUserAccount(req, res) {
-        // Expect userProfileName instead of userProfile enum value
-        const { username, userProfileName, email, status } = req.body;
+        // Expect id, username, userProfileName, email, status
+        const { id, username, userProfileName, email, status } = req.body;
 
-         if (!userProfileName) {
+        if (!id) {
+            return res.status(400).json({ error: 'User ID is required for update.' });
+        }
+        if (!userProfileName) {
              return res.status(400).json({ error: 'userProfileName is required.' });
         }
+        // Add basic checks for other required fields if necessary
+        if (!username || !email || !status) {
+             return res.status(400).json({ error: 'Username, email, and status are required.' });
+        }
+
 
         try {
-            const result = await this.userEntity.editUserAccount(username, userProfileName, email, status);
+            // Pass id along with other data to the entity
+            const result = await this.userEntity.editUserAccount(id, username, userProfileName, email, status);
             if (result.error) {
                 res.status(result.error.status).json({ error: result.error.error });
             } else {
