@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Navbar from './boundaries/Navbar';
-import CreateUser from './boundaries/CreateUser';
-import ManageUsers from './boundaries/ManageUsers';
-import Login from './boundaries/Login';
+import UserAdminUI from './boundaries/UserAdminUI';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('create');
@@ -37,31 +35,40 @@ function App() {
     localStorage.removeItem('user');
   };
 
-  // If not authenticated, show login screen
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
-  }
-
   return (
     <div className="app-container">
-      <header className="app-header">
-        <h1>User Administration System</h1>
-      </header>
-      
-      <Navbar 
-        currentPage={currentPage} 
-        navigateTo={navigateTo} 
-        user={user}
-        onLogout={handleLogout}
-      />
-      
-      <main className="app-content">
-        {currentPage === 'create' ? <CreateUser /> : <ManageUsers />}
-      </main>
-      
-      <footer className="app-footer">
-        <p>&copy; {new Date().getFullYear()} User Admin System</p>
-      </footer>
+      {isAuthenticated ? (
+        // Show the main app when authenticated
+        <>
+          <header className="app-header">
+            <h1>User Administration System</h1>
+          </header>
+          
+          <Navbar 
+            currentPage={currentPage} 
+            navigateTo={navigateTo} 
+            user={user}
+            onLogout={handleLogout}
+          />
+          
+          <main className="app-content">
+            <UserAdminUI
+              initialTab={currentPage === 'create' ? 'create' : 'manage'} 
+              isAuthenticated={true} 
+            />
+          </main>
+          
+          <footer className="app-footer">
+            <p>&copy; {new Date().getFullYear()} User Admin System</p>
+          </footer>
+        </>
+      ) : (
+        // Show just the UserAdminUi for login when not authenticated
+        <UserAdminUI 
+          onLogin={handleLogin} 
+          isAuthenticated={false}
+        />
+      )}
     </div>
   );
 }
