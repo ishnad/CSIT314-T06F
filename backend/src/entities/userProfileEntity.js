@@ -112,6 +112,84 @@ class UserProfileEntity {
             return { error: { status: 500, error: 'Failed to retrieve user profiles due to a server error.' } };
         }
     }
+
+    /**
+     * Updates an existing user profile.
+     * @param {string} profileId - The ID of the profile to update.
+     * @param {object} updateData - Data to update.
+     * @param {string} [updateData.name] - The new name for the profile.
+     * @param {string} [updateData.description] - The new description for the profile.
+     * @returns {Promise<object>} The updated profile object or an error object.
+     */
+    async updateUserProfile(profileId, { name, description }) {
+        const nameProvided = name !== undefined;
+        const descriptionProvided = description !== undefined;
+        const trimmedName = nameProvided ? name.trim() : undefined;
+
+        // Check 1: If name was provided but is empty after trimming
+        if (nameProvided && !trimmedName) {
+            return { error: { status: 400, error: 'Profile name cannot be empty.' } };
+        }
+
+        // Check 2: If neither a valid name nor a description was provided
+        const validNameProvided = nameProvided && !!trimmedName; // Name provided and not empty after trim
+        if (!validNameProvided && !descriptionProvided) {
+            return { error: { status: 400, error: 'At least name or description must be provided for update.' } };
+        }
+
+        try {
+            // Check if the target profile exists
+            const existingProfile = await this.prisma.userProfile.findUnique({
+                where: { id: profileId },
+                select: { id: true, name: true } // Select current name for conflict check
+            });
+
+            if (!existingProfile) {
+                return { error: { status: 404, error: 'User profile not found.' } };
+            }
+
+            // If name is being updated, check if the new name already exists on *another* profile
+            if (trimmedName && trimmedName !== existingProfile.name) {
+                const conflictingProfile = await this.prisma.userProfile.findUnique({
+                    where: { name: trimmedName },
+                    select: { id: true }
+                });
+                // Conflict if a profile with the new name exists AND it's not the same profile we are editing
+                if (conflictingProfile && conflictingProfile.id !== profileId) {
+                    return { error: { status: 409, error: 'A profile with this name already exists.' } };
+                }
+            }
+
+            // Prepare data for update, only include fields that were provided and valid
+            const dataToUpdate = {};
+            if (validNameProvided) { // Use the flag determined earlier
+                dataToUpdate.name = trimmedName;
+            }
+            if (descriptionProvided) { // Use the flag determined earlier
+                // Trim description here before saving, handle null explicitly
+                dataToUpdate.description = description === null ? null : description.trim();
+            }
+
+            // Update the profile
+            const updatedProfile = await this.prisma.userProfile.update({
+                where: { id: profileId },
+                data: dataToUpdate,
+                select: { // Select the fields to return
+                    id: true,
+                    name: true,
+                    description: true,
+                    createdAt: true,
+                    updatedAt: true
+                }
+            });
+
+            return updatedProfile;
+
+        } catch (error) {
+            console.error("Error updating user profile:", error);
+            return { error: { status: 500, error: 'Failed to update user profile due to a server error.' } };
+        }
+    }
 }
 
 module.exports = UserProfileEntity;

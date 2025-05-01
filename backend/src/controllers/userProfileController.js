@@ -67,8 +67,46 @@ class ViewUserProfileController {
     }
 }
 
+class EditUserProfileController {
+    constructor() {
+        this.userProfileEntity = new UserProfileEntity();
+    }
+
+    /**
+     * Handles the HTTP request to update a user profile.
+     * @param {object} req - Express request object.
+     * @param {object} res - Express response object.
+     */
+    async updateUserProfile(req, res) {
+        const { id } = req.params; // Extract profile ID from URL parameter
+        const { name, description } = req.body; // Extract data from request body
+
+        // Basic check: ID must be present
+        if (!id) {
+            return res.status(400).json({ error: 'Profile ID is required in the URL.' });
+        }
+
+        try {
+            const result = await this.userProfileEntity.updateUserProfile(id, { name, description });
+
+            if (result.error) {
+                // If the entity returned an error object, use its status and message
+                res.status(result.error.status).json({ error: result.error.error });
+            } else {
+                // Success: return the updated profile data
+                res.status(200).json({ message: 'User profile updated successfully.', profile: result });
+            }
+        } catch (error) {
+            // Catch unexpected errors during the process
+            console.error("Controller error updating user profile:", error);
+            res.status(500).json({ error: 'An unexpected error occurred while updating the user profile.' });
+        }
+    }
+}
+
 // Export the controllers
 module.exports = {
     CreateUserProfileController,
-    ViewUserProfileController
+    ViewUserProfileController,
+    EditUserProfileController
 };
