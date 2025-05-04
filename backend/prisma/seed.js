@@ -12,6 +12,7 @@ async function main() {
     { name: 'UserAdmin', description: 'Administrator with full access.' },
     { name: 'Homeowner', description: 'User who owns properties and books services.' },
     { name: 'Cleaner', description: 'User who provides cleaning services.' },
+    { name: 'Platform Management', description: 'User who manages service categories and reporting.' },
   ];
 
   for (const profileData of profilesToSeed) {
@@ -57,6 +58,55 @@ async function main() {
     console.warn("Could not seed admin user because 'UserAdmin' profile was not found.");
   }
   // --- End Seed Default Admin User ---
+
+  // --- Seed Bulk Users ---
+  console.log('Starting bulk user seeding...');
+
+  const profilesToSeedUsers = ['Homeowner', 'Cleaner', 'Platform Management'];
+  const usersPerProfile = 100;
+  const defaultPassword = 'password123'; // Default password for seeded users
+  const hashedPassword = await bcrypt.hash(defaultPassword, SALT_ROUNDS);
+
+  for (const profileName of profilesToSeedUsers) {
+    const profile = await prisma.userProfile.findUnique({
+      where: { name: profileName },
+    });
+
+    if (!profile) {
+      console.warn(`Profile '${profileName}' not found. Skipping user seeding for this profile.`);
+      continue;
+    }
+
+    console.log(`Seeding ${usersPerProfile} users for profile: ${profileName}`);
+    const usersToCreate = [];
+    for (let i = 1; i <= usersPerProfile; i++) {
+      const username = `${profileName.toLowerCase().replace(/\s+/g, '')}${i}`; // e.g., homeowner1, cleaner50
+      const email = `${username}@example.com`;
+      usersToCreate.push({
+        username: username,
+        password: hashedPassword,
+        email: email,
+        userProfileId: profile.id,
+        status: 'ACTIVE',
+      });
+    }
+
+    for (const userData of usersToCreate) {
+       await prisma.userAccount.upsert({
+         where: { username: userData.username },
+         update: { // Update if exists, ensure correct profile and status
+            password: hashedPassword,
+            email: userData.email,
+            userProfileId: userData.userProfileId,
+            status: 'ACTIVE',
+         },
+         create: userData, // Create if not exists
+       });
+    }
+     console.log(`Finished seeding users for profile: ${profileName}`);
+  }
+  // --- End Seed Bulk Users ---
+
 
   console.log(`Seeding finished.`);
 }
