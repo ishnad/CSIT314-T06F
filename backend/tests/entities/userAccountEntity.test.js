@@ -81,7 +81,7 @@ describe('UserAccountEntity', () => {
                     password: hashedPassword,
                     userProfileId: mockProfile.id,
                 },
-                include: { userProfile: true },
+                include: { userProfile: { select: { name: true, permissions: true } } },
             });
             // Expect email in the returned result
             expect(result).toEqual({
@@ -176,7 +176,7 @@ describe('UserAccountEntity', () => {
                     email: editData.email,
                     status: 'ACTIVE', // Expect uppercase status in DB call
                 },
-                include: { userProfile: true },
+                include: { userProfile: { select: { name: true, permissions: true } } },
             });
             expect(result).toEqual({
                 username: updatedUser.username,
@@ -212,7 +212,7 @@ describe('UserAccountEntity', () => {
                     email: editData.email,
                     status: 'ACTIVE', // Expect uppercase status in DB call
                 },
-                include: { userProfile: true },
+                include: { userProfile: { select: { name: true, permissions: true } } },
             });
             expect(result).toEqual({
                 username: updatedUser.username,
@@ -320,7 +320,7 @@ describe('UserAccountEntity', () => {
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: {}, // Empty where clause
                 select: {
-                    id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true, createdAt: true
+                    id: true, username: true, email: true, userProfile: { select: { name: true, permissions: true } }, status: true, createdAt: true
                 }
             });
             expect(result).toEqual(expectedMappedUsers); // Compare with updated expected users
@@ -334,7 +334,7 @@ describe('UserAccountEntity', () => {
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: { username: { contains: 'user1', mode: 'insensitive' } },
                 select: {
-                    id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true, createdAt: true
+                    id: true, username: true, email: true, userProfile: { select: { name: true, permissions: true } }, status: true, createdAt: true
                 }
             });
             expect(result).toEqual([expectedMappedUsers[0]]); // Compare with updated expected users
@@ -348,7 +348,7 @@ describe('UserAccountEntity', () => {
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: { userProfile: { name: { equals: 'Cleaner' } } },
                 select: {
-                    id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true, createdAt: true
+                    id: true, username: true, email: true, userProfile: { select: { name: true, permissions: true } }, status: true, createdAt: true
                 }
             });
              expect(result).toEqual([expectedMappedUsers[1]]); // Compare with updated expected users
@@ -362,7 +362,7 @@ describe('UserAccountEntity', () => {
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: { status: { equals: 'ACTIVE' } },
                 select: {
-                    id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true, createdAt: true
+                    id: true, username: true, email: true, userProfile: { select: { name: true, permissions: true } }, status: true, createdAt: true
                 }
             });
              expect(result).toEqual(expectedMappedUsers); // Compare with updated expected users
@@ -450,7 +450,7 @@ describe('UserAccountEntity', () => {
 
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: { username: { contains: 'searchUser', mode: 'insensitive' } },
-                select: { id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true }
+                select: { id: true, username: true, email: true, userProfile: { select: { name: true, permissions: true } }, status: true }
             });
             expect(result).toEqual([expectedMappedUsers[0]]); // Compare with updated expected users
         });
@@ -462,7 +462,7 @@ describe('UserAccountEntity', () => {
 
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: { userProfile: { name: { contains: 'clean', mode: 'insensitive' } } },
-                 select: { id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true }
+                 select: { id: true, username: true, email: true, userProfile: { select: { name: true, permissions: true } }, status: true }
             });
             expect(result).toEqual([expectedMappedUsers[1]]); // Compare with updated expected users
         });
@@ -474,7 +474,7 @@ describe('UserAccountEntity', () => {
 
             expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                 where: { status: { equals: 'ACTIVE' } },
-                 select: { id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true }
+                 select: { id: true, username: true, email: true, userProfile: { select: { name: true, permissions: true } }, status: true }
             });
             expect(result).toEqual(expectedMappedUsers); // Compare with updated expected users
         });
@@ -489,7 +489,7 @@ describe('UserAccountEntity', () => {
              await userAccountEntity.searchUserAccount('userProfile', ''); // Empty keyword
              expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                  where: { userProfile: { isNot: null } }, // Checks if profile relation exists
-                 select: { id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true }
+                 select: { id: true, username: true, email: true, userProfile: { select: { name: true, permissions: true } }, status: true }
              });
         });
 
@@ -499,7 +499,7 @@ describe('UserAccountEntity', () => {
              // Current implementation results in an empty where clause for non-profile fields when keyword is empty
              expect(mockPrismaClient.userAccount.findMany).toHaveBeenCalledWith({
                  where: {},
-                 select: { id: true, username: true, email: true, userProfile: { select: { name: true } }, status: true }
+                 select: { id: true, username: true, email: true, userProfile: { select: { name: true, permissions: true } }, status: true }
              });
         });
     });
@@ -511,9 +511,11 @@ describe('UserAccountEntity', () => {
             username: loginData.username,
             password: 'hashedAdminPassword',
             status: 'ACTIVE', // Use uppercase to match UserStatus enum
-            userProfile: { name: 'UserAdmin' }, // Correct profile
+            // Add permissions to mock user profile
+            userProfile: { name: 'UserAdmin', permissions: ['ADMIN_PRIVILEGES'] }, // Correct profile with permissions
         };
-        const mockUserWrongProfile = { ...mockUser, userProfile: { name: 'HomeOwner' } };
+        // Add permissions to mock user profile (even if wrong profile)
+        const mockUserWrongProfile = { ...mockUser, userProfile: { name: 'HomeOwner', permissions: ['SOME_OTHER_PERMISSION'] } };
         const mockUserInactive = { ...mockUser, status: 'INACTIVE' }; // Use uppercase
 
         it('should return true for valid admin credentials', async () => {
@@ -524,7 +526,7 @@ describe('UserAccountEntity', () => {
 
             expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({
                 where: { username: loginData.username },
-                include: { userProfile: { select: { name: true } } },
+                include: { userProfile: { select: { name: true, permissions: true } } },
             });
             expect(bcrypt.compare).toHaveBeenCalledWith(loginData.password, mockUser.password);
             expect(result).toBe(true);
@@ -586,7 +588,8 @@ describe('UserAccountEntity', () => {
             userProfileId: 'profile-id-cleaner',
             userProfile: {
                 id: 'profile-id-cleaner',
-                name: 'Cleaner'
+                name: 'Cleaner',
+                permissions: ['SOME_PERMISSION'] // Add mock permissions
             }
         };
         const expectedUserInfo = { // Expected return on success (password omitted)
@@ -606,7 +609,7 @@ describe('UserAccountEntity', () => {
 
             expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({
                 where: { username: username },
-                include: { userProfile: { select: { id: true, name: true } } }
+                include: { userProfile: { select: { id: true, name: true, permissions: true } } }
             });
             expect(bcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
             expect(result).toEqual(expectedUserInfo);
@@ -621,7 +624,7 @@ describe('UserAccountEntity', () => {
 
             expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({
                 where: { username: username },
-                include: { userProfile: { select: { id: true, name: true } } }
+                include: { userProfile: { select: { id: true, name: true, permissions: true } } }
             });
             expect(bcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
             expect(result).toEqual(expectedError);
@@ -635,7 +638,7 @@ describe('UserAccountEntity', () => {
 
             expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({
                 where: { username: username },
-                include: { userProfile: { select: { id: true, name: true } } }
+                include: { userProfile: { select: { id: true, name: true, permissions: true } } }
             });
             expect(bcrypt.compare).not.toHaveBeenCalled();
             expect(result).toEqual(expectedError);
@@ -651,7 +654,7 @@ describe('UserAccountEntity', () => {
 
             expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({
                 where: { username: username },
-                include: { userProfile: { select: { id: true, name: true } } }
+                include: { userProfile: { select: { id: true, name: true, permissions: true } } }
             });
             expect(bcrypt.compare).not.toHaveBeenCalled(); // Password check shouldn't happen if inactive
             expect(result).toEqual(expectedError);
