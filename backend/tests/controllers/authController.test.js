@@ -31,8 +31,8 @@ describe('AuthController', () => {
         // Instantiate the single controller here
         controller = new AuthController();
         res = mockResponse(); // Get fresh response mock
-        // Mock methods on the prototype for the instance
-        UserAccountEntity.prototype.validateLogin = jest.fn();
+        // Mock the validateLogin method directly on the entity instance used by the controller
+        controller.userAccountEntity.validateLogin = jest.fn();
         // No entity method for logout in this stateless approach
     });
 
@@ -61,11 +61,12 @@ describe('AuthController', () => {
 
         it('should login successfully and return user info', async () => {
             req = mockRequest({ username, password });
-            UserAccountEntity.prototype.validateLogin.mockResolvedValue(mockUser); // Simulate successful validation
+            // Use the instance mock
+            controller.userAccountEntity.validateLogin.mockResolvedValue(mockUser); // Simulate successful validation
 
             await controller.login(req, res);
 
-            expect(UserAccountEntity.prototype.validateLogin).toHaveBeenCalledWith(username, password);
+            expect(controller.userAccountEntity.validateLogin).toHaveBeenCalledWith(username, password);
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({
                 message: 'Login successful.',
@@ -79,7 +80,7 @@ describe('AuthController', () => {
 
             await controller.login(req, res);
 
-            expect(UserAccountEntity.prototype.validateLogin).not.toHaveBeenCalled();
+            expect(controller.userAccountEntity.validateLogin).not.toHaveBeenCalled();
             expect(res.status).toHaveBeenCalledWith(400);
             expect(res.json).toHaveBeenCalledWith({ error: 'Username and password are required.' });
         });
@@ -89,7 +90,7 @@ describe('AuthController', () => {
 
             await controller.login(req, res);
 
-            expect(UserAccountEntity.prototype.validateLogin).not.toHaveBeenCalled();
+            expect(controller.userAccountEntity.validateLogin).not.toHaveBeenCalled();
             expect(res.status).toHaveBeenCalledWith(400);
             expect(res.json).toHaveBeenCalledWith({ error: 'Username and password are required.' });
         });
@@ -97,11 +98,12 @@ describe('AuthController', () => {
         it('login should return error from entity if validation fails (e.g., invalid credentials)', async () => {
             req = mockRequest({ username, password });
             const errorResponse = { error: { status: 401, message: 'Invalid username or password.' } };
-            UserAccountEntity.prototype.validateLogin.mockResolvedValue(errorResponse); // Simulate entity returning error
+            // Use the instance mock
+            controller.userAccountEntity.validateLogin.mockResolvedValue(errorResponse); // Simulate entity returning error
 
             await controller.login(req, res);
 
-            expect(UserAccountEntity.prototype.validateLogin).toHaveBeenCalledWith(username, password);
+            expect(controller.userAccountEntity.validateLogin).toHaveBeenCalledWith(username, password);
             expect(res.status).toHaveBeenCalledWith(401);
             expect(res.json).toHaveBeenCalledWith({ error: 'Invalid username or password.' });
         });
@@ -109,11 +111,12 @@ describe('AuthController', () => {
          it('login should return error from entity if validation fails (e.g., bad request)', async () => {
             req = mockRequest({ username, password });
             const errorResponse = { error: { status: 400, message: 'Password is required.' } }; // Example bad request error from entity
-            UserAccountEntity.prototype.validateLogin.mockResolvedValue(errorResponse);
+            // Use the instance mock
+            controller.userAccountEntity.validateLogin.mockResolvedValue(errorResponse);
 
             await controller.login(req, res);
 
-            expect(UserAccountEntity.prototype.validateLogin).toHaveBeenCalledWith(username, password);
+            expect(controller.userAccountEntity.validateLogin).toHaveBeenCalledWith(username, password);
             expect(res.status).toHaveBeenCalledWith(400);
             expect(res.json).toHaveBeenCalledWith({ error: 'Password is required.' });
         });
@@ -121,13 +124,14 @@ describe('AuthController', () => {
         it('login should return 500 on unexpected controller error', async () => {
             req = mockRequest({ username, password });
             const error = new Error("Something broke badly");
-            UserAccountEntity.prototype.validateLogin.mockRejectedValue(error); // Simulate unexpected throw
+            // Use the instance mock
+            controller.userAccountEntity.validateLogin.mockRejectedValue(error); // Simulate unexpected throw
 
             const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
             await controller.login(req, res);
             consoleErrorSpy.mockRestore();
 
-            expect(UserAccountEntity.prototype.validateLogin).toHaveBeenCalledWith(username, password);
+            expect(controller.userAccountEntity.validateLogin).toHaveBeenCalledWith(username, password);
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.json).toHaveBeenCalledWith({ error: 'An unexpected error occurred during login.' });
         });
@@ -142,7 +146,7 @@ describe('AuthController', () => {
             await controller.logout(req, res);
 
             // No entity method is called for stateless logout
-            expect(UserAccountEntity.prototype.validateLogin).not.toHaveBeenCalled(); // Ensure login wasn't called
+            expect(controller.userAccountEntity.validateLogin).not.toHaveBeenCalled(); // Ensure login wasn't called
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({
                 message: 'Logout successful. Please clear your session/token.'

@@ -210,7 +210,8 @@ describe('UserAccount Controllers (excluding Login)', () => {
             await controller.editUserAccount(req, res);
             expect(UserAccountEntity.prototype.editUserAccount).not.toHaveBeenCalled();
             expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({ error: 'Username, email, and status are required.' }); // Adjust based on controller check
+            // Controller checks for userProfileName first after id
+            expect(res.json).toHaveBeenCalledWith({ error: 'userProfileName is required.' });
         });
 
         it('should return error from entity if edit fails', async () => {

@@ -139,6 +139,19 @@ exports.Prisma.UserProfileScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ServiceListingScalarFieldEnum = {
+  id: 'id',
+  serviceType: 'serviceType',
+  title: 'title',
+  description: 'description',
+  ratePerHr: 'ratePerHr',
+  duration: 'duration',
+  availability: 'availability',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  cleanerId: 'cleanerId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -162,7 +175,8 @@ exports.UserStatus = exports.$Enums.UserStatus = {
 
 exports.Prisma.ModelName = {
   UserAccount: 'UserAccount',
-  UserProfile: 'UserProfile'
+  UserProfile: 'UserProfile',
+  ServiceListing: 'ServiceListing'
 };
 
 /**
