@@ -1,15 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Navbar from './boundaries/Navbar';
-import UserAdminUi from './boundaries/UserAdminUI';
+import UserAdminUI from './boundaries/UserAdminUI';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('create');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState('');
-  
-  // Create a ref to the UserAdminUi component
-  const userAdminRef = useRef(null);
   
   // Check if user is already logged in (from localStorage)
   useEffect(() => {
@@ -18,18 +15,6 @@ function App() {
       setIsAuthenticated(true);
       setUser(loggedInUser);
     }
-    
-    // Define the global refresh function for the Navbar to call
-    window.refreshActiveTab = () => {
-      if (userAdminRef.current && typeof userAdminRef.current.refreshActiveTabData === 'function') {
-        userAdminRef.current.refreshActiveTabData();
-      }
-    };
-    
-    // Cleanup
-    return () => {
-      delete window.refreshActiveTab;
-    };
   }, []);
   
   const navigateTo = (page) => {
@@ -67,11 +52,9 @@ function App() {
           />
           
           <main className="app-content">
-            <UserAdminUi 
-              ref={userAdminRef}
-              initialTab={currentPage} 
-              isAuthenticated={true}
-              onNavigate={navigateTo}
+            <UserAdminUI
+              initialTab={currentPage === 'create' ? 'create' : 'manage'} 
+              isAuthenticated={true} 
             />
           </main>
           
@@ -81,7 +64,7 @@ function App() {
         </>
       ) : (
         // Show just the UserAdminUi for login when not authenticated
-        <UserAdminUi 
+        <UserAdminUI 
           onLogin={handleLogin} 
           isAuthenticated={false}
         />
