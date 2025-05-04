@@ -32,14 +32,21 @@ model UserAccount {
   serviceListings ServiceListing[]
 }
 
+// Define standard permissions
+enum Permission {
+  MANAGE_SERVICES // e.g., Cleaners creating/managing their listings
+  ADMIN_PRIVILEGES // e.g., UserAdmins managing users, profiles, etc.
+  SEARCH_CLEANERS // e.g., Homeowners searching for cleaners/listings
+  VIEW_REPORTS // e.g., Platform Management viewing reports
+}
+
 // New UserProfile model to allow dynamic creation
 model UserProfile {
-  id          String   @id @default(cuid())
-  name        String   @unique // e.g., "HomeOwner", "Cleaner", "UserAdmin"
-  description String?
-  // permissions  String[]   // Future enhancement: Add specific permissions
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String       @id @default(cuid())
+  name        String       @unique // e.g., "HomeOwner", "Cleaner", "UserAdmin"
+  permissions Permission[] // List of permissions granted to this profile
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   // Relation back to UserAccount
   userAccounts UserAccount[]

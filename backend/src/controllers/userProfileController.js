@@ -11,15 +11,20 @@ class CreateUserProfileController {
      * @param {object} res - Express response object.
      */
     async createUserProfile(req, res) {
-        const { name, description } = req.body; // Extract data from request body
+        const { name, permissions } = req.body;
 
         // Basic check for required fields
         if (!name) {
             return res.status(400).json({ error: 'Profile name is required.' });
         }
+        // Permissions are optional, but if provided, should be an array (entity validates further)
+        if (permissions !== undefined && !Array.isArray(permissions)) {
+             return res.status(400).json({ error: 'Permissions must be an array.' });
+        }
 
         try {
-            const result = await this.userProfileEntity.createUserProfile({ name, description });
+            // Pass permissions (or undefined if not provided) to the entity
+            const result = await this.userProfileEntity.createUserProfile({ name, permissions });
 
             if (result.error) {
                 // If the entity returned an error object, use its status and message
@@ -79,15 +84,24 @@ class EditUserProfileController {
      */
     async updateUserProfile(req, res) {
         const { id } = req.params; // Extract profile ID from URL parameter
-        const { name, description } = req.body; // Extract data from request body
+        const { name, permissions } = req.body; // Extract data, including optional permissions
 
         // Basic check: ID must be present
         if (!id) {
             return res.status(400).json({ error: 'Profile ID is required in the URL.' });
         }
+        // Basic check: At least name or permissions must be provided
+        if (name === undefined && permissions === undefined) {
+             return res.status(400).json({ error: 'At least name or permissions must be provided for update.' });
+        }
+        // Permissions are optional, but if provided, should be an array (entity validates further)
+        if (permissions !== undefined && !Array.isArray(permissions)) {
+             return res.status(400).json({ error: 'Permissions must be an array.' });
+        }
 
         try {
-            const result = await this.userProfileEntity.updateUserProfile(id, { name, description });
+            // Pass both name and permissions (or undefined) to the entity
+            const result = await this.userProfileEntity.updateUserProfile(id, { name, permissions });
 
             if (result.error) {
                 // If the entity returned an error object, use its status and message

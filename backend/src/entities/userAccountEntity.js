@@ -78,12 +78,14 @@ class UserAccountEntity {
                     email,
                     status: upperCaseStatus
                 },
-                include: { userProfile: true }
+                // Include profile with permissions
+                include: { userProfile: { select: { name: true, permissions: true } } }
             });
 
             return {
                 username: updatedUser.username,
-                userProfile: updatedUser.userProfile.name,
+                userProfile: updatedUser.userProfile.name, // Keep name for simplicity here
+                permissions: updatedUser.userProfile.permissions, // Add permissions
                 email: updatedUser.email,
                 status: updatedUser.status
             };
@@ -134,14 +136,16 @@ class UserAccountEntity {
                 password: hashedPassword,
                 userProfileId: profile.id,
             },
-            include: { userProfile: true }
+            // Include profile with permissions
+            include: { userProfile: { select: { name: true, permissions: true } } }
         });
 
         return {
             id: newUser.id,
             username: newUser.username,
             email: newUser.email,
-            userProfile: newUser.userProfile.name,
+            userProfile: newUser.userProfile.name, // Keep name for simplicity here
+            permissions: newUser.userProfile.permissions, // Add permissions
             createdAt: newUser.createdAt,
         };
     }
@@ -191,16 +195,17 @@ class UserAccountEntity {
                 id: true,
                 username: true,
                 email: true,
-                userProfile: { select: { name: true } },
+                userProfile: { select: { name: true, permissions: true } }, // Select profile name and permissions
                 status: true,
                 createdAt: true
             }
         });
 
-        // Map the result to return profile name directly
+        // Map the result to return profile name and permissions directly
         return users.map(user => ({
             ...user,
-            userProfile: user.userProfile ? user.userProfile.name : null // Handle potential null profile
+            permissions: user.userProfile ? user.userProfile.permissions : [], // Add permissions
+            userProfile: user.userProfile ? user.userProfile.name : null // Keep profile name
         }));
     }
 
@@ -259,32 +264,33 @@ class UserAccountEntity {
                 id: true,
                 username: true,
                 email: true,
-                userProfile: { select: { name: true } }, // Select profile name
+                userProfile: { select: { name: true, permissions: true } }, // Select profile name and permissions
                 status: true
             }
         });
 
-        // Map the result to return profile name directly
+        // Map the result to return profile name and permissions directly
         return users.map(user => ({
             ...user,
-            userProfile: user.userProfile ? user.userProfile.name : null // Handle potential null profile
+            permissions: user.userProfile ? user.userProfile.permissions : [], // Add permissions
+            userProfile: user.userProfile ? user.userProfile.name : null // Keep profile name
         }));
     }
 
     async verifyLoginCredentials({ username, password }) {
         const user = await this.prisma.userAccount.findUnique({
             where: { username },
-            // Include the related userProfile to check its name
+            // Include the related userProfile to check its name and permissions
             include: {
                 userProfile: {
-                    select: { name: true }
+                    select: { name: true, permissions: true } // Include permissions
                 }
             }
         });
 
-        // Check status using the imported enum and if the related profile exists and is named 'UserAdmin'
-        if (!user || user.status !== UserStatus.ACTIVE || !user.userProfile || user.userProfile.name !== 'UserAdmin') {
-            return false;
+        // Check status using the imported enum and if the related profile exists and has ADMIN_PRIVILEGES permission
+        if (!user || user.status !== UserStatus.ACTIVE || !user.userProfile || !user.userProfile.permissions.includes('ADMIN_PRIVILEGES')) {
+            return false; // User is not active or not an admin based on permissions
         }
 
         return await bcrypt.compare(password, user.password);
@@ -318,7 +324,8 @@ class UserAccountEntity {
                     userProfile: { // Include the related user profile
                         select: {
                             id: true,
-                            name: true // Select profile name (role)
+                            name: true, // Select profile name (role)
+                            permissions: true // Select permissions
                         }
                     }
                 }
@@ -339,7 +346,8 @@ class UserAccountEntity {
 
             // Login successful: Return user data (excluding password)
             const { password: _, ...userWithoutPassword } = userAccount; // Destructure to omit password
-            return userWithoutPassword; // Contains id, username, email, status, userProfileId, userProfile { id, name }
+            // userWithoutPassword now contains id, username, email, status, userProfileId, userProfile { id, name, permissions }
+            return userWithoutPassword;
 
         } catch (error) {
             console.error(`Error during login validation for user ${trimmedUsername}:`, error);

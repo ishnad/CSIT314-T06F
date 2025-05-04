@@ -6,28 +6,36 @@ class UserProfileEntity {
     }
 
     /**
-     * Validates the input for creating a user profile.
+     * Validates the input for creating or updating a user profile.
      * @param {string} name - The name of the profile.
-     * @param {string} [description] - Optional description.
+     * @param {string[]} [permissions] - Optional array of permission strings.
      * @returns {object|null} Error object or null if valid.
      */
-    validateUserProfileInput(name, description) {
+    validateUserProfileInput(name, permissions) {
         if (!name || typeof name !== 'string' || name.trim() === '') {
             return { status: 400, error: 'Profile name is required and cannot be empty.' };
         }
-        // Add more validation as needed (e.g., length limits, character restrictions)
-        return null;
+        // Validate permissions if provided
+        if (permissions !== undefined) {
+            if (!Array.isArray(permissions)) {
+                return { status: 400, error: 'Permissions must be an array of strings.' };
+            }
+            if (!permissions.every(p => typeof p === 'string')) {
+                 return { status: 400, error: 'Each permission must be a string.' };
+            }
+        }
+        return null; // Input is valid
     }
 
     /**
      * Creates a new user profile.
      * @param {object} profileData - Data for the new profile.
      * @param {string} profileData.name - The name of the profile.
-     * @param {string} [profileData.description] - Optional description.
+     * @param {string[]} [profileData.permissions] - Optional list of permissions.
      * @returns {Promise<object>} The created profile object or an error object.
      */
-    async createUserProfile({ name, description }) {
-        const validationError = this.validateUserProfileInput(name, description);
+    async createUserProfile({ name, permissions = [] }) { // Default to empty array if not provided
+        const validationError = this.validateUserProfileInput(name, permissions);
         if (validationError) {
             return { error: validationError };
         }
@@ -46,13 +54,12 @@ class UserProfileEntity {
             const newProfile = await this.prisma.userProfile.create({
                 data: {
                     name: name.trim(),
-                    description: description ? description.trim() : null,
-                    // permissions: [] // Initialize permissions if field exists
+                    permissions: permissions,
                 },
-                select: { // Select only the fields to return
+                select: { // Select the fields to return
                     id: true,
                     name: true,
-                    description: true,
+                    permissions: true,
                     createdAt: true
                 }
             });
@@ -87,7 +94,7 @@ class UserProfileEntity {
                 select: {
                     id: true,
                     name: true,
-                    description: true,
+                    permissions: true,
                     createdAt: true,
                     _count: { // Include the count of related user accounts
                         select: { userAccounts: true },
@@ -118,23 +125,31 @@ class UserProfileEntity {
      * @param {string} profileId - The ID of the profile to update.
      * @param {object} updateData - Data to update.
      * @param {string} [updateData.name] - The new name for the profile.
-     * @param {string} [updateData.description] - The new description for the profile.
+     * @param {string[]} [updateData.permissions] - The new list of permissions.
      * @returns {Promise<object>} The updated profile object or an error object.
      */
-    async updateUserProfile(profileId, { name, description }) {
+    async updateUserProfile(profileId, { name, permissions }) {
         const nameProvided = name !== undefined;
-        const descriptionProvided = description !== undefined;
+        const permissionsProvided = permissions !== undefined;
         const trimmedName = nameProvided ? name.trim() : undefined;
 
+        // Validate input
+        const validationError = this.validateUserProfileInput(
+            nameProvided ? trimmedName : 'placeholder', // Provide placeholder if name not changing
+            permissions
+        );
+        // If name wasn't provided, ignore the name part of validation
+        if (validationError && (!nameProvided || validationError.error !== 'Profile name is required and cannot be empty.')) {
+             return { error: validationError };
+        }
         // Check 1: If name was provided but is empty after trimming
         if (nameProvided && !trimmedName) {
             return { error: { status: 400, error: 'Profile name cannot be empty.' } };
         }
 
-        // Check 2: If neither a valid name nor a description was provided
-        const validNameProvided = nameProvided && !!trimmedName; // Name provided and not empty after trim
-        if (!validNameProvided && !descriptionProvided) {
-            return { error: { status: 400, error: 'At least name or description must be provided for update.' } };
+        // Check 2: At least one field must be provided for update
+        if (!nameProvided && !permissionsProvided) {
+            return { error: { status: 400, error: 'At least name or permissions must be provided for update.' } };
         }
 
         try {
@@ -162,12 +177,11 @@ class UserProfileEntity {
 
             // Prepare data for update, only include fields that were provided and valid
             const dataToUpdate = {};
-            if (validNameProvided) { // Use the flag determined earlier
+            if (nameProvided && trimmedName) { // Ensure name is valid if provided
                 dataToUpdate.name = trimmedName;
             }
-            if (descriptionProvided) { // Use the flag determined earlier
-                // Trim description here before saving, handle null explicitly
-                dataToUpdate.description = description === null ? null : description.trim();
+            if (permissionsProvided) {
+                dataToUpdate.permissions = permissions;
             }
 
             // Update the profile
@@ -177,7 +191,7 @@ class UserProfileEntity {
                 select: { // Select the fields to return
                     id: true,
                     name: true,
-                    description: true,
+                    permissions: true,
                     createdAt: true,
                     updatedAt: true
                 }
@@ -210,7 +224,7 @@ class UserProfileEntity {
                 select: { // Select the necessary fields for the frontend to simulate
                     id: true,
                     name: true,
-                    description: true,
+                    permissions: true,
                 }
             });
 

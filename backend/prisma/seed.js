@@ -7,21 +7,23 @@ const SALT_ROUNDS = 10; // Define salt rounds for hashing
 async function main() {
   console.log(`Start seeding ...`);
 
-  // Define default user profiles
   const profilesToSeed = [
-    { name: 'UserAdmin', description: 'Administrator with full access.' },
-    { name: 'Homeowner', description: 'User who owns properties and books services.' },
-    { name: 'Cleaner', description: 'User who provides cleaning services.' },
-    { name: 'Platform Management', description: 'User who manages service categories and reporting.' },
+    { name: 'UserAdmin', permissions: ['ADMIN_PRIVILEGES', 'MANAGE_SERVICES', 'SEARCH_CLEANERS', 'VIEW_REPORTS'] },
+    { name: 'Homeowner', permissions: ['SEARCH_CLEANERS'] },
+    { name: 'Cleaner', permissions: ['MANAGE_SERVICES'] },
+    { name: 'Platform Management', permissions: ['VIEW_REPORTS', 'MANAGE_SERVICES'] },
   ];
 
   for (const profileData of profilesToSeed) {
     const profile = await prisma.userProfile.upsert({
-      where: { name: profileData.name }, // Check if profile with this name exists
-      update: {}, // Don't update if it exists
-      create: profileData, // Create if it doesn't exist
+      where: { name: profileData.name },
+      update: { permissions: profileData.permissions },
+      create: {
+          name: profileData.name,
+          permissions: profileData.permissions,
+      },
     });
-    console.log(`Created or found profile with name: ${profile.name}`);
+    console.log(`Created or updated profile '${profile.name}' with permissions: ${profile.permissions.join(', ')}`);
   }
 
   // --- Seed Default Admin User ---

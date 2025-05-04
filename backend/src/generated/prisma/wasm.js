@@ -134,7 +134,7 @@ exports.Prisma.UserAccountScalarFieldEnum = {
 exports.Prisma.UserProfileScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  description: 'description',
+  permissions: 'permissions',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -171,6 +171,13 @@ exports.UserStatus = exports.$Enums.UserStatus = {
   INACTIVE: 'INACTIVE',
   SUSPENDED: 'SUSPENDED',
   BANNED: 'BANNED'
+};
+
+exports.Permission = exports.$Enums.Permission = {
+  MANAGE_SERVICES: 'MANAGE_SERVICES',
+  ADMIN_PRIVILEGES: 'ADMIN_PRIVILEGES',
+  SEARCH_CLEANERS: 'SEARCH_CLEANERS',
+  VIEW_REPORTS: 'VIEW_REPORTS'
 };
 
 exports.Prisma.ModelName = {

@@ -39,10 +39,11 @@ class UserAdminUI extends Component {
 
       // CreateUserProfile state
       profileName: '',
-      permissions: {
-        manageServices: false,
-        adminPrivileges: false,
-        searchCleaners: false
+      permissions: { // Corresponds to backend Permission enum
+        MANAGE_SERVICES: false,
+        ADMIN_PRIVILEGES: false,
+        SEARCH_CLEANERS: false,
+        VIEW_REPORTS: false
       },
       profileMessage: null,
 
@@ -58,10 +59,11 @@ class UserAdminUI extends Component {
       showProfileEditModal: false,
       editProfileFormData: {
         name: '',
-        permissions: {
-          manageServices: false,
-          adminPrivileges: false,
-          searchCleaners: false
+        permissions: { // Corresponds to backend Permission enum
+          MANAGE_SERVICES: false,
+          ADMIN_PRIVILEGES: false,
+          SEARCH_CLEANERS: false,
+          VIEW_REPORTS: false
         }
       },
 
@@ -256,6 +258,11 @@ class UserAdminUI extends Component {
   // Create new profile
   createUserProfile = async (profileName, permissions) => {
     try {
+      // Convert permissions object back to array of strings for API call
+      const permissionsArray = Object.entries(permissions)
+        .filter(([key, value]) => value)
+        .map(([key]) => key);
+
       // Call the API to create a new profile
       const res = await fetch('http://localhost:3001/api/profiles', {
         method: 'POST',
@@ -264,7 +271,7 @@ class UserAdminUI extends Component {
         },
         body: JSON.stringify({
           name: profileName,
-          permissions: permissions
+          permissions: permissionsArray // Send the array
         }),
       });
 
@@ -275,16 +282,17 @@ class UserAdminUI extends Component {
 
       const data = await res.json();
 
-      // Update state with success message
+      // Update state with success message and reset form
       this.setState({
         profileName: '',
-        permissions: {
-          manageServices: false,
-          adminPrivileges: false,
-          searchCleaners: false
+        permissions: { // Reset permissions object
+          MANAGE_SERVICES: false,
+          ADMIN_PRIVILEGES: false,
+          SEARCH_CLEANERS: false,
+          VIEW_REPORTS: false
         },
         profileMessage: {
-          text: `Profile "${profileName}" created successfully!`,
+          text: `Profile "${data.profile.name}" created successfully!`, // Use name from response
           type: "success"
         }
       });
@@ -316,15 +324,20 @@ class UserAdminUI extends Component {
   };
 
   // Edit profile
-  editUserProfile = async (profileId, profileData) => {
+  editUserProfile = async (profileId, { name, permissions }) => {
     try {
+       // Convert permissions object back to array of strings for API call
+       const permissionsArray = Object.entries(permissions)
+         .filter(([key, value]) => value)
+         .map(([key]) => key);
+
       // Call the API to update the profile
       const res = await fetch(`http://localhost:3001/api/profiles/${profileId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(profileData),
+        body: JSON.stringify({ name, permissions: permissionsArray }), // Send name and permissions array
       });
 
       if (!res.ok) {
@@ -348,7 +361,7 @@ class UserAdminUI extends Component {
       // Show success message
       this.setState({
         message: {
-          text: `Profile ${data.name} updated successfully!`,
+          text: `Profile ${data.profile.name} updated successfully!`, // Use name from response
           type: 'success'
         },
         showProfileEditModal: false
@@ -839,10 +852,11 @@ class UserAdminUI extends Component {
   handleCancelProfile = () => {
     this.setState({
       profileName: '',
-      permissions: {
-        manageServices: false,
-        adminPrivileges: false,
-        searchCleaners: false
+      permissions: { // Reset permissions object
+        MANAGE_SERVICES: false,
+        ADMIN_PRIVILEGES: false,
+        SEARCH_CLEANERS: false,
+        VIEW_REPORTS: false
       }
     });
 
@@ -854,15 +868,31 @@ class UserAdminUI extends Component {
     }
   };
 
+  // Handle changes to permission checkboxes in the edit modal
+  handleProfilePermissionChange = (e) => {
+    const { name, checked } = e.target;
+    this.setState(prevState => ({
+      editProfileFormData: {
+        ...prevState.editProfileFormData,
+        permissions: {
+          ...prevState.editProfileFormData.permissions,
+          [name]: checked // Update the specific permission based on checkbox name
+        }
+      }
+    }));
+  };
+
+
   handleSaveProfileChanges = async (e) => {
     e.preventDefault();
     const { selectedProfile, editProfileFormData } = this.state;
 
     try {
-      // Edit the profile via API
+      // Pass the name and permissions object to editUserProfile
+      // editUserProfile will handle converting permissions to an array
       await this.editUserProfile(selectedProfile.id, {
         name: editProfileFormData.name,
-        permissions: editProfileFormData.permissions
+        permissions: editProfileFormData.permissions // Pass the object
       });
 
     } catch (err) {
@@ -925,13 +955,19 @@ class UserAdminUI extends Component {
     const { selectedProfile } = this.state;
     if (!selectedProfile) return;
 
+    // Convert incoming permissions array to object for checkboxes
+    const permissionsObject = {
+      MANAGE_SERVICES: selectedProfile.permissions.includes('MANAGE_SERVICES'),
+      ADMIN_PRIVILEGES: selectedProfile.permissions.includes('ADMIN_PRIVILEGES'),
+      SEARCH_CLEANERS: selectedProfile.permissions.includes('SEARCH_CLEANERS'),
+      VIEW_REPORTS: selectedProfile.permissions.includes('VIEW_REPORTS')
+    };
+
     // Set the edit form data with the selected profile data
     this.setState({
       editProfileFormData: {
         name: selectedProfile.name,
-        permissions: {
-          ...selectedProfile.permissions
-        }
+        permissions: permissionsObject // Use the converted object
       },
       showProfileEditModal: true
     });
@@ -965,13 +1001,8 @@ class UserAdminUI extends Component {
           const profileData = await res.json();
 
           // Ensure permissions object exists
-          if (!profileData.permissions) {
-            profileData.permissions = {
-              manageServices: false,
-              adminPrivileges: false,
-              searchCleaners: false
-            };
-          }
+          // Backend sends permissions as an array, keep it as is
+          // The details view and edit modal will handle the array/object conversion
 
           this.setState({
             selectedProfile: profileData,
@@ -988,14 +1019,8 @@ class UserAdminUI extends Component {
       const profile = this.state.profiles.find(p => p.id === profileId || p.name === profileId);
 
       if (profile) {
-        // Ensure permissions object exists
-        if (!profile.permissions) {
-          profile.permissions = {
-            manageServices: false,
-            adminPrivileges: false,
-            searchCleaners: false
-          };
-        }
+        // Backend sends permissions as an array, keep it as is
+        // The details view and edit modal will handle the array/object conversion
 
         // Use the profile from state as a fallback
         this.setState({
@@ -1008,11 +1033,13 @@ class UserAdminUI extends Component {
           id: profileId,
           name: typeof profileId === 'string' ? profileId : `Profile ${profileId}`,
           userCount: Math.floor(Math.random() * 10) + 1,
-          permissions: {
-            manageServices: Math.random() > 0.5,
-            adminPrivileges: Math.random() > 0.7,
-            searchCleaners: Math.random() > 0.3
-          }
+          // Mock permissions as an array for fallback consistency
+          permissions: [
+            ...(Math.random() > 0.5 ? ['MANAGE_SERVICES'] : []),
+            ...(Math.random() > 0.7 ? ['ADMIN_PRIVILEGES'] : []),
+            ...(Math.random() > 0.3 ? ['SEARCH_CLEANERS'] : []),
+            ...(Math.random() > 0.4 ? ['VIEW_REPORTS'] : [])
+          ]
         };
 
         this.setState({
@@ -1421,34 +1448,45 @@ class UserAdminUI extends Component {
               <div className="permission-option">
                 <input
                   type="checkbox"
-                  id="manageServices"
-                  name="manageServices"
-                  checked={permissions.manageServices}
+                  id="MANAGE_SERVICES"
+                  name="MANAGE_SERVICES" // Use backend enum name
+                  checked={permissions.MANAGE_SERVICES}
                   onChange={this.handlePermissionChange}
                 />
-                <label htmlFor="manageServices">Manage Services</label>
+                <label htmlFor="MANAGE_SERVICES">Manage Services</label>
               </div>
 
               <div className="permission-option">
                 <input
                   type="checkbox"
-                  id="adminPrivileges"
-                  name="adminPrivileges"
-                  checked={permissions.adminPrivileges}
+                  id="ADMIN_PRIVILEGES"
+                  name="ADMIN_PRIVILEGES" // Use backend enum name
+                  checked={permissions.ADMIN_PRIVILEGES}
                   onChange={this.handlePermissionChange}
                 />
-                <label htmlFor="adminPrivileges">Admin Privileges</label>
+                <label htmlFor="ADMIN_PRIVILEGES">Admin Privileges</label>
               </div>
 
               <div className="permission-option">
                 <input
                   type="checkbox"
-                  id="searchCleaners"
-                  name="searchCleaners"
-                  checked={permissions.searchCleaners}
+                  id="SEARCH_CLEANERS"
+                  name="SEARCH_CLEANERS" // Use backend enum name
+                  checked={permissions.SEARCH_CLEANERS}
                   onChange={this.handlePermissionChange}
                 />
-                <label htmlFor="searchCleaners">Search Cleaners</label>
+                <label htmlFor="SEARCH_CLEANERS">Search Cleaners</label>
+              </div>
+
+              <div className="permission-option">
+                <input
+                  type="checkbox"
+                  id="VIEW_REPORTS"
+                  name="VIEW_REPORTS" // Use backend enum name
+                  checked={permissions.VIEW_REPORTS}
+                  onChange={this.handlePermissionChange}
+                />
+                <label htmlFor="VIEW_REPORTS">View Reports</label>
               </div>
             </div>
           </div>
@@ -1562,12 +1600,8 @@ class UserAdminUI extends Component {
 
     if (!selectedProfile) return null;
 
-    // Check if permissions object exists, if not, use empty defaults
-    const permissions = selectedProfile.permissions || {
-      manageServices: false,
-      adminPrivileges: false,
-      searchCleaners: false
-    };
+    // Permissions should be an array from the backend/state
+    const permissionsArray = Array.isArray(selectedProfile.permissions) ? selectedProfile.permissions : [];
 
     return (
       <div className="profile-details-container">
@@ -1575,23 +1609,29 @@ class UserAdminUI extends Component {
         <div className="profile-details">
           <h4>Permissions:</h4>
           <ul className="permissions-list">
-            <li className={permissions.manageServices ? 'enabled' : 'disabled'}>
+            <li className={permissionsArray.includes('MANAGE_SERVICES') ? 'enabled' : 'disabled'}>
               <span className="permission-icon">
-                {permissions.manageServices ? '✓' : '✗'}
+                {permissionsArray.includes('MANAGE_SERVICES') ? '✓' : '✗'}
               </span>
               <span className="permission-name">Manage Services</span>
             </li>
-            <li className={permissions.adminPrivileges ? 'enabled' : 'disabled'}>
+            <li className={permissionsArray.includes('ADMIN_PRIVILEGES') ? 'enabled' : 'disabled'}>
               <span className="permission-icon">
-                {permissions.adminPrivileges ? '✓' : '✗'}
+                {permissionsArray.includes('ADMIN_PRIVILEGES') ? '✓' : '✗'}
               </span>
               <span className="permission-name">Admin Privileges</span>
             </li>
-            <li className={permissions.searchCleaners ? 'enabled' : 'disabled'}>
+            <li className={permissionsArray.includes('SEARCH_CLEANERS') ? 'enabled' : 'disabled'}>
               <span className="permission-icon">
-                {permissions.searchCleaners ? '✓' : '✗'}
+                {permissionsArray.includes('SEARCH_CLEANERS') ? '✓' : '✗'}
               </span>
               <span className="permission-name">Search Cleaners</span>
+            </li>
+            <li className={permissionsArray.includes('VIEW_REPORTS') ? 'enabled' : 'disabled'}>
+              <span className="permission-icon">
+                {permissionsArray.includes('VIEW_REPORTS') ? '✓' : '✗'}
+              </span>
+              <span className="permission-name">View Reports</span>
             </li>
           </ul>
         </div>
@@ -1642,34 +1682,45 @@ class UserAdminUI extends Component {
                 <div className="edit-permission-option">
                   <input
                     type="checkbox"
-                    id="edit-manageServices"
-                    name="manageServices"
-                    checked={editProfileFormData.permissions.manageServices}
+                    id="edit-MANAGE_SERVICES"
+                    name="MANAGE_SERVICES" // Use backend enum name
+                    checked={editProfileFormData.permissions.MANAGE_SERVICES}
                     onChange={this.handleProfilePermissionChange}
                   />
-                  <label htmlFor="edit-manageServices">Manage Services</label>
+                  <label htmlFor="edit-MANAGE_SERVICES">Manage Services</label>
                 </div>
 
                 <div className="edit-permission-option">
                   <input
                     type="checkbox"
-                    id="edit-adminPrivileges"
-                    name="adminPrivileges"
-                    checked={editProfileFormData.permissions.adminPrivileges}
+                    id="edit-ADMIN_PRIVILEGES"
+                    name="ADMIN_PRIVILEGES" // Use backend enum name
+                    checked={editProfileFormData.permissions.ADMIN_PRIVILEGES}
                     onChange={this.handleProfilePermissionChange}
                   />
-                  <label htmlFor="edit-adminPrivileges">Admin Privileges</label>
+                  <label htmlFor="edit-ADMIN_PRIVILEGES">Admin Privileges</label>
                 </div>
 
                 <div className="edit-permission-option">
                   <input
                     type="checkbox"
-                    id="edit-searchCleaners"
-                    name="searchCleaners"
-                    checked={editProfileFormData.permissions.searchCleaners}
+                    id="edit-SEARCH_CLEANERS"
+                    name="SEARCH_CLEANERS" // Use backend enum name
+                    checked={editProfileFormData.permissions.SEARCH_CLEANERS}
                     onChange={this.handleProfilePermissionChange}
                   />
-                  <label htmlFor="edit-searchCleaners">Search Cleaners</label>
+                  <label htmlFor="edit-SEARCH_CLEANERS">Search Cleaners</label>
+                </div>
+
+                 <div className="edit-permission-option">
+                  <input
+                    type="checkbox"
+                    id="edit-VIEW_REPORTS"
+                    name="VIEW_REPORTS" // Use backend enum name
+                    checked={editProfileFormData.permissions.VIEW_REPORTS}
+                    onChange={this.handleProfilePermissionChange}
+                  />
+                  <label htmlFor="edit-VIEW_REPORTS">View Reports</label>
                 </div>
               </div>
             </div>

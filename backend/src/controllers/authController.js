@@ -32,7 +32,11 @@ class AuthController {
                         id: result.id,
                         username: result.username,
                         email: result.email,
-                        profile: result.userProfile
+                        profile: { // Include profile details and permissions
+                            id: result.userProfile.id,
+                            name: result.userProfile.name,
+                            permissions: result.userProfile.permissions
+                        }
                     }
                 });
             }
