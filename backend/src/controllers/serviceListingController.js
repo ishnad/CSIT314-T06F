@@ -1,3 +1,4 @@
+const { Prisma } = require('../generated/prisma');
 const ServiceListingEntity = require('../entities/serviceListingEntity');
 
 class CreateServiceListingController {
@@ -65,6 +66,50 @@ class CreateServiceListingController {
     }
 }
 
+class GetServiceListingController {
+     constructor() {
+        this.serviceListingEntity = new ServiceListingEntity();
+    }
+
+    /**
+     * Handles the HTTP request to get details for a specific service listing.
+     * @param {object} req - Express request object.
+     * @param {object} res - Express response object.
+     */
+    async getListingDetails(req, res) {
+        const requestingUserId = req.user?.id;
+        const listingId = req.params.id; // Get listing ID from route parameters
+
+        // --- Authorization Check ---
+        if (!requestingUserId) {
+            return res.status(401).json({ error: 'Authentication required.' });
+        }
+
+        if (!listingId) {
+             return res.status(400).json({ error: 'Listing ID is required in the URL path.' });
+        }
+
+        try {
+            // Call the entity method, passing both listing ID and the requesting user's ID
+            const result = await this.serviceListingEntity.getListingDetails(listingId, requestingUserId);
+
+            if (result.error) {
+                // If the entity returned an error object, use its status and message
+                res.status(result.error.status).json({ error: result.error.error });
+            } else {
+                // Success: return the listing data
+                res.status(200).json({ message: 'Service listing details retrieved successfully.', listing: result });
+            }
+        } catch (error) {
+            // Catch unexpected errors during the process
+            console.error(`Controller error getting service listing ${listingId}:`, error);
+            res.status(500).json({ error: 'An unexpected error occurred while retrieving the service listing.' });
+        }
+    }
+}
+
+
 module.exports = {
-    CreateServiceListingController
+    CreateServiceListingController,
+    GetServiceListingController
 };

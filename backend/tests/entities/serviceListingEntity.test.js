@@ -6,13 +6,19 @@ jest.mock('../../src/generated/prisma', () => {
     const mockPrisma = {
         serviceListing: {
             create: jest.fn(),
+            findUnique: jest.fn(),
         },
         userAccount: { // Mock UserAccount for cleaner check
             findUnique: jest.fn(),
         },
     };
+    // Mock the Prisma namespace and the specific error class used in the entity
+    const mockPrismaNamespace = {
+        PrismaClientKnownRequestError: class PrismaClientKnownRequestError extends Error {},
+    };
     return {
         PrismaClient: jest.fn(() => mockPrisma),
+        Prisma: mockPrismaNamespace, // Export the mocked Prisma namespace
     };
 });
 
@@ -263,6 +269,119 @@ describe('ServiceListingEntity', () => {
             expect(result).toEqual(expectedError);
             expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalled();
             expect(mockPrismaClient.serviceListing.create).toHaveBeenCalled();
+        });
+    });
+
+    // --- Test getListingDetails ---
+    describe('getListingDetails', () => {
+        const listingId = 'listing-id-789';
+        const ownerCleanerId = 'cleaner-id-abc';
+        const otherCleanerId = 'cleaner-id-xyz';
+        const mockListing = {
+            id: listingId,
+            serviceType: 'Gardening',
+            title: 'Lawn Mowing',
+            description: 'Basic lawn mowing service.',
+            ratePerHr: 40,
+            duration: 1.5,
+            availability: new Date(),
+            createdAt: new Date(),
+            cleanerId: ownerCleanerId, // Belongs to ownerCleanerId
+            cleaner: {
+                username: 'gardenMaster'
+            }
+        };
+         const expectedResult = {
+            ...mockListing,
+            cleanerUsername: mockListing.cleaner.username,
+            cleaner: undefined
+        };
+
+        it('should return listing details if found and requester is the owner', async () => {
+            mockPrismaClient.serviceListing.findUnique.mockResolvedValue(mockListing);
+
+            const result = await serviceListingEntity.getListingDetails(listingId, ownerCleanerId);
+
+            expect(mockPrismaClient.serviceListing.findUnique).toHaveBeenCalledWith({
+                where: { id: listingId },
+                select: expect.any(Object) // Verify select is used
+            });
+            expect(result).toEqual(expectedResult);
+        });
+
+        it('should return 404 error if listing is not found', async () => {
+            mockPrismaClient.serviceListing.findUnique.mockResolvedValue(null);
+            const expectedError = { error: { status: 404, error: `Service listing with ID ${listingId} not found.` } };
+
+            const result = await serviceListingEntity.getListingDetails(listingId, ownerCleanerId);
+
+            expect(mockPrismaClient.serviceListing.findUnique).toHaveBeenCalledWith({
+                where: { id: listingId },
+                select: expect.any(Object)
+            });
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return 403 error if listing is found but requester is not the owner', async () => {
+            mockPrismaClient.serviceListing.findUnique.mockResolvedValue(mockListing); // Found the listing
+            const expectedError = { error: { status: 403, error: 'Forbidden: You do not have permission to view this listing.' } };
+
+            // Requesting user is different from the listing's cleanerId
+            const result = await serviceListingEntity.getListingDetails(listingId, otherCleanerId);
+
+            expect(mockPrismaClient.serviceListing.findUnique).toHaveBeenCalledWith({
+                where: { id: listingId },
+                select: expect.any(Object)
+            });
+            expect(result).toEqual(expectedError);
+        });
+
+         it('should return 400 error for invalid listing ID format (simulated Prisma error)', async () => {
+            const invalidId = 'invalid-id-format';
+            const prismaError = new Error("Simulated Malformed ObjectID");
+            prismaError.code = 'P2023'; // Prisma code for invalid ID format often
+            mockPrismaClient.serviceListing.findUnique.mockRejectedValue(prismaError);
+            const expectedError = { error: { status: 400, error: 'Invalid listing ID format.' } };
+
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await serviceListingEntity.getListingDetails(invalidId, ownerCleanerId);
+            consoleErrorSpy.mockRestore();
+
+
+            expect(mockPrismaClient.serviceListing.findUnique).toHaveBeenCalledWith({
+                where: { id: invalidId },
+                select: expect.any(Object)
+            });
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return 500 error on unexpected database error', async () => {
+            const dbError = new Error("Unexpected DB failure");
+            mockPrismaClient.serviceListing.findUnique.mockRejectedValue(dbError);
+            const expectedError = { error: { status: 500, error: 'Failed to retrieve service listing due to a server error.' } };
+
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await serviceListingEntity.getListingDetails(listingId, ownerCleanerId);
+            consoleErrorSpy.mockRestore();
+
+            expect(mockPrismaClient.serviceListing.findUnique).toHaveBeenCalledWith({
+                where: { id: listingId },
+                select: expect.any(Object)
+            });
+            expect(result).toEqual(expectedError);
+        });
+
+         it('should return 400 error if listingId is not provided or not a string', async () => {
+            let result = await serviceListingEntity.getListingDetails(null, ownerCleanerId);
+            expect(result).toEqual({ error: { status: 400, error: 'Invalid listing ID provided.' } });
+
+            result = await serviceListingEntity.getListingDetails(123, ownerCleanerId); // Not a string
+             expect(result).toEqual({ error: { status: 400, error: 'Invalid listing ID provided.' } });
+        });
+
+         it('should return 401 error if requestingCleanerId is not provided', async () => {
+            let result = await serviceListingEntity.getListingDetails(listingId, null);
+            expect(result).toEqual({ error: { status: 401, error: 'Authentication required.' } });
         });
     });
 });

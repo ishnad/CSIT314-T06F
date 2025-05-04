@@ -1,4 +1,4 @@
-const { PrismaClient } = require('../generated/prisma');
+const { PrismaClient, Prisma } = require('../generated/prisma');
 
 class ServiceListingEntity {
     constructor() {
@@ -132,6 +132,69 @@ class ServiceListingEntity {
                  return { error: { status: 400, error: `Invalid cleanerId provided.` } };
             }
             return { error: { status: 500, error: 'Failed to create service listing due to a server error.' } };
+        }
+    }
+
+    /**
+     * Retrieves the details of a specific service listing, ensuring the requester is the owner.
+     * @param {string} listingId - The ID of the listing to retrieve.
+     * @param {string} requestingCleanerId - The ID of the user requesting the details.
+     * @returns {Promise<object>} The listing object or an error object.
+     */
+    async getListingDetails(listingId, requestingCleanerId) {
+        if (!listingId || typeof listingId !== 'string') {
+            return { error: { status: 400, error: 'Invalid listing ID provided.' } };
+        }
+        if (!requestingCleanerId) {
+             // double-check
+            return { error: { status: 401, error: 'Authentication required.' } };
+        }
+
+        try {
+            const listing = await this.prisma.serviceListing.findUnique({
+                where: { id: listingId },
+                select: {
+                    id: true,
+                    serviceType: true,
+                    title: true,
+                    description: true,
+                    ratePerHr: true,
+                    duration: true,
+                    availability: true,
+                    createdAt: true,
+                    cleanerId: true, // Need cleanerId to verify ownership
+                    cleaner: { // Include cleaner's username for context
+                        select: {
+                            username: true
+                        }
+                    }
+                }
+            });
+
+            if (!listing) {
+                return { error: { status: 404, error: `Service listing with ID ${listingId} not found.` } };
+            }
+
+            // Verify ownership
+            if (listing.cleanerId !== requestingCleanerId) {
+                // Although the user is authenticated, they don't own this specific listing
+                return { error: { status: 403, error: 'Forbidden: You do not have permission to view this listing.' } };
+            }
+
+            // Remap cleaner info for a cleaner response structure
+             return {
+                ...listing,
+                cleanerUsername: listing.cleaner.username,
+                cleaner: undefined // Remove nested cleaner object
+            };
+
+        } catch (error) {
+            console.error(`Error retrieving service listing ${listingId}:`, error);
+             // Handle potential Prisma errors (e.g., malformed ID format)
+            if (error.code === 'P2023' || (error instanceof Prisma.PrismaClientKnownRequestError && error.message.includes("Malformed ObjectID"))) {
+                 return { error: { status: 400, error: 'Invalid listing ID format.' } };
+            }
+            return { error: { status: 500, error: 'Failed to retrieve service listing due to a server error.' } };
         }
     }
 }
