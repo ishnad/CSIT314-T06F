@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 3001;
 // Import routes
 const userAccountRoutes = require('./routes/userAccountRoutes');
 const userProfileRoutes = require('./routes/userProfileRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware to parse JSON bodies
@@ -17,6 +18,8 @@ app.use(express.json()); // Middleware to parse JSON bodies
 app.use('/api/users', userAccountRoutes);
 // Mount the user profile routes under the /api/profiles path
 app.use('/api/profiles', userProfileRoutes);
+// Mount the authentication routes under the /api/auth path
+app.use('/api/auth', authRoutes);
 
 // Health Check Route
 app.get('/api/health', (req, res) => {

@@ -144,67 +144,10 @@ class SearchUserAccountController {
     }
 }
 
-class VerifyLoginCredentialsController {
-    constructor() {
-        this.userEntity = new UserAccountEntity();
-    }
-
-    async verifyLoginCredentials(req, res) {
-        const { username, password } = req.body;
-
-        try {
-            const isValid = await this.userEntity.verifyLoginCredentials({ username, password });
-            if (isValid) {
-                res.status(200).json({ message: 'Login successful' });
-            } else {
-                res.status(401).json({ error: 'Invalid credentials or not a UserAdmin' });
-            }
-        } catch (error) {
-            console.error("Error verifying login:", error);
-            res.status(500).json({ error: "Failed to verify login" });
-        }
-    }
-}
-
-class LogoutController {
-    constructor() {
-        this.userEntity = new UserAccountEntity();
-    }
-
-    async confirmLogout(req, res) {
-        try {
-            const result = await this.userEntity.confirmLogout();
-            if (result) {
-                res.status(200).json({
-                    message: 'Logout successful',
-                    redirect: '/login'
-                });
-            } else {
-                res.status(500).json({ error: 'Failed to logout' });
-            }
-        } catch (error) {
-            console.error("Error logging out:", error);
-            res.status(500).json({ error: 'Internal server error during logout' });
-        }
-    }
-
-    async cancelLogout(req, res) {
-        try {
-            const result = this.userEntity.cancelLogout();
-            res.status(200).json({ message: 'Logout cancelled' });
-        } catch (error) {
-            console.error("Error cancelling logout:", error);
-            res.status(500).json({ error: 'Failed to cancel logout' });
-        }
-    }
-}
-
 module.exports = {
     CreateUserAccountController,
     ViewUserAccountController,
     EditUserAccountController,
     SuspendUserAccountController,
-    SearchUserAccountController,
-    VerifyLoginCredentialsController,
-    LogoutController
+    SearchUserAccountController
 };

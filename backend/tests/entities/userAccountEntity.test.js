@@ -572,32 +572,137 @@ describe('UserAccountEntity', () => {
         });
     });
 
-     // --- Test confirmLogout ---
-    describe('confirmLogout', () => {
-        // NOTE: This test reflects the current flawed implementation.
-        // In a real stateless API, this method wouldn't modify entity state like this.
-        it('should set internal properties to null and return true', async () => {
-            // Set some initial dummy values to see them cleared
-            userAccountEntity.sessionID = 'some-session';
-            userAccountEntity.userID = 'some-user';
+    // --- Test validateLogin ---
+    describe('validateLogin', () => {
+        const username = 'testuser';
+        const password = 'password123';
+        const hashedPassword = 'hashedPassword';
+        const mockUser = {
+            id: 'user-id-1',
+            username: username,
+            password: hashedPassword,
+            email: 'test@example.com',
+            status: 'ACTIVE', // Use the actual string value from the mocked enum
+            userProfileId: 'profile-id-cleaner',
+            userProfile: {
+                id: 'profile-id-cleaner',
+                name: 'Cleaner'
+            }
+        };
+        const expectedUserInfo = { // Expected return on success (password omitted)
+            id: mockUser.id,
+            username: mockUser.username,
+            email: mockUser.email,
+            status: mockUser.status,
+            userProfileId: mockUser.userProfileId,
+            userProfile: mockUser.userProfile
+        };
 
-            const result = await userAccountEntity.confirmLogout();
+        it('should return user info if credentials are valid and user is active', async () => {
+            mockPrismaClient.userAccount.findUnique.mockResolvedValue(mockUser);
+            bcrypt.compare.mockResolvedValue(true); // Simulate correct password
 
-            expect(userAccountEntity.sessionID).toBeNull();
-            expect(userAccountEntity.userID).toBeNull();
-            expect(result).toBe(true);
+            const result = await userAccountEntity.validateLogin(username, password);
+
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({
+                where: { username: username },
+                include: { userProfile: { select: { id: true, name: true } } }
+            });
+            expect(bcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
+            expect(result).toEqual(expectedUserInfo);
         });
 
-         // It's hard to simulate an error here as the try block is synchronous
-         // and doesn't have operations that typically throw in this context.
-         // If there were async operations, we could mock them to reject.
-    });
+        it('should return 401 error if password does not match', async () => {
+            mockPrismaClient.userAccount.findUnique.mockResolvedValue(mockUser);
+            bcrypt.compare.mockResolvedValue(false); // Simulate incorrect password
+            const expectedError = { error: { status: 401, message: 'Invalid username or password.' } };
 
-    // --- Test cancelLogout ---
-    describe('cancelLogout', () => {
-        it('should simply return true', () => {
-            const result = userAccountEntity.cancelLogout();
-            expect(result).toBe(true);
+            const result = await userAccountEntity.validateLogin(username, password);
+
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({
+                where: { username: username },
+                include: { userProfile: { select: { id: true, name: true } } }
+            });
+            expect(bcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return 401 error if user is not found', async () => {
+            mockPrismaClient.userAccount.findUnique.mockResolvedValue(null); // Simulate user not found
+            const expectedError = { error: { status: 401, message: 'Invalid username or password.' } };
+
+            const result = await userAccountEntity.validateLogin(username, password);
+
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({
+                where: { username: username },
+                include: { userProfile: { select: { id: true, name: true } } }
+            });
+            expect(bcrypt.compare).not.toHaveBeenCalled();
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return 401 error if user status is not ACTIVE', async () => {
+            // Use the actual string value from the mocked enum
+            const inactiveUser = { ...mockUser, status: mockUserStatus.INACTIVE };
+            mockPrismaClient.userAccount.findUnique.mockResolvedValue(inactiveUser);
+            const expectedError = { error: { status: 401, message: 'Invalid username or password.' } };
+
+            const result = await userAccountEntity.validateLogin(username, password);
+
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalledWith({
+                where: { username: username },
+                include: { userProfile: { select: { id: true, name: true } } }
+            });
+            expect(bcrypt.compare).not.toHaveBeenCalled(); // Password check shouldn't happen if inactive
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return 400 error if username is missing or empty', async () => {
+            const expectedError = { error: { status: 400, message: 'Username is required.' } };
+            expect(await userAccountEntity.validateLogin('', password)).toEqual(expectedError);
+            expect(await userAccountEntity.validateLogin('   ', password)).toEqual(expectedError);
+            expect(await userAccountEntity.validateLogin(null, password)).toEqual(expectedError);
+            expect(await userAccountEntity.validateLogin(undefined, password)).toEqual(expectedError);
+            expect(mockPrismaClient.userAccount.findUnique).not.toHaveBeenCalled();
+            expect(bcrypt.compare).not.toHaveBeenCalled();
+        });
+
+        it('should return 400 error if password is missing or empty', async () => {
+            const expectedError = { error: { status: 400, message: 'Password is required.' } };
+            expect(await userAccountEntity.validateLogin(username, '')).toEqual(expectedError);
+            expect(await userAccountEntity.validateLogin(username, null)).toEqual(expectedError);
+            expect(await userAccountEntity.validateLogin(username, undefined)).toEqual(expectedError);
+            expect(mockPrismaClient.userAccount.findUnique).not.toHaveBeenCalled();
+            expect(bcrypt.compare).not.toHaveBeenCalled();
+        });
+
+        it('should return 500 error if prisma findUnique fails', async () => {
+            const prismaError = new Error("Database connection failed");
+            const expectedError = { error: { status: 500, message: 'Login failed due to a server error.' } };
+            mockPrismaClient.userAccount.findUnique.mockRejectedValue(prismaError);
+
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await userAccountEntity.validateLogin(username, password);
+            consoleErrorSpy.mockRestore();
+
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalled();
+            expect(bcrypt.compare).not.toHaveBeenCalled();
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return 500 error if bcrypt compare fails', async () => {
+            const bcryptError = new Error("Bcrypt error");
+            const expectedError = { error: { status: 500, message: 'Login failed due to a server error.' } };
+            mockPrismaClient.userAccount.findUnique.mockResolvedValue(mockUser);
+            bcrypt.compare.mockRejectedValue(bcryptError); // Simulate bcrypt failure
+
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await userAccountEntity.validateLogin(username, password);
+            consoleErrorSpy.mockRestore();
+
+            expect(mockPrismaClient.userAccount.findUnique).toHaveBeenCalled();
+            expect(bcrypt.compare).toHaveBeenCalled();
+            expect(result).toEqual(expectedError);
         });
     });
 

@@ -290,21 +290,61 @@ class UserAccountEntity {
         return await bcrypt.compare(password, user.password);
     }
 
-    async confirmLogout() {
-        try {
-            // Clear session data
-            this.sessionID = null;
-            this.userID = null;
-            return true;
-        } catch (error) {
-            console.error("Error confirming logout:", error);
-            return false;
+    /**
+     * Validates user login credentials.
+     * Finds user by username and compares the provided password with the stored hash.
+     * Includes user profile information on successful validation.
+     * @param {string} username - The username entered by the user.
+     * @param {string} password - The password entered by the user.
+     * @returns {Promise<object>} User object with profile if valid, otherwise an error object.
+     */
+    async validateLogin(username, password) {
+        // Basic validation
+        if (!username || typeof username !== 'string' || username.trim() === '') {
+            return { error: { status: 400, message: 'Username is required.' } };
         }
-    }
+        if (!password || typeof password !== 'string' || password === '') {
+            // Note: Password validation (length, complexity) should happen on signup/update, not necessarily login attempt.
+            return { error: { status: 400, message: 'Password is required.' } };
+        }
 
-    cancelLogout() {
-        // Simply return true since we're not actually logging out
-        return true;
+        const trimmedUsername = username.trim();
+
+        try {
+            // Find the user by username, include their profile details
+            const userAccount = await this.prisma.userAccount.findUnique({
+                where: { username: trimmedUsername },
+                include: {
+                    userProfile: { // Include the related user profile
+                        select: {
+                            id: true,
+                            name: true // Select profile name (role)
+                        }
+                    }
+                }
+            });
+
+            // Check if user exists and is active
+            if (!userAccount || userAccount.status !== UserStatus.ACTIVE) { // Use UserStatus enum
+                // Generic error for security (don't reveal if username exists but is inactive)
+                return { error: { status: 401, message: 'Invalid username or password.' } };
+            }
+
+            // Compare the provided password with the stored hash
+            const isPasswordValid = await bcrypt.compare(password, userAccount.password);
+
+            if (!isPasswordValid) {
+                return { error: { status: 401, message: 'Invalid username or password.' } };
+            }
+
+            // Login successful: Return user data (excluding password)
+            const { password: _, ...userWithoutPassword } = userAccount; // Destructure to omit password
+            return userWithoutPassword; // Contains id, username, email, status, userProfileId, userProfile { id, name }
+
+        } catch (error) {
+            console.error(`Error during login validation for user ${trimmedUsername}:`, error);
+            return { error: { status: 500, message: 'Login failed due to a server error.' } };
+        }
     }
 }
 
