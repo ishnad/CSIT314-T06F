@@ -104,9 +104,48 @@ class EditUserProfileController {
     }
 }
 
+class SimulateUserProfileController {
+    constructor() {
+        this.userProfileEntity = new UserProfileEntity();
+    }
+
+    /**
+     * Handles the HTTP request to simulate a user profile view.
+     * @param {object} req - Express request object.
+     * @param {object} res - Express response object.
+     */
+    async simulateProfile(req, res) {
+        const { profileName } = req.params; // Extract profile name from URL parameter
+
+        // Basic check: profileName must be present (entity layer does more thorough validation)
+        if (!profileName) {
+            return res.status(400).json({ error: 'Profile name is required in the URL for simulation.' });
+        }
+
+        try {
+            const result = await this.userProfileEntity.simulateProfile(profileName);
+
+            if (result.error) {
+                // If the entity returned an error object, use its status and message
+                res.status(result.error.status).json({ error: result.error.error });
+            } else {
+                // Success: return the profile data needed for simulation
+                // The frontend will use this data to render the simulated view
+                res.status(200).json({ message: `Simulating profile: ${result.name}`, profile: result });
+            }
+        } catch (error) {
+            // Catch unexpected errors during the process
+            console.error("Controller error simulating user profile:", error);
+            res.status(500).json({ error: 'An unexpected error occurred while simulating the user profile.' });
+        }
+    }
+}
+
+
 // Export the controllers
 module.exports = {
     CreateUserProfileController,
     ViewUserProfileController,
-    EditUserProfileController
+    EditUserProfileController,
+    SimulateUserProfileController
 };

@@ -190,6 +190,41 @@ class UserProfileEntity {
             return { error: { status: 500, error: 'Failed to update user profile due to a server error.' } };
         }
     }
+
+    /**
+     * Finds a user profile by name for simulation purposes.
+     * @param {string} profileName - The name of the profile to simulate.
+     * @returns {Promise<object>} The profile object or an error object.
+     */
+    async simulateProfile(profileName) {
+        // Basic validation
+        if (!profileName || typeof profileName !== 'string' || profileName.trim() === '') {
+            return { error: { status: 400, error: 'Profile name is required for simulation.' } };
+        }
+
+        const trimmedName = profileName.trim();
+
+        try {
+            const profile = await this.prisma.userProfile.findUnique({
+                where: { name: trimmedName },
+                select: { // Select the necessary fields for the frontend to simulate
+                    id: true,
+                    name: true,
+                    description: true,
+                }
+            });
+
+            if (!profile) {
+                return { error: { status: 404, error: `User profile '${trimmedName}' not found.` } };
+            }
+
+            return profile;
+
+        } catch (error) {
+            console.error(`Error finding profile '${trimmedName}' for simulation:`, error);
+            return { error: { status: 500, error: 'Failed to retrieve user profile for simulation due to a server error.' } };
+        }
+    }
 }
 
 module.exports = UserProfileEntity;

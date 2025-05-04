@@ -446,4 +446,71 @@ describe('UserProfileEntity', () => {
             expect(mockPrismaClient.userProfile.update).toHaveBeenCalled();
         });
     });
+
+    // --- Test simulateProfile ---
+    describe('simulateProfile', () => {
+        const profileName = ' Test Profile '; // With whitespace
+        const trimmedProfileName = 'Test Profile';
+        const mockProfile = {
+            id: 'sim-profile-id',
+            name: trimmedProfileName,
+            description: 'Profile for simulation',
+        };
+
+        it('should return profile data for a valid profile name', async () => {
+            mockPrismaClient.userProfile.findUnique.mockResolvedValue(mockProfile);
+
+            const result = await userProfileEntity.simulateProfile(profileName);
+
+            expect(mockPrismaClient.userProfile.findUnique).toHaveBeenCalledWith({
+                where: { name: trimmedProfileName },
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                }
+            });
+            expect(result).toEqual(mockProfile);
+        });
+
+        it('should return 400 error if profile name is missing or empty', async () => {
+            const expectedError = { error: { status: 400, error: 'Profile name is required for simulation.' } };
+
+            expect(await userProfileEntity.simulateProfile('')).toEqual(expectedError);
+            expect(await userProfileEntity.simulateProfile('   ')).toEqual(expectedError);
+            expect(await userProfileEntity.simulateProfile(null)).toEqual(expectedError);
+            expect(await userProfileEntity.simulateProfile(undefined)).toEqual(expectedError);
+            expect(mockPrismaClient.userProfile.findUnique).not.toHaveBeenCalled();
+        });
+
+        it('should return 404 error if profile is not found', async () => {
+            const expectedError = { error: { status: 404, error: `User profile '${trimmedProfileName}' not found.` } };
+            mockPrismaClient.userProfile.findUnique.mockResolvedValue(null); // Simulate not found
+
+            const result = await userProfileEntity.simulateProfile(profileName);
+
+            expect(mockPrismaClient.userProfile.findUnique).toHaveBeenCalledWith({
+                where: { name: trimmedProfileName },
+                select: { id: true, name: true, description: true }
+            });
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return 500 error if prisma findUnique fails', async () => {
+            const prismaError = new Error("Database connection failed");
+            const expectedError = { error: { status: 500, error: 'Failed to retrieve user profile for simulation due to a server error.' } };
+            mockPrismaClient.userProfile.findUnique.mockRejectedValue(prismaError);
+
+            // Silence console.error for this test
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await userProfileEntity.simulateProfile(profileName);
+            consoleErrorSpy.mockRestore(); // Restore console.error
+
+            expect(mockPrismaClient.userProfile.findUnique).toHaveBeenCalledWith({
+                where: { name: trimmedProfileName },
+                select: { id: true, name: true, description: true }
+            });
+            expect(result).toEqual(expectedError);
+        });
+    });
 });
