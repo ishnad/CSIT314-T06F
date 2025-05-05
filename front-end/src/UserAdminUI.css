@@ -1400,22 +1400,48 @@ body {
     box-shadow: var(--shadow);
 }
 
-.profile-actions .delete-button {
-    background-color: var(--danger);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    padding: 10px 16px;
+/* Status badges */
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 0.85rem;
     font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
+    text-align: center;
+    min-width: 80px;
 }
 
-.profile-actions .delete-button:hover {
-    background-color: var(--danger-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
+.status-badge.active {
+    background-color: rgba(40, 167, 69, 0.15);
+    color: var(--success);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-badge.suspended {
+    background-color: rgba(220, 53, 69, 0.15);
+    color: var(--danger);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+/* Profile status in details */
+.profile-status {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .status-badge.active {
+        background-color: rgba(40, 167, 69, 0.2);
+        color: #8cde9b;
+    }
+
+    .status-badge.suspended {
+        background-color: rgba(220, 53, 69, 0.2);
+        color: #f1a0a8;
+    }
 }
 
 /* Dark mode support */

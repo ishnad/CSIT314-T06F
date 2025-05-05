@@ -432,17 +432,17 @@ const renderingMethods = {
 
   renderManageProfiles() {
     const { filteredProfiles, profileSearchTerm, profilesLoading } = this.state;
-
+    
     return (
       <div className="manage-profiles-container">
         <h2 className="page-title">Manage User Profiles</h2>
-
+        
         {/* Search form */}
         <form onSubmit={this.handleProfileSearchSubmit} className="search-form">
           <div className="profile-search-group">
             <label htmlFor="profileSearchTerm">Search:</label>
-            <input
-              type="text"
+            <input 
+              type="text" 
               id="profileSearchTerm"
               name="profileSearchTerm"
               value={profileSearchTerm}
@@ -455,7 +455,7 @@ const renderingMethods = {
             </button>
           </div>
         </form>
-
+        
         {/* Profiles table */}
         {profilesLoading ? (
           <div className="loading">Loading profiles...</div>
@@ -466,19 +466,33 @@ const renderingMethods = {
                 <tr>
                   <th>User Profile</th>
                   <th>Number</th>
+                  <th>Status</th>
                   <th></th> {/* For View button */}
                 </tr>
               </thead>
               <tbody>
                 {filteredProfiles.length > 0 ? (
                   filteredProfiles.map((profile) => (
-                    <tr key={profile.id || profile.name}>
+                    <tr 
+                      key={profile.id || profile.name} 
+                      className={profile.status === 'SUSPENDED' ? 'suspended-row' : ''}
+                    >
                       <td>{profile.name}</td>
-                      <td>{profile.userAccountCount !== undefined ? profile.userAccountCount : 0}</td>
+                      <td>{profile.userCount || 0}</td>
                       <td>
-                        <button
+                        <span className={`status-badge ${profile.status === 'ACTIVE' ? 'active' : 'suspended'}`}>
+                          {profile.status === 'ACTIVE' ? 'Active' : 'Suspended'}
+                        </span>
+                      </td>
+                      <td>
+                        <button 
                           className="view-profile-button"
-                          onClick={() => this.viewProfileDetails(profile.id || profile.name)}
+                          onClick={(e) => {
+                            // Stop propagation to prevent any parent handlers
+                            e.stopPropagation();
+                            // Only view the profile, don't change status
+                            this.viewProfileDetails(profile.id || profile.name);
+                          }}
                         >
                           View
                         </button>
@@ -487,23 +501,23 @@ const renderingMethods = {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="3" className="no-profiles">No profiles found</td>
+                    <td colSpan="4" className="no-profiles">No profiles found</td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
         )}
-
+        
         {/* Profile details - shown when a profile is selected */}
         {this.renderProfileDetails()}
-
+        
         {/* Profile edit modal */}
-        {this.renderProfileEditModal()}
-
+        {this.renderProfileEditModal && this.renderProfileEditModal()}
+        
         {/* Add New User Profile button */}
         <div className="add-profile-button-container">
-          <button
+          <button 
             className="add-profile-button"
             onClick={this.navigateToAddProfile}
           >
@@ -516,56 +530,65 @@ const renderingMethods = {
 
   renderProfileDetails() {
     const { selectedProfile } = this.state;
-
+    
     if (!selectedProfile) return null;
-
-    // Permissions should be an array from the backend/state
-    const permissionsArray = Array.isArray(selectedProfile.permissions) ? selectedProfile.permissions : [];
-
+    
+    // Check if permissions object exists, if not, use empty defaults
+    const permissions = selectedProfile.permissions || {
+      manageServices: false,
+      adminPrivileges: false,
+      searchCleaners: false
+    };
+    
+    // Check if status exists, default to ACTIVE if not
+    const status = selectedProfile.status || 'ACTIVE';
+    
     return (
       <div className="profile-details-container">
         <h3>Profile Details: {selectedProfile.name}</h3>
+        
+        <div className="profile-status">
+          <strong>Status:</strong>
+          <span className={`status-badge ${status === 'ACTIVE' ? 'active' : 'suspended'}`}>
+            {status === 'ACTIVE' ? 'Active' : 'Suspended'}
+          </span>
+        </div>
+        
         <div className="profile-details">
           <h4>Permissions:</h4>
           <ul className="permissions-list">
-            <li className={permissionsArray.includes('MANAGE_SERVICES') ? 'enabled' : 'disabled'}>
+            <li className={permissions.manageServices ? 'enabled' : 'disabled'}>
               <span className="permission-icon">
-                {permissionsArray.includes('MANAGE_SERVICES') ? '✓' : '✗'}
+                {permissions.manageServices ? '✓' : '✗'}
               </span>
               <span className="permission-name">Manage Services</span>
             </li>
-            <li className={permissionsArray.includes('ADMIN_PRIVILEGES') ? 'enabled' : 'disabled'}>
+            <li className={permissions.adminPrivileges ? 'enabled' : 'disabled'}>
               <span className="permission-icon">
-                {permissionsArray.includes('ADMIN_PRIVILEGES') ? '✓' : '✗'}
+                {permissions.adminPrivileges ? '✓' : '✗'}
               </span>
               <span className="permission-name">Admin Privileges</span>
             </li>
-            <li className={permissionsArray.includes('SEARCH_CLEANERS') ? 'enabled' : 'disabled'}>
+            <li className={permissions.searchCleaners ? 'enabled' : 'disabled'}>
               <span className="permission-icon">
-                {permissionsArray.includes('SEARCH_CLEANERS') ? '✓' : '✗'}
+                {permissions.searchCleaners ? '✓' : '✗'}
               </span>
               <span className="permission-name">Search Cleaners</span>
-            </li>
-            <li className={permissionsArray.includes('VIEW_REPORTS') ? 'enabled' : 'disabled'}>
-              <span className="permission-icon">
-                {permissionsArray.includes('VIEW_REPORTS') ? '✓' : '✗'}
-              </span>
-              <span className="permission-name">View Reports</span>
             </li>
           </ul>
         </div>
         <div className="profile-actions">
-          <button
+          <button 
             className="edit-button"
             onClick={this.handleEditProfile}
           >
             Edit Profile
           </button>
-          <button
-            className="delete-button"
-            onClick={this.handleDeleteProfile}
+          <button 
+            className={status === 'ACTIVE' ? 'suspend-button' : 'activate-button'}
+            onClick={this.handleToggleProfileStatus}
           >
-            Delete Profile
+            {status === 'ACTIVE' ? 'Suspend Profile' : 'Activate Profile'}
           </button>
         </div>
       </div>

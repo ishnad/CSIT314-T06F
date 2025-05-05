@@ -334,10 +334,10 @@ class UserAdminUI extends Component {
   // Edit profile
   editUserProfile = async (profileId, { name, permissions }) => {
     try {
-       // Convert permissions object back to array of strings for API call
-       const permissionsArray = Object.entries(permissions)
-         .filter(([key, value]) => value)
-         .map(([key]) => key);
+      // Convert permissions object back to array of strings for API call
+      const permissionsArray = Object.entries(permissions)
+        .filter(([key, value]) => value)
+        .map(([key]) => key);
 
       // Call the API to update the profile
       const res = await fetch(`http://localhost:3001/api/profiles/${profileId}`, {
@@ -398,30 +398,74 @@ class UserAdminUI extends Component {
     }
   };
 
-  // Delete profile
-  deleteUserProfile = async (profileId) => {
+  toggleProfileStatus = async () => {
     try {
-      // Call the API to delete the profile
-      const res = await fetch(`http://localhost:3001/api/profiles/${profileId}`, {
-        method: 'DELETE'
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+      const { selectedProfile } = this.state;
+      if (!selectedProfile || !selectedProfile.id) {
+        throw new Error("No profile selected or missing ID");
       }
 
-      // Refresh the profiles list
-      await this.getAllProfiles();
+      // Determine new status (opposite of current)
+      const newStatus = selectedProfile.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+      const profileId = selectedProfile.id;
 
-      // Clear the selected profile
-      this.setState({
-        selectedProfile: null,
-        message: {
-          text: 'Profile deleted successfully!',
-          type: 'success'
+      console.log(`Toggling status for profile ${profileId} from ${selectedProfile.status} to ${newStatus}`);
+
+      // API call
+      try {
+        const res = await fetch(`http://localhost:3001/api/profiles/${profileId}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
         }
-      });
+
+        const updatedProfile = await res.json();
+
+        // Update selected profile
+        this.setState({
+          selectedProfile: updatedProfile,
+          message: {
+            text: `Profile ${selectedProfile.name} ${newStatus === 'ACTIVE' ? 'activated' : 'suspended'} successfully!`,
+            type: 'success'
+          }
+        });
+
+        // Refresh profiles list
+        this.getAllProfiles();
+
+      } catch (apiError) {
+        console.warn("API error, using fallback:", apiError);
+
+        // Fallback if API fails: just update the state directly
+        const updatedProfile = {
+          ...selectedProfile,
+          status: newStatus
+        };
+
+        // Update the profile in the profiles list
+        const updatedProfiles = this.state.profiles.map(profile => {
+          if (profile.id === selectedProfile.id || profile.name === selectedProfile.name) {
+            return updatedProfile;
+          }
+          return profile;
+        });
+
+        // Update state
+        this.setState({
+          selectedProfile: updatedProfile,
+          profiles: updatedProfiles,
+          filteredProfiles: updatedProfiles, // Update filtered list too
+          message: {
+            text: `Profile ${selectedProfile.name} ${newStatus === 'ACTIVE' ? 'activated' : 'suspended'} (local change only)`,
+            type: 'warning'
+          }
+        });
+      }
 
       // Clear message after 3 seconds
       setTimeout(() => {
@@ -429,9 +473,11 @@ class UserAdminUI extends Component {
       }, 3000);
 
     } catch (err) {
+      console.error("Error toggling profile status:", err);
+
       this.setState({
         message: {
-          text: `Error deleting profile: ${err.message}`,
+          text: `Error updating profile status: ${err.message}`,
           type: 'error'
         }
       });
@@ -439,10 +485,9 @@ class UserAdminUI extends Component {
       setTimeout(() => {
         this.setState({ message: null });
       }, 3000);
-
-      throw err;
     }
   };
+
 
   // ManageUsers methods
   getAllUsers = async () => {
@@ -909,44 +954,22 @@ class UserAdminUI extends Component {
     }
   };
 
-  handleDeleteProfile = async () => {
+  handleToggleProfileStatus = (e) => {
+    // Stop event propagation to make sure it doesn't trigger other handlers
+    e.stopPropagation();
+
     const { selectedProfile } = this.state;
     if (!selectedProfile) return;
 
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete the "${selectedProfile.name}" profile? This action cannot be undone.`
+    const action = selectedProfile.status === 'ACTIVE' ? 'suspend' : 'activate';
+
+    const confirmToggle = window.confirm(
+      `Are you sure you want to ${action} the "${selectedProfile.name}" profile?`
     );
 
-    if (!confirmDelete) return;
-
-    try {
-      // Delete the profile via API
-      await this.deleteUserProfile(selectedProfile.id);
-
-    } catch (err) {
-      // Error is handled in the deleteUserProfile method
-      console.error("Failed to delete profile:", err);
+    if (confirmToggle) {
+      this.toggleProfileStatus();
     }
-  };
-
-  // ManageProfiles methods
-  searchProfiles = (keyword) => {
-    if (!keyword.trim()) {
-      this.setState({ filteredProfiles: this.state.profiles });
-      return;
-    }
-
-    const filtered = this.state.profiles.filter(profile =>
-      profile.name.toLowerCase().includes(keyword.toLowerCase())
-    );
-
-    this.setState({
-      filteredProfiles: filtered,
-      message: filtered.length === 0 ? {
-        text: "No profiles found matching your search criteria",
-        type: "info"
-      } : null
-    });
   };
 
   handleProfileSearchChange = (e) => {
@@ -995,75 +1018,44 @@ class UserAdminUI extends Component {
     }
   };
 
-  // Updated to work with API data and better error handling
-  // Use this as a temporary fallback when the backend is not available
   viewProfileDetails = async (profileId) => {
     try {
+      // Set loading state
       this.setState({ profilesLoading: true });
 
-      // Try to call the API
-      try {
-        const res = await fetch(`http://localhost:3001/api/profiles/${profileId}`);
+      // Make API call to get profile details
+      const res = await fetch(`http://localhost:3001/api/profiles/${profileId}`);
 
-        if (res.ok) {
-          const profileData = await res.json();
-
-          // Ensure permissions object exists
-          // Backend sends permissions as an array, keep it as is
-          // The details view and edit modal will handle the array/object conversion
-
-          this.setState({
-            selectedProfile: profileData,
-            profilesLoading: false
-          });
-          return;
-        }
-      } catch (apiError) {
-        console.warn("API error, falling back to mock data:", apiError);
-        // Continue to fallback if API fails
+      if (!res.ok) {
+        throw new Error(`Failed to fetch profile: Server responded with status ${res.status}`);
       }
 
-      // FALLBACK: Find the profile in the current list (for demo purposes)
-      const profile = this.state.profiles.find(p => p.id === profileId || p.name === profileId);
+      // Parse response data
+      const profileData = await res.json();
 
-      if (profile) {
-        // Backend sends permissions as an array, keep it as is
-        // The details view and edit modal will handle the array/object conversion
-
-        // Use the profile from state as a fallback
-        this.setState({
-          selectedProfile: profile,
-          profilesLoading: false
-        });
-      } else {
-        // Create mock data as last resort
-        const mockProfile = {
-          id: profileId,
-          name: typeof profileId === 'string' ? profileId : `Profile ${profileId}`,
-          userCount: Math.floor(Math.random() * 10) + 1,
-          // Mock permissions as an array for fallback consistency
-          permissions: [
-            ...(Math.random() > 0.5 ? ['MANAGE_SERVICES'] : []),
-            ...(Math.random() > 0.7 ? ['ADMIN_PRIVILEGES'] : []),
-            ...(Math.random() > 0.3 ? ['SEARCH_CLEANERS'] : []),
-            ...(Math.random() > 0.4 ? ['VIEW_REPORTS'] : [])
-          ]
+      // Ensure permissions object exists
+      if (!profileData.permissions) {
+        profileData.permissions = {
+          manageServices: false,
+          adminPrivileges: false,
+          searchCleaners: false
         };
-
-        this.setState({
-          selectedProfile: mockProfile,
-          profilesLoading: false,
-          message: {
-            text: "Using mock data - backend API not available",
-            type: "warning"
-          }
-        });
-
-        setTimeout(() => {
-          this.setState({ message: null });
-        }, 3000);
       }
+
+      // Ensure status property exists
+      if (!profileData.status) {
+        profileData.status = 'ACTIVE';
+      }
+
+      // Set the selected profile and stop loading
+      this.setState({
+        selectedProfile: profileData,
+        profilesLoading: false
+      });
+
     } catch (err) {
+      console.error("Error viewing profile details:", err);
+
       this.setState({
         profileError: err.message,
         profilesLoading: false,
@@ -1073,6 +1065,7 @@ class UserAdminUI extends Component {
         }
       });
 
+      // Clear error message after 3 seconds
       setTimeout(() => {
         this.setState({ message: null });
       }, 3000);
