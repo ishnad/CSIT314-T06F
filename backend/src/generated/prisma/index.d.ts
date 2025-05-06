@@ -43,6 +43,14 @@ export namespace $Enums {
 export type Permission = (typeof Permission)[keyof typeof Permission]
 
 
+export const UserProfileStatus: {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED'
+};
+
+export type UserProfileStatus = (typeof UserProfileStatus)[keyof typeof UserProfileStatus]
+
+
 export const UserStatus: {
   ACTIVE: 'ACTIVE',
   INACTIVE: 'INACTIVE',
@@ -57,6 +65,10 @@ export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus]
 export type Permission = $Enums.Permission
 
 export const Permission: typeof $Enums.Permission
+
+export type UserProfileStatus = $Enums.UserProfileStatus
+
+export const UserProfileStatus: typeof $Enums.UserProfileStatus
 
 export type UserStatus = $Enums.UserStatus
 
@@ -2306,6 +2318,7 @@ export namespace Prisma {
     name: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    status: $Enums.UserProfileStatus | null
   }
 
   export type UserProfileMaxAggregateOutputType = {
@@ -2313,6 +2326,7 @@ export namespace Prisma {
     name: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    status: $Enums.UserProfileStatus | null
   }
 
   export type UserProfileCountAggregateOutputType = {
@@ -2321,6 +2335,7 @@ export namespace Prisma {
     permissions: number
     createdAt: number
     updatedAt: number
+    status: number
     _all: number
   }
 
@@ -2330,6 +2345,7 @@ export namespace Prisma {
     name?: true
     createdAt?: true
     updatedAt?: true
+    status?: true
   }
 
   export type UserProfileMaxAggregateInputType = {
@@ -2337,6 +2353,7 @@ export namespace Prisma {
     name?: true
     createdAt?: true
     updatedAt?: true
+    status?: true
   }
 
   export type UserProfileCountAggregateInputType = {
@@ -2345,6 +2362,7 @@ export namespace Prisma {
     permissions?: true
     createdAt?: true
     updatedAt?: true
+    status?: true
     _all?: true
   }
 
@@ -2426,6 +2444,7 @@ export namespace Prisma {
     permissions: $Enums.Permission[]
     createdAt: Date
     updatedAt: Date
+    status: $Enums.UserProfileStatus
     _count: UserProfileCountAggregateOutputType | null
     _min: UserProfileMinAggregateOutputType | null
     _max: UserProfileMaxAggregateOutputType | null
@@ -2451,6 +2470,7 @@ export namespace Prisma {
     permissions?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    status?: boolean
     userAccounts?: boolean | UserProfile$userAccountsArgs<ExtArgs>
     _count?: boolean | UserProfileCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["userProfile"]>
@@ -2461,6 +2481,7 @@ export namespace Prisma {
     permissions?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    status?: boolean
   }, ExtArgs["result"]["userProfile"]>
 
   export type UserProfileSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2469,6 +2490,7 @@ export namespace Prisma {
     permissions?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    status?: boolean
   }, ExtArgs["result"]["userProfile"]>
 
   export type UserProfileSelectScalar = {
@@ -2477,9 +2499,10 @@ export namespace Prisma {
     permissions?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    status?: boolean
   }
 
-  export type UserProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "permissions" | "createdAt" | "updatedAt", ExtArgs["result"]["userProfile"]>
+  export type UserProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "permissions" | "createdAt" | "updatedAt" | "status", ExtArgs["result"]["userProfile"]>
   export type UserProfileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     userAccounts?: boolean | UserProfile$userAccountsArgs<ExtArgs>
     _count?: boolean | UserProfileCountOutputTypeDefaultArgs<ExtArgs>
@@ -2498,6 +2521,7 @@ export namespace Prisma {
       permissions: $Enums.Permission[]
       createdAt: Date
       updatedAt: Date
+      status: $Enums.UserProfileStatus
     }, ExtArgs["result"]["userProfile"]>
     composites: {}
   }
@@ -2927,6 +2951,7 @@ export namespace Prisma {
     readonly permissions: FieldRef<"UserProfile", 'Permission[]'>
     readonly createdAt: FieldRef<"UserProfile", 'DateTime'>
     readonly updatedAt: FieldRef<"UserProfile", 'DateTime'>
+    readonly status: FieldRef<"UserProfile", 'UserProfileStatus'>
   }
     
 
@@ -4551,7 +4576,8 @@ export namespace Prisma {
     name: 'name',
     permissions: 'permissions',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    status: 'status'
   };
 
   export type UserProfileScalarFieldEnum = (typeof UserProfileScalarFieldEnum)[keyof typeof UserProfileScalarFieldEnum]
@@ -4655,6 +4681,20 @@ export namespace Prisma {
    * Reference to a field of type 'Permission'
    */
   export type EnumPermissionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Permission'>
+    
+
+
+  /**
+   * Reference to a field of type 'UserProfileStatus'
+   */
+  export type EnumUserProfileStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserProfileStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'UserProfileStatus[]'
+   */
+  export type ListEnumUserProfileStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserProfileStatus[]'>
     
 
 
@@ -4771,6 +4811,7 @@ export namespace Prisma {
     permissions?: EnumPermissionNullableListFilter<"UserProfile">
     createdAt?: DateTimeFilter<"UserProfile"> | Date | string
     updatedAt?: DateTimeFilter<"UserProfile"> | Date | string
+    status?: EnumUserProfileStatusFilter<"UserProfile"> | $Enums.UserProfileStatus
     userAccounts?: UserAccountListRelationFilter
   }
 
@@ -4780,6 +4821,7 @@ export namespace Prisma {
     permissions?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    status?: SortOrder
     userAccounts?: UserAccountOrderByRelationAggregateInput
   }
 
@@ -4792,6 +4834,7 @@ export namespace Prisma {
     permissions?: EnumPermissionNullableListFilter<"UserProfile">
     createdAt?: DateTimeFilter<"UserProfile"> | Date | string
     updatedAt?: DateTimeFilter<"UserProfile"> | Date | string
+    status?: EnumUserProfileStatusFilter<"UserProfile"> | $Enums.UserProfileStatus
     userAccounts?: UserAccountListRelationFilter
   }, "id" | "name">
 
@@ -4801,6 +4844,7 @@ export namespace Prisma {
     permissions?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    status?: SortOrder
     _count?: UserProfileCountOrderByAggregateInput
     _max?: UserProfileMaxOrderByAggregateInput
     _min?: UserProfileMinOrderByAggregateInput
@@ -4815,6 +4859,7 @@ export namespace Prisma {
     permissions?: EnumPermissionNullableListFilter<"UserProfile">
     createdAt?: DateTimeWithAggregatesFilter<"UserProfile"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"UserProfile"> | Date | string
+    status?: EnumUserProfileStatusWithAggregatesFilter<"UserProfile"> | $Enums.UserProfileStatus
   }
 
   export type ServiceListingWhereInput = {
@@ -4985,6 +5030,7 @@ export namespace Prisma {
     permissions?: UserProfileCreatepermissionsInput | $Enums.Permission[]
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.UserProfileStatus
     userAccounts?: UserAccountCreateNestedManyWithoutUserProfileInput
   }
 
@@ -4994,6 +5040,7 @@ export namespace Prisma {
     permissions?: UserProfileCreatepermissionsInput | $Enums.Permission[]
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.UserProfileStatus
     userAccounts?: UserAccountUncheckedCreateNestedManyWithoutUserProfileInput
   }
 
@@ -5003,6 +5050,7 @@ export namespace Prisma {
     permissions?: UserProfileUpdatepermissionsInput | $Enums.Permission[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumUserProfileStatusFieldUpdateOperationsInput | $Enums.UserProfileStatus
     userAccounts?: UserAccountUpdateManyWithoutUserProfileNestedInput
   }
 
@@ -5012,6 +5060,7 @@ export namespace Prisma {
     permissions?: UserProfileUpdatepermissionsInput | $Enums.Permission[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumUserProfileStatusFieldUpdateOperationsInput | $Enums.UserProfileStatus
     userAccounts?: UserAccountUncheckedUpdateManyWithoutUserProfileNestedInput
   }
 
@@ -5021,6 +5070,7 @@ export namespace Prisma {
     permissions?: UserProfileCreatepermissionsInput | $Enums.Permission[]
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.UserProfileStatus
   }
 
   export type UserProfileUpdateManyMutationInput = {
@@ -5029,6 +5079,7 @@ export namespace Prisma {
     permissions?: UserProfileUpdatepermissionsInput | $Enums.Permission[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumUserProfileStatusFieldUpdateOperationsInput | $Enums.UserProfileStatus
   }
 
   export type UserProfileUncheckedUpdateManyInput = {
@@ -5037,6 +5088,7 @@ export namespace Prisma {
     permissions?: UserProfileUpdatepermissionsInput | $Enums.Permission[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumUserProfileStatusFieldUpdateOperationsInput | $Enums.UserProfileStatus
   }
 
   export type ServiceListingCreateInput = {
@@ -5298,6 +5350,13 @@ export namespace Prisma {
     isEmpty?: boolean
   }
 
+  export type EnumUserProfileStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserProfileStatus | EnumUserProfileStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.UserProfileStatus[] | ListEnumUserProfileStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserProfileStatus[] | ListEnumUserProfileStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserProfileStatusFilter<$PrismaModel> | $Enums.UserProfileStatus
+  }
+
   export type UserAccountListRelationFilter = {
     every?: UserAccountWhereInput
     some?: UserAccountWhereInput
@@ -5314,6 +5373,7 @@ export namespace Prisma {
     permissions?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    status?: SortOrder
   }
 
   export type UserProfileMaxOrderByAggregateInput = {
@@ -5321,6 +5381,7 @@ export namespace Prisma {
     name?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    status?: SortOrder
   }
 
   export type UserProfileMinOrderByAggregateInput = {
@@ -5328,6 +5389,17 @@ export namespace Prisma {
     name?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    status?: SortOrder
+  }
+
+  export type EnumUserProfileStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserProfileStatus | EnumUserProfileStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.UserProfileStatus[] | ListEnumUserProfileStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserProfileStatus[] | ListEnumUserProfileStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserProfileStatusWithAggregatesFilter<$PrismaModel> | $Enums.UserProfileStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserProfileStatusFilter<$PrismaModel>
+    _max?: NestedEnumUserProfileStatusFilter<$PrismaModel>
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -5508,6 +5580,10 @@ export namespace Prisma {
     push?: $Enums.Permission | $Enums.Permission[]
   }
 
+  export type EnumUserProfileStatusFieldUpdateOperationsInput = {
+    set?: $Enums.UserProfileStatus
+  }
+
   export type UserAccountUpdateManyWithoutUserProfileNestedInput = {
     create?: XOR<UserAccountCreateWithoutUserProfileInput, UserAccountUncheckedCreateWithoutUserProfileInput> | UserAccountCreateWithoutUserProfileInput[] | UserAccountUncheckedCreateWithoutUserProfileInput[]
     connectOrCreate?: UserAccountCreateOrConnectWithoutUserProfileInput | UserAccountCreateOrConnectWithoutUserProfileInput[]
@@ -5684,6 +5760,23 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedEnumUserProfileStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserProfileStatus | EnumUserProfileStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.UserProfileStatus[] | ListEnumUserProfileStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserProfileStatus[] | ListEnumUserProfileStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserProfileStatusFilter<$PrismaModel> | $Enums.UserProfileStatus
+  }
+
+  export type NestedEnumUserProfileStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserProfileStatus | EnumUserProfileStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.UserProfileStatus[] | ListEnumUserProfileStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserProfileStatus[] | ListEnumUserProfileStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserProfileStatusWithAggregatesFilter<$PrismaModel> | $Enums.UserProfileStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserProfileStatusFilter<$PrismaModel>
+    _max?: NestedEnumUserProfileStatusFilter<$PrismaModel>
+  }
+
   export type NestedFloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -5717,6 +5810,7 @@ export namespace Prisma {
     permissions?: UserProfileCreatepermissionsInput | $Enums.Permission[]
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.UserProfileStatus
   }
 
   export type UserProfileUncheckedCreateWithoutUserAccountsInput = {
@@ -5725,6 +5819,7 @@ export namespace Prisma {
     permissions?: UserProfileCreatepermissionsInput | $Enums.Permission[]
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.UserProfileStatus
   }
 
   export type UserProfileCreateOrConnectWithoutUserAccountsInput = {
@@ -5783,6 +5878,7 @@ export namespace Prisma {
     permissions?: UserProfileUpdatepermissionsInput | $Enums.Permission[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumUserProfileStatusFieldUpdateOperationsInput | $Enums.UserProfileStatus
   }
 
   export type UserProfileUncheckedUpdateWithoutUserAccountsInput = {
@@ -5791,6 +5887,7 @@ export namespace Prisma {
     permissions?: UserProfileUpdatepermissionsInput | $Enums.Permission[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumUserProfileStatusFieldUpdateOperationsInput | $Enums.UserProfileStatus
   }
 
   export type ServiceListingUpsertWithWhereUniqueWithoutCleanerInput = {

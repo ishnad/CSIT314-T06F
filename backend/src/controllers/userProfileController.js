@@ -155,11 +155,49 @@ class SimulateUserProfileController {
     }
 }
 
+class UpdateUserProfileStatusController {
+    constructor() {
+        this.userProfileEntity = new UserProfileEntity();
+    }
 
-// Export the controllers
+    /**
+     * Handles the HTTP request to update the status of a user profile.
+     * @param {object} req - Express request object.
+     * @param {object} res - Express response object.
+     */
+    async updateProfileStatus(req, res) {
+        const { id } = req.params;
+        const { status } = req.body; // Expecting status like "ACTIVE" or "SUSPENDED"
+
+        if (!status) {
+            return res.status(400).json({ error: 'Status is required in the request body.' });
+        }
+
+        // Validate status against UserProfileStatus enum values
+        const validStatuses = Object.values(require('../generated/prisma').UserProfileStatus);
+        if (!validStatuses.includes(status.toUpperCase())) {
+            return res.status(400).json({ error: `Invalid status value. Must be one of: ${validStatuses.join(', ')}.` });
+        }
+
+        try {
+            const result = await this.userProfileEntity.updateUserProfileStatus(id, status.toUpperCase());
+
+            if (result.error) {
+                res.status(result.error.status).json({ error: result.error.error });
+            } else {
+                res.status(200).json({ message: `User profile status updated to ${result.status}.`, profile: result });
+            }
+        } catch (error) {
+            console.error("Controller error updating user profile status:", error);
+            res.status(500).json({ error: 'An unexpected error occurred while updating the user profile status.' });
+        }
+    }
+}
+
 module.exports = {
     CreateUserProfileController,
     ViewUserProfileController,
     EditUserProfileController,
-    SimulateUserProfileController
+    SimulateUserProfileController,
+    UpdateUserProfileStatusController
 };

@@ -424,13 +424,13 @@ class UserAdminUI extends Component {
           throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
         }
 
-        const updatedProfile = await res.json();
+        const responseData = await res.json(); // Backend returns { message, profile }
 
-        // Update selected profile
+        // Update selected profile from responseData.profile
         this.setState({
-          selectedProfile: updatedProfile,
+          selectedProfile: responseData.profile,
           message: {
-            text: `Profile ${selectedProfile.name} ${newStatus === 'ACTIVE' ? 'activated' : 'suspended'} successfully!`,
+            text: responseData.message,
             type: 'success'
           }
         });
@@ -1018,56 +1018,32 @@ class UserAdminUI extends Component {
     }
   };
 
-  viewProfileDetails = async (profileId) => {
-    try {
-      // Set loading state
-      this.setState({ profilesLoading: true });
+  viewProfileDetails = (profileId) => { // No longer async, no fetch
+    // Find the profile from the existing list in state
+    // Prefer filteredProfiles if available, otherwise fall back to all profiles
+    const profilesToSearch = this.state.filteredProfiles.length > 0 ? this.state.filteredProfiles : this.state.profiles;
+    const profile = profilesToSearch.find(p => p.id === profileId);
 
-      // Make API call to get profile details
-      const res = await fetch(`http://localhost:3001/api/profiles/${profileId}`);
-
-      if (!res.ok) {
-        throw new Error(`Failed to fetch profile: Server responded with status ${res.status}`);
-      }
-
-      // Parse response data
-      const profileData = await res.json();
-
-      // Ensure permissions object exists
-      if (!profileData.permissions) {
-        profileData.permissions = {
-          manageServices: false,
-          adminPrivileges: false,
-          searchCleaners: false
-        };
-      }
-
-      // Ensure status property exists
-      if (!profileData.status) {
-        profileData.status = 'ACTIVE';
-      }
-
-      // Set the selected profile and stop loading
+    if (profile) {
       this.setState({
-        selectedProfile: profileData,
-        profilesLoading: false
+        selectedProfile: profile,
+        profileError: null, // Clear any previous error
+        profilesLoading: false // Ensure loading is false
       });
-
-    } catch (err) {
-      console.error("Error viewing profile details:", err);
-
+    } else {
+      console.error(`Profile with ID ${profileId} not found in local state.`);
       this.setState({
-        profileError: err.message,
-        profilesLoading: false,
+        selectedProfile: null, // Clear selected profile if not found
+        profileError: `Profile with ID ${profileId} not found. Please refresh the list.`,
+        profilesLoading: false, // Ensure loading is false
         message: {
-          text: `Error loading profile details: ${err.message}`,
+          text: `Error: Profile with ID ${profileId} not found. The list might be outdated.`,
           type: 'error'
         }
       });
-
-      // Clear error message after 3 seconds
+      // Clear message after 3 seconds
       setTimeout(() => {
-        this.setState({ message: null });
+        this.setState({ message: null, profileError: null });
       }, 3000);
     }
   };

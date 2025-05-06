@@ -52,6 +52,13 @@ model UserProfile {
   userAccounts UserAccount[]
   // Relation to ServiceListing (if a profile can be associated with listings, e.g., category management)
   // serviceListings ServiceListing[] // Optional: Add if profiles manage listings directly
+
+  status UserProfileStatus @default(ACTIVE) // Status of the user profile
+}
+
+enum UserProfileStatus {
+  ACTIVE
+  SUSPENDED
 }
 
 // Relation from UserAccount to ServiceListing

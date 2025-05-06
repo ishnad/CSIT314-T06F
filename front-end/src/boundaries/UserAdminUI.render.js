@@ -478,7 +478,7 @@ const renderingMethods = {
                       className={profile.status === 'SUSPENDED' ? 'suspended-row' : ''}
                     >
                       <td>{profile.name}</td>
-                      <td>{profile.userCount || 0}</td>
+                      <td>{profile.userAccountCount !== undefined ? profile.userAccountCount : 0}</td>
                       <td>
                         <span className={`status-badge ${profile.status === 'ACTIVE' ? 'active' : 'suspended'}`}>
                           {profile.status === 'ACTIVE' ? 'Active' : 'Suspended'}
@@ -533,15 +533,19 @@ const renderingMethods = {
     
     if (!selectedProfile) return null;
     
-    // Check if permissions object exists, if not, use empty defaults
-    const permissions = selectedProfile.permissions || {
-      manageServices: false,
-      adminPrivileges: false,
-      searchCleaners: false
+    // Convert permissions array from backend to an object for easy checking in JSX
+    // Ensure selectedProfile.permissions is an array before calling .includes
+    const permissionsArray = Array.isArray(selectedProfile.permissions) ? selectedProfile.permissions : [];
+    const currentPermissions = {
+      MANAGE_SERVICES: permissionsArray.includes('MANAGE_SERVICES'),
+      ADMIN_PRIVILEGES: permissionsArray.includes('ADMIN_PRIVILEGES'),
+      SEARCH_CLEANERS: permissionsArray.includes('SEARCH_CLEANERS'),
+      VIEW_REPORTS: permissionsArray.includes('VIEW_REPORTS'),
     };
     
     // Check if status exists, default to ACTIVE if not
     const status = selectedProfile.status || 'ACTIVE';
+    const userAccountCount = selectedProfile.userAccountCount !== undefined ? selectedProfile.userAccountCount : 'N/A';
     
     return (
       <div className="profile-details-container">
@@ -557,23 +561,29 @@ const renderingMethods = {
         <div className="profile-details">
           <h4>Permissions:</h4>
           <ul className="permissions-list">
-            <li className={permissions.manageServices ? 'enabled' : 'disabled'}>
+            <li className={currentPermissions.MANAGE_SERVICES ? 'enabled' : 'disabled'}>
               <span className="permission-icon">
-                {permissions.manageServices ? '✓' : '✗'}
+                {currentPermissions.MANAGE_SERVICES ? '✓' : '✗'}
               </span>
               <span className="permission-name">Manage Services</span>
             </li>
-            <li className={permissions.adminPrivileges ? 'enabled' : 'disabled'}>
+            <li className={currentPermissions.ADMIN_PRIVILEGES ? 'enabled' : 'disabled'}>
               <span className="permission-icon">
-                {permissions.adminPrivileges ? '✓' : '✗'}
+                {currentPermissions.ADMIN_PRIVILEGES ? '✓' : '✗'}
               </span>
               <span className="permission-name">Admin Privileges</span>
             </li>
-            <li className={permissions.searchCleaners ? 'enabled' : 'disabled'}>
+            <li className={currentPermissions.SEARCH_CLEANERS ? 'enabled' : 'disabled'}>
               <span className="permission-icon">
-                {permissions.searchCleaners ? '✓' : '✗'}
+                {currentPermissions.SEARCH_CLEANERS ? '✓' : '✗'}
               </span>
               <span className="permission-name">Search Cleaners</span>
+            </li>
+            <li className={currentPermissions.VIEW_REPORTS ? 'enabled' : 'disabled'}>
+              <span className="permission-icon">
+                {currentPermissions.VIEW_REPORTS ? '✓' : '✗'}
+              </span>
+              <span className="permission-name">View Reports</span>
             </li>
           </ul>
         </div>

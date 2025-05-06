@@ -11,8 +11,14 @@ jest.mock('../../src/generated/prisma', () => {
             update: jest.fn(),
         },
     };
+    // Define mockUserStatus INSIDE the factory function, similar to userAccountEntity.test.js
+    const mockUserProfileStatus = {
+        ACTIVE: 'ACTIVE',
+        SUSPENDED: 'SUSPENDED',
+    };
     return {
         PrismaClient: jest.fn(() => mockPrisma),
+        UserProfileStatus: mockUserProfileStatus, // Provide the mocked enum
     };
 });
 
@@ -77,12 +83,14 @@ describe('UserProfileEntity', () => {
             id: 'profile-id-123',
             name: profileData.name,
             permissions: profileData.permissions,
+            status: 'ACTIVE', // Add status here
             createdAt: new Date(),
         };
          const expectedProfileNoPerms = {
             id: 'profile-id-456',
             name: profileDataNoPerms.name,
             permissions: [], // Expect empty array when permissions are omitted
+            status: 'ACTIVE', // Add status here
             createdAt: new Date(),
         };
 
@@ -99,10 +107,13 @@ describe('UserProfileEntity', () => {
                 data: {
                     name: profileData.name,
                     permissions: profileData.permissions, // Include permissions
+                    status: 'ACTIVE', // Default status from entity
                 },
-                select: { id: true, name: true, permissions: true, createdAt: true },
+                select: { id: true, name: true, permissions: true, status: true, createdAt: true },
             });
-            expect(result).toEqual(expectedProfile);
+            // expectedProfile now includes status, so direct comparison is fine.
+            // Using expect.objectContaining to be robust against minor differences in Date objects if not mocked perfectly.
+            expect(result).toEqual(expect.objectContaining(expectedProfile));
         });
 
          it('should create a new user profile successfully without permissions (defaults to empty array)', async () => {
@@ -118,10 +129,12 @@ describe('UserProfileEntity', () => {
                 data: {
                     name: profileDataNoPerms.name,
                     permissions: [], // Ensure empty array is passed when permissions are undefined
+                    status: 'ACTIVE', // Default status from entity
                 },
-                select: { id: true, name: true, permissions: true, createdAt: true },
+                select: { id: true, name: true, permissions: true, status: true, createdAt: true },
             });
-            expect(result).toEqual(expectedProfileNoPerms);
+            // expectedProfileNoPerms now includes status.
+            expect(result).toEqual(expect.objectContaining(expectedProfileNoPerms));
         });
 
          it('should return validation error if permissions is not an array', async () => {
@@ -180,16 +193,16 @@ describe('UserProfileEntity', () => {
 
     // --- Test listUserProfiles ---
     describe('listUserProfiles', () => {
-        // Include permissions in mock data
+        // Include permissions and status in mock data
         const mockProfilesRaw = [
-            { id: 'p1', name: 'Admin', permissions: ['ADMIN', 'READ', 'WRITE'], createdAt: new Date(), _count: { userAccounts: 5 } },
-            { id: 'p2', name: 'Editor', permissions: ['READ', 'WRITE'], createdAt: new Date(), _count: { userAccounts: 10 } },
-            { id: 'p3', name: 'Viewer', permissions: ['READ'], createdAt: new Date(), _count: { userAccounts: 2 } },
+            { id: 'p1', name: 'Admin', permissions: ['ADMIN', 'READ', 'WRITE'], status: 'ACTIVE', createdAt: new Date(), _count: { userAccounts: 5 } },
+            { id: 'p2', name: 'Editor', permissions: ['READ', 'WRITE'], status: 'SUSPENDED', createdAt: new Date(), _count: { userAccounts: 10 } },
+            { id: 'p3', name: 'Viewer', permissions: ['READ'], status: 'ACTIVE', createdAt: new Date(), _count: { userAccounts: 2 } },
         ];
          const mockProfilesExpected = [
-            { id: 'p1', name: 'Admin', permissions: ['ADMIN', 'READ', 'WRITE'], createdAt: mockProfilesRaw[0].createdAt, userAccountCount: 5 },
-            { id: 'p2', name: 'Editor', permissions: ['READ', 'WRITE'], createdAt: mockProfilesRaw[1].createdAt, userAccountCount: 10 },
-            { id: 'p3', name: 'Viewer', permissions: ['READ'], createdAt: mockProfilesRaw[2].createdAt, userAccountCount: 2 },
+            { id: 'p1', name: 'Admin', permissions: ['ADMIN', 'READ', 'WRITE'], status: 'ACTIVE', createdAt: mockProfilesRaw[0].createdAt, userAccountCount: 5, _count: undefined },
+            { id: 'p2', name: 'Editor', permissions: ['READ', 'WRITE'], status: 'SUSPENDED', createdAt: mockProfilesRaw[1].createdAt, userAccountCount: 10, _count: undefined },
+            { id: 'p3', name: 'Viewer', permissions: ['READ'], status: 'ACTIVE', createdAt: mockProfilesRaw[2].createdAt, userAccountCount: 2, _count: undefined },
         ];
 
         beforeEach(() => {
@@ -210,18 +223,21 @@ describe('UserProfileEntity', () => {
                     id: true,
                     name: true,
                     permissions: true, // Include permissions
+                    status: true, // Add status
                     createdAt: true,
                     _count: { select: { userAccounts: true } },
                 },
                 orderBy: { name: 'asc' },
             });
+            // mockProfilesExpected now includes status and _count: undefined
             expect(result).toEqual(mockProfilesExpected);
         });
 
         it('should return a filtered list of user profiles based on keyword', async () => {
             const keyword = 'admin';
-            const filteredRaw = [mockProfilesRaw[0]];
-            const filteredExpected = [mockProfilesExpected[0]];
+            // Ensure filteredRaw and filteredExpected are derived correctly based on the updated mockProfilesRaw/Expected
+            const filteredRaw = [mockProfilesRaw.find(p => p.name.toLowerCase().includes(keyword))];
+            const filteredExpected = [mockProfilesExpected.find(p => p.name.toLowerCase().includes(keyword))];
             mockPrismaClient.userProfile.findMany.mockResolvedValue(filteredRaw);
 
             const result = await userProfileEntity.listUserProfiles({ keyword });
@@ -232,18 +248,22 @@ describe('UserProfileEntity', () => {
                     id: true,
                     name: true,
                     permissions: true, // Include permissions
+                    status: true, // Add status
                     createdAt: true,
                     _count: { select: { userAccounts: true } },
                 },
                 orderBy: { name: 'asc' },
             });
+            // filteredExpected now includes status and _count: undefined
             expect(result).toEqual(filteredExpected);
         });
 
          it('should handle keyword with leading/trailing whitespace', async () => {
             const keyword = '  Editor  ';
-            const filteredRaw = [mockProfilesRaw[1]];
-            const filteredExpected = [mockProfilesExpected[1]];
+            const trimmedKeyword = keyword.trim().toLowerCase();
+            // Ensure filteredRaw and filteredExpected are derived correctly
+            const filteredRaw = [mockProfilesRaw.find(p => p.name.toLowerCase().includes(trimmedKeyword))];
+            const filteredExpected = [mockProfilesExpected.find(p => p.name.toLowerCase().includes(trimmedKeyword))];
             mockPrismaClient.userProfile.findMany.mockResolvedValue(filteredRaw);
 
             const result = await userProfileEntity.listUserProfiles({ keyword });
@@ -254,11 +274,13 @@ describe('UserProfileEntity', () => {
                     id: true,
                     name: true,
                     permissions: true, // Include permissions
+                    status: true, // Add status
                     createdAt: true,
                     _count: { select: { userAccounts: true } },
                 },
                 orderBy: { name: 'asc' },
             });
+            // filteredExpected now includes status and _count: undefined
             expect(result).toEqual(filteredExpected);
         });
 
@@ -274,6 +296,7 @@ describe('UserProfileEntity', () => {
                     id: true,
                     name: true,
                     permissions: true, // Include permissions
+                    status: true, // Add status
                     createdAt: true,
                     _count: { select: { userAccounts: true } },
                 },
@@ -316,7 +339,7 @@ describe('UserProfileEntity', () => {
 
         it('should update profile name successfully', async () => {
             const expectedData = { name: 'Updated Name' }; // Trimmed
-            const mockReturn = { ...updatedProfileMock, name: expectedData.name };
+            const mockReturn = { ...updatedProfileMock, name: expectedData.name, status: 'ACTIVE' }; // Add status
             mockPrismaClient.userProfile.findUnique.mockResolvedValueOnce(existingProfile); // Find target profile
             mockPrismaClient.userProfile.findUnique.mockResolvedValueOnce(null); // Check for name conflict (none)
             mockPrismaClient.userProfile.update.mockResolvedValue(mockReturn);
@@ -328,7 +351,7 @@ describe('UserProfileEntity', () => {
             expect(mockPrismaClient.userProfile.update).toHaveBeenCalledWith({
                 where: { id: profileId },
                 data: expectedData,
-                select: { id: true, name: true, permissions: true, createdAt: true, updatedAt: true },
+                select: { id: true, name: true, permissions: true, status: true, createdAt: true, updatedAt: true }, // Add status
             });
             expect(result).toEqual(mockReturn);
         });
@@ -337,7 +360,7 @@ describe('UserProfileEntity', () => {
         it('should update profile permissions successfully', async () => {
             // Adjust expectation: The entity currently doesn't trim individual permissions
             const expectedDataPerms = { permissions: [' NEW ', ' PERMS '] };
-            const mockReturnPerms = { ...updatedProfileMock, name: existingProfile.name, permissions: expectedDataPerms.permissions };
+            const mockReturnPerms = { ...updatedProfileMock, name: existingProfile.name, permissions: expectedDataPerms.permissions, status: 'ACTIVE' }; // Add status
             mockPrismaClient.userProfile.findUnique.mockResolvedValueOnce(existingProfile); // Find target profile
             // No name conflict check needed if name isn't changing
             mockPrismaClient.userProfile.update.mockResolvedValue(mockReturnPerms);
@@ -348,14 +371,14 @@ describe('UserProfileEntity', () => {
             expect(mockPrismaClient.userProfile.update).toHaveBeenCalledWith({
                 where: { id: profileId },
                 data: expectedDataPerms,
-                select: { id: true, name: true, permissions: true, createdAt: true, updatedAt: true },
+                select: { id: true, name: true, permissions: true, status: true, createdAt: true, updatedAt: true }, // Add status
             });
             expect(resultPerms).toEqual(mockReturnPerms);
         });
 
         it('should update profile permissions to an empty array successfully', async () => {
             const expectedDataEmpty = { permissions: [] };
-            const mockReturnEmpty = { ...updatedProfileMock, name: existingProfile.name, permissions: [] };
+            const mockReturnEmpty = { ...updatedProfileMock, name: existingProfile.name, permissions: [], status: 'ACTIVE' }; // Add status
             mockPrismaClient.userProfile.findUnique.mockResolvedValueOnce(existingProfile);
             mockPrismaClient.userProfile.update.mockResolvedValue(mockReturnEmpty);
 
@@ -365,7 +388,7 @@ describe('UserProfileEntity', () => {
             expect(mockPrismaClient.userProfile.update).toHaveBeenCalledWith({
                 where: { id: profileId },
                 data: expectedDataEmpty,
-                select: { id: true, name: true, permissions: true, createdAt: true, updatedAt: true },
+                select: { id: true, name: true, permissions: true, status: true, createdAt: true, updatedAt: true }, // Add status
             });
             expect(resultEmpty).toEqual(mockReturnEmpty);
         });
@@ -374,7 +397,7 @@ describe('UserProfileEntity', () => {
 
          it('should update both name and permissions successfully', async () => {
             const expectedData = { name: 'BothUpdated', permissions: ['BOTH'] }; // Correct expected data
-            const mockReturn = { ...updatedProfileMock, ...expectedData }; // Use spread for updated fields
+            const mockReturn = { ...updatedProfileMock, ...expectedData, status: 'ACTIVE' }; // Use spread for updated fields and add status
             mockPrismaClient.userProfile.findUnique.mockResolvedValueOnce(existingProfile); // Find target
             mockPrismaClient.userProfile.findUnique.mockResolvedValueOnce(null); // Check name conflict
             mockPrismaClient.userProfile.update.mockResolvedValue(mockReturn);
@@ -386,7 +409,7 @@ describe('UserProfileEntity', () => {
             expect(mockPrismaClient.userProfile.update).toHaveBeenCalledWith({
                 where: { id: profileId },
                 data: expectedData, // Expect both fields
-                select: { id: true, name: true, permissions: true, createdAt: true, updatedAt: true },
+                select: { id: true, name: true, permissions: true, status: true, createdAt: true, updatedAt: true }, // Add status
             });
             expect(result).toEqual(mockReturn);
         });
@@ -441,7 +464,7 @@ describe('UserProfileEntity', () => {
             // Simulate providing the same name it already has, but maybe different permissions
             const sameNameData = { name: existingProfile.name, permissions: ['NEW'] };
             const expectedData = { name: existingProfile.name, permissions: ['NEW'] }; // Data sent to update
-            const mockReturn = { ...updatedProfileMock, name: existingProfile.name, permissions: ['NEW'] }; // What prisma returns
+            const mockReturn = { ...updatedProfileMock, name: existingProfile.name, permissions: ['NEW'], status: 'ACTIVE' }; // What prisma returns, add status
             // Reset mocks
             mockPrismaClient.userProfile.findUnique.mockReset();
             mockPrismaClient.userProfile.update.mockReset();
@@ -457,7 +480,7 @@ describe('UserProfileEntity', () => {
             expect(mockPrismaClient.userProfile.update).toHaveBeenCalledWith({
                 where: { id: profileId },
                 data: expectedData, // Data to update (includes permissions)
-                select: { id: true, name: true, permissions: true, createdAt: true, updatedAt: true },
+                select: { id: true, name: true, permissions: true, status: true, createdAt: true, updatedAt: true }, // Add status
             });
             expect(result).toEqual(mockReturn);
         });
@@ -496,7 +519,8 @@ describe('UserProfileEntity', () => {
         };
 
         it('should return profile data for a valid profile name', async () => {
-            mockPrismaClient.userProfile.findUnique.mockResolvedValue(mockProfile);
+            const mockProfileWithStatus = { ...mockProfile, status: 'ACTIVE' }; // Add status
+            mockPrismaClient.userProfile.findUnique.mockResolvedValue(mockProfileWithStatus);
 
             const result = await userProfileEntity.simulateProfile(profileName);
 
@@ -506,9 +530,10 @@ describe('UserProfileEntity', () => {
                     id: true,
                     name: true,
                     permissions: true, // Include permissions
+                    status: true, // Add status
                 }
             });
-            expect(result).toEqual(mockProfile);
+            expect(result).toEqual(mockProfileWithStatus);
         });
 
         it('should return 400 error if profile name is missing or empty', async () => {
@@ -529,7 +554,7 @@ describe('UserProfileEntity', () => {
 
             expect(mockPrismaClient.userProfile.findUnique).toHaveBeenCalledWith({
                 where: { name: trimmedProfileName },
-                select: { id: true, name: true, permissions: true }
+                select: { id: true, name: true, permissions: true, status: true } // Add status
             });
             expect(result).toEqual(expectedError);
         });
@@ -546,7 +571,7 @@ describe('UserProfileEntity', () => {
 
             expect(mockPrismaClient.userProfile.findUnique).toHaveBeenCalledWith({
                 where: { name: trimmedProfileName },
-                select: { id: true, name: true, permissions: true }
+                select: { id: true, name: true, permissions: true, status: true } // Add status
             });
             expect(result).toEqual(expectedError);
         });

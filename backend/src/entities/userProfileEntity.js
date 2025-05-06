@@ -1,4 +1,4 @@
-const { PrismaClient } = require('../generated/prisma');
+const { PrismaClient, UserProfileStatus } = require('../generated/prisma');
 
 class UserProfileEntity {
     constructor() {
@@ -55,11 +55,13 @@ class UserProfileEntity {
                 data: {
                     name: name.trim(),
                     permissions: permissions,
+                    status: UserProfileStatus.ACTIVE, // Default status
                 },
                 select: { // Select the fields to return
                     id: true,
                     name: true,
                     permissions: true,
+                    status: true,
                     createdAt: true
                 }
             });
@@ -95,6 +97,7 @@ class UserProfileEntity {
                     id: true,
                     name: true,
                     permissions: true,
+                    status: true,
                     createdAt: true,
                     _count: { // Include the count of related user accounts
                         select: { userAccounts: true },
@@ -192,6 +195,7 @@ class UserProfileEntity {
                     id: true,
                     name: true,
                     permissions: true,
+                    status: true,
                     createdAt: true,
                     updatedAt: true
                 }
@@ -202,6 +206,58 @@ class UserProfileEntity {
         } catch (error) {
             console.error("Error updating user profile:", error);
             return { error: { status: 500, error: 'Failed to update user profile due to a server error.' } };
+        }
+    }
+
+    /**
+     * Updates the status of an existing user profile.
+     * @param {string} profileId - The ID of the profile to update.
+     * @param {UserProfileStatus} newStatus - The new status for the profile.
+     * @returns {Promise<object>} The updated profile object or an error object.
+     */
+    async updateUserProfileStatus(profileId, newStatus) {
+        if (!profileId) {
+            return { error: { status: 400, error: 'Profile ID is required.' } };
+        }
+        if (!newStatus || !Object.values(UserProfileStatus).includes(newStatus)) {
+            return { error: { status: 400, error: `Invalid status provided. Must be one of: ${Object.values(UserProfileStatus).join(', ')}.` } };
+        }
+
+        try {
+            const existingProfile = await this.prisma.userProfile.findUnique({
+                where: { id: profileId },
+            });
+
+            if (!existingProfile) {
+                return { error: { status: 404, error: 'User profile not found.' } };
+            }
+
+            const updatedProfile = await this.prisma.userProfile.update({
+                where: { id: profileId },
+                data: { status: newStatus },
+                select: {
+                    id: true,
+                    name: true,
+                    permissions: true,
+                    status: true,
+                    createdAt: true,
+                    updatedAt: true,
+                     _count: {
+                        select: { userAccounts: true },
+                    },
+                }
+            });
+            
+            // Remap to include userAccountCount directly
+            return {
+                ...updatedProfile,
+                userAccountCount: updatedProfile._count.userAccounts,
+                _count: undefined
+            };
+
+        } catch (error) {
+            console.error(`Error updating status for profile ${profileId}:`, error);
+            return { error: { status: 500, error: 'Failed to update user profile status due to a server error.' } };
         }
     }
 
@@ -225,6 +281,7 @@ class UserProfileEntity {
                     id: true,
                     name: true,
                     permissions: true,
+                    status: true,
                 }
             });
 
