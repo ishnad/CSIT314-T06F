@@ -33,6 +33,16 @@ export type ServiceListing = $Result.DefaultSelection<Prisma.$ServiceListingPayl
  * 
  */
 export type ProfileView = $Result.DefaultSelection<Prisma.$ProfileViewPayload>
+/**
+ * Model Shortlist
+ * 
+ */
+export type Shortlist = $Result.DefaultSelection<Prisma.$ShortlistPayload>
+/**
+ * Model ConfirmedMatch
+ * 
+ */
+export type ConfirmedMatch = $Result.DefaultSelection<Prisma.$ConfirmedMatchPayload>
 
 /**
  * Enums
@@ -56,6 +66,14 @@ export const UserProfileStatus: {
 export type UserProfileStatus = (typeof UserProfileStatus)[keyof typeof UserProfileStatus]
 
 
+export const ServiceListingStatus: {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED'
+};
+
+export type ServiceListingStatus = (typeof ServiceListingStatus)[keyof typeof ServiceListingStatus]
+
+
 export const UserStatus: {
   ACTIVE: 'ACTIVE',
   INACTIVE: 'INACTIVE',
@@ -74,6 +92,10 @@ export const Permission: typeof $Enums.Permission
 export type UserProfileStatus = $Enums.UserProfileStatus
 
 export const UserProfileStatus: typeof $Enums.UserProfileStatus
+
+export type ServiceListingStatus = $Enums.ServiceListingStatus
+
+export const ServiceListingStatus: typeof $Enums.ServiceListingStatus
 
 export type UserStatus = $Enums.UserStatus
 
@@ -243,6 +265,26 @@ export class PrismaClient<
     * ```
     */
   get profileView(): Prisma.ProfileViewDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.shortlist`: Exposes CRUD operations for the **Shortlist** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Shortlists
+    * const shortlists = await prisma.shortlist.findMany()
+    * ```
+    */
+  get shortlist(): Prisma.ShortlistDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.confirmedMatch`: Exposes CRUD operations for the **ConfirmedMatch** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ConfirmedMatches
+    * const confirmedMatches = await prisma.confirmedMatch.findMany()
+    * ```
+    */
+  get confirmedMatch(): Prisma.ConfirmedMatchDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -686,7 +728,9 @@ export namespace Prisma {
     UserAccount: 'UserAccount',
     UserProfile: 'UserProfile',
     ServiceListing: 'ServiceListing',
-    ProfileView: 'ProfileView'
+    ProfileView: 'ProfileView',
+    Shortlist: 'Shortlist',
+    ConfirmedMatch: 'ConfirmedMatch'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -705,7 +749,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "userAccount" | "userProfile" | "serviceListing" | "profileView"
+      modelProps: "userAccount" | "userProfile" | "serviceListing" | "profileView" | "shortlist" | "confirmedMatch"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1005,6 +1049,154 @@ export namespace Prisma {
           }
         }
       }
+      Shortlist: {
+        payload: Prisma.$ShortlistPayload<ExtArgs>
+        fields: Prisma.ShortlistFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ShortlistFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShortlistPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ShortlistFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShortlistPayload>
+          }
+          findFirst: {
+            args: Prisma.ShortlistFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShortlistPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ShortlistFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShortlistPayload>
+          }
+          findMany: {
+            args: Prisma.ShortlistFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShortlistPayload>[]
+          }
+          create: {
+            args: Prisma.ShortlistCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShortlistPayload>
+          }
+          createMany: {
+            args: Prisma.ShortlistCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ShortlistCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShortlistPayload>[]
+          }
+          delete: {
+            args: Prisma.ShortlistDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShortlistPayload>
+          }
+          update: {
+            args: Prisma.ShortlistUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShortlistPayload>
+          }
+          deleteMany: {
+            args: Prisma.ShortlistDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ShortlistUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ShortlistUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShortlistPayload>[]
+          }
+          upsert: {
+            args: Prisma.ShortlistUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShortlistPayload>
+          }
+          aggregate: {
+            args: Prisma.ShortlistAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateShortlist>
+          }
+          groupBy: {
+            args: Prisma.ShortlistGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ShortlistGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ShortlistCountArgs<ExtArgs>
+            result: $Utils.Optional<ShortlistCountAggregateOutputType> | number
+          }
+        }
+      }
+      ConfirmedMatch: {
+        payload: Prisma.$ConfirmedMatchPayload<ExtArgs>
+        fields: Prisma.ConfirmedMatchFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ConfirmedMatchFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfirmedMatchPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ConfirmedMatchFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfirmedMatchPayload>
+          }
+          findFirst: {
+            args: Prisma.ConfirmedMatchFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfirmedMatchPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ConfirmedMatchFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfirmedMatchPayload>
+          }
+          findMany: {
+            args: Prisma.ConfirmedMatchFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfirmedMatchPayload>[]
+          }
+          create: {
+            args: Prisma.ConfirmedMatchCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfirmedMatchPayload>
+          }
+          createMany: {
+            args: Prisma.ConfirmedMatchCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ConfirmedMatchCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfirmedMatchPayload>[]
+          }
+          delete: {
+            args: Prisma.ConfirmedMatchDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfirmedMatchPayload>
+          }
+          update: {
+            args: Prisma.ConfirmedMatchUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfirmedMatchPayload>
+          }
+          deleteMany: {
+            args: Prisma.ConfirmedMatchDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ConfirmedMatchUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ConfirmedMatchUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfirmedMatchPayload>[]
+          }
+          upsert: {
+            args: Prisma.ConfirmedMatchUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfirmedMatchPayload>
+          }
+          aggregate: {
+            args: Prisma.ConfirmedMatchAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateConfirmedMatch>
+          }
+          groupBy: {
+            args: Prisma.ConfirmedMatchGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ConfirmedMatchGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ConfirmedMatchCountArgs<ExtArgs>
+            result: $Utils.Optional<ConfirmedMatchCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1093,6 +1285,8 @@ export namespace Prisma {
     userProfile?: UserProfileOmit
     serviceListing?: ServiceListingOmit
     profileView?: ProfileViewOmit
+    shortlist?: ShortlistOmit
+    confirmedMatch?: ConfirmedMatchOmit
   }
 
   /* Types for Logging */
@@ -1190,12 +1384,18 @@ export namespace Prisma {
     serviceListings: number
     profileViews: number
     viewedOthers: number
+    createdShortlists: number
+    shortlistedIn: number
+    confirmedMatchesAsHomeowner: number
   }
 
   export type UserAccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     serviceListings?: boolean | UserAccountCountOutputTypeCountServiceListingsArgs
     profileViews?: boolean | UserAccountCountOutputTypeCountProfileViewsArgs
     viewedOthers?: boolean | UserAccountCountOutputTypeCountViewedOthersArgs
+    createdShortlists?: boolean | UserAccountCountOutputTypeCountCreatedShortlistsArgs
+    shortlistedIn?: boolean | UserAccountCountOutputTypeCountShortlistedInArgs
+    confirmedMatchesAsHomeowner?: boolean | UserAccountCountOutputTypeCountConfirmedMatchesAsHomeownerArgs
   }
 
   // Custom InputTypes
@@ -1230,6 +1430,27 @@ export namespace Prisma {
     where?: ProfileViewWhereInput
   }
 
+  /**
+   * UserAccountCountOutputType without action
+   */
+  export type UserAccountCountOutputTypeCountCreatedShortlistsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ShortlistWhereInput
+  }
+
+  /**
+   * UserAccountCountOutputType without action
+   */
+  export type UserAccountCountOutputTypeCountShortlistedInArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ShortlistWhereInput
+  }
+
+  /**
+   * UserAccountCountOutputType without action
+   */
+  export type UserAccountCountOutputTypeCountConfirmedMatchesAsHomeownerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ConfirmedMatchWhereInput
+  }
+
 
   /**
    * Count Type UserProfileCountOutputType
@@ -1259,6 +1480,37 @@ export namespace Prisma {
    */
   export type UserProfileCountOutputTypeCountUserAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserAccountWhereInput
+  }
+
+
+  /**
+   * Count Type ServiceListingCountOutputType
+   */
+
+  export type ServiceListingCountOutputType = {
+    confirmedMatches: number
+  }
+
+  export type ServiceListingCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    confirmedMatches?: boolean | ServiceListingCountOutputTypeCountConfirmedMatchesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * ServiceListingCountOutputType without action
+   */
+  export type ServiceListingCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceListingCountOutputType
+     */
+    select?: ServiceListingCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ServiceListingCountOutputType without action
+   */
+  export type ServiceListingCountOutputTypeCountConfirmedMatchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ConfirmedMatchWhereInput
   }
 
 
@@ -1458,6 +1710,9 @@ export namespace Prisma {
     serviceListings?: boolean | UserAccount$serviceListingsArgs<ExtArgs>
     profileViews?: boolean | UserAccount$profileViewsArgs<ExtArgs>
     viewedOthers?: boolean | UserAccount$viewedOthersArgs<ExtArgs>
+    createdShortlists?: boolean | UserAccount$createdShortlistsArgs<ExtArgs>
+    shortlistedIn?: boolean | UserAccount$shortlistedInArgs<ExtArgs>
+    confirmedMatchesAsHomeowner?: boolean | UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs>
     _count?: boolean | UserAccountCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["userAccount"]>
 
@@ -1502,6 +1757,9 @@ export namespace Prisma {
     serviceListings?: boolean | UserAccount$serviceListingsArgs<ExtArgs>
     profileViews?: boolean | UserAccount$profileViewsArgs<ExtArgs>
     viewedOthers?: boolean | UserAccount$viewedOthersArgs<ExtArgs>
+    createdShortlists?: boolean | UserAccount$createdShortlistsArgs<ExtArgs>
+    shortlistedIn?: boolean | UserAccount$shortlistedInArgs<ExtArgs>
+    confirmedMatchesAsHomeowner?: boolean | UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs>
     _count?: boolean | UserAccountCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserAccountIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1518,6 +1776,9 @@ export namespace Prisma {
       serviceListings: Prisma.$ServiceListingPayload<ExtArgs>[]
       profileViews: Prisma.$ProfileViewPayload<ExtArgs>[]
       viewedOthers: Prisma.$ProfileViewPayload<ExtArgs>[]
+      createdShortlists: Prisma.$ShortlistPayload<ExtArgs>[]
+      shortlistedIn: Prisma.$ShortlistPayload<ExtArgs>[]
+      confirmedMatchesAsHomeowner: Prisma.$ConfirmedMatchPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -1926,6 +2187,9 @@ export namespace Prisma {
     serviceListings<T extends UserAccount$serviceListingsArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$serviceListingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceListingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     profileViews<T extends UserAccount$profileViewsArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$profileViewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     viewedOthers<T extends UserAccount$viewedOthersArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$viewedOthersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    createdShortlists<T extends UserAccount$createdShortlistsArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$createdShortlistsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    shortlistedIn<T extends UserAccount$shortlistedInArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$shortlistedInArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    confirmedMatchesAsHomeowner<T extends UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2447,6 +2711,78 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ProfileViewScalarFieldEnum | ProfileViewScalarFieldEnum[]
+  }
+
+  /**
+   * UserAccount.createdShortlists
+   */
+  export type UserAccount$createdShortlistsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistInclude<ExtArgs> | null
+    where?: ShortlistWhereInput
+    orderBy?: ShortlistOrderByWithRelationInput | ShortlistOrderByWithRelationInput[]
+    cursor?: ShortlistWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ShortlistScalarFieldEnum | ShortlistScalarFieldEnum[]
+  }
+
+  /**
+   * UserAccount.shortlistedIn
+   */
+  export type UserAccount$shortlistedInArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistInclude<ExtArgs> | null
+    where?: ShortlistWhereInput
+    orderBy?: ShortlistOrderByWithRelationInput | ShortlistOrderByWithRelationInput[]
+    cursor?: ShortlistWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ShortlistScalarFieldEnum | ShortlistScalarFieldEnum[]
+  }
+
+  /**
+   * UserAccount.confirmedMatchesAsHomeowner
+   */
+  export type UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchInclude<ExtArgs> | null
+    where?: ConfirmedMatchWhereInput
+    orderBy?: ConfirmedMatchOrderByWithRelationInput | ConfirmedMatchOrderByWithRelationInput[]
+    cursor?: ConfirmedMatchWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ConfirmedMatchScalarFieldEnum | ConfirmedMatchScalarFieldEnum[]
   }
 
   /**
@@ -3580,6 +3916,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     cleanerId: string | null
+    status: $Enums.ServiceListingStatus | null
   }
 
   export type ServiceListingMaxAggregateOutputType = {
@@ -3593,6 +3930,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     cleanerId: string | null
+    status: $Enums.ServiceListingStatus | null
   }
 
   export type ServiceListingCountAggregateOutputType = {
@@ -3606,6 +3944,7 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     cleanerId: number
+    status: number
     _all: number
   }
 
@@ -3631,6 +3970,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     cleanerId?: true
+    status?: true
   }
 
   export type ServiceListingMaxAggregateInputType = {
@@ -3644,6 +3984,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     cleanerId?: true
+    status?: true
   }
 
   export type ServiceListingCountAggregateInputType = {
@@ -3657,6 +3998,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     cleanerId?: true
+    status?: true
     _all?: true
   }
 
@@ -3757,6 +4099,7 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     cleanerId: string
+    status: $Enums.ServiceListingStatus
     _count: ServiceListingCountAggregateOutputType | null
     _avg: ServiceListingAvgAggregateOutputType | null
     _sum: ServiceListingSumAggregateOutputType | null
@@ -3789,7 +4132,10 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     cleanerId?: boolean
+    status?: boolean
     cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
+    confirmedMatches?: boolean | ServiceListing$confirmedMatchesArgs<ExtArgs>
+    _count?: boolean | ServiceListingCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["serviceListing"]>
 
   export type ServiceListingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3803,6 +4149,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     cleanerId?: boolean
+    status?: boolean
     cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["serviceListing"]>
 
@@ -3817,6 +4164,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     cleanerId?: boolean
+    status?: boolean
     cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["serviceListing"]>
 
@@ -3831,11 +4179,14 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     cleanerId?: boolean
+    status?: boolean
   }
 
-  export type ServiceListingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "serviceType" | "title" | "description" | "ratePerHr" | "duration" | "availability" | "createdAt" | "updatedAt" | "cleanerId", ExtArgs["result"]["serviceListing"]>
+  export type ServiceListingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "serviceType" | "title" | "description" | "ratePerHr" | "duration" | "availability" | "createdAt" | "updatedAt" | "cleanerId" | "status", ExtArgs["result"]["serviceListing"]>
   export type ServiceListingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
+    confirmedMatches?: boolean | ServiceListing$confirmedMatchesArgs<ExtArgs>
+    _count?: boolean | ServiceListingCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ServiceListingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
@@ -3848,6 +4199,7 @@ export namespace Prisma {
     name: "ServiceListing"
     objects: {
       cleaner: Prisma.$UserAccountPayload<ExtArgs>
+      confirmedMatches: Prisma.$ConfirmedMatchPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3860,6 +4212,7 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       cleanerId: string
+      status: $Enums.ServiceListingStatus
     }, ExtArgs["result"]["serviceListing"]>
     composites: {}
   }
@@ -4255,6 +4608,7 @@ export namespace Prisma {
   export interface Prisma__ServiceListingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     cleaner<T extends UserAccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserAccountDefaultArgs<ExtArgs>>): Prisma__UserAccountClient<$Result.GetResult<Prisma.$UserAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    confirmedMatches<T extends ServiceListing$confirmedMatchesArgs<ExtArgs> = {}>(args?: Subset<T, ServiceListing$confirmedMatchesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4294,6 +4648,7 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"ServiceListing", 'DateTime'>
     readonly updatedAt: FieldRef<"ServiceListing", 'DateTime'>
     readonly cleanerId: FieldRef<"ServiceListing", 'String'>
+    readonly status: FieldRef<"ServiceListing", 'ServiceListingStatus'>
   }
     
 
@@ -4687,6 +5042,30 @@ export namespace Prisma {
      * Limit how many ServiceListings to delete.
      */
     limit?: number
+  }
+
+  /**
+   * ServiceListing.confirmedMatches
+   */
+  export type ServiceListing$confirmedMatchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchInclude<ExtArgs> | null
+    where?: ConfirmedMatchWhereInput
+    orderBy?: ConfirmedMatchOrderByWithRelationInput | ConfirmedMatchOrderByWithRelationInput[]
+    cursor?: ConfirmedMatchWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ConfirmedMatchScalarFieldEnum | ConfirmedMatchScalarFieldEnum[]
   }
 
   /**
@@ -5781,6 +6160,2112 @@ export namespace Prisma {
 
 
   /**
+   * Model Shortlist
+   */
+
+  export type AggregateShortlist = {
+    _count: ShortlistCountAggregateOutputType | null
+    _min: ShortlistMinAggregateOutputType | null
+    _max: ShortlistMaxAggregateOutputType | null
+  }
+
+  export type ShortlistMinAggregateOutputType = {
+    id: string | null
+    homeownerId: string | null
+    cleanerId: string | null
+    createdAt: Date | null
+  }
+
+  export type ShortlistMaxAggregateOutputType = {
+    id: string | null
+    homeownerId: string | null
+    cleanerId: string | null
+    createdAt: Date | null
+  }
+
+  export type ShortlistCountAggregateOutputType = {
+    id: number
+    homeownerId: number
+    cleanerId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type ShortlistMinAggregateInputType = {
+    id?: true
+    homeownerId?: true
+    cleanerId?: true
+    createdAt?: true
+  }
+
+  export type ShortlistMaxAggregateInputType = {
+    id?: true
+    homeownerId?: true
+    cleanerId?: true
+    createdAt?: true
+  }
+
+  export type ShortlistCountAggregateInputType = {
+    id?: true
+    homeownerId?: true
+    cleanerId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type ShortlistAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Shortlist to aggregate.
+     */
+    where?: ShortlistWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Shortlists to fetch.
+     */
+    orderBy?: ShortlistOrderByWithRelationInput | ShortlistOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ShortlistWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Shortlists from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Shortlists.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Shortlists
+    **/
+    _count?: true | ShortlistCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ShortlistMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ShortlistMaxAggregateInputType
+  }
+
+  export type GetShortlistAggregateType<T extends ShortlistAggregateArgs> = {
+        [P in keyof T & keyof AggregateShortlist]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateShortlist[P]>
+      : GetScalarType<T[P], AggregateShortlist[P]>
+  }
+
+
+
+
+  export type ShortlistGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ShortlistWhereInput
+    orderBy?: ShortlistOrderByWithAggregationInput | ShortlistOrderByWithAggregationInput[]
+    by: ShortlistScalarFieldEnum[] | ShortlistScalarFieldEnum
+    having?: ShortlistScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ShortlistCountAggregateInputType | true
+    _min?: ShortlistMinAggregateInputType
+    _max?: ShortlistMaxAggregateInputType
+  }
+
+  export type ShortlistGroupByOutputType = {
+    id: string
+    homeownerId: string
+    cleanerId: string
+    createdAt: Date
+    _count: ShortlistCountAggregateOutputType | null
+    _min: ShortlistMinAggregateOutputType | null
+    _max: ShortlistMaxAggregateOutputType | null
+  }
+
+  type GetShortlistGroupByPayload<T extends ShortlistGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ShortlistGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ShortlistGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ShortlistGroupByOutputType[P]>
+            : GetScalarType<T[P], ShortlistGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ShortlistSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    homeownerId?: boolean
+    cleanerId?: boolean
+    createdAt?: boolean
+    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
+    cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["shortlist"]>
+
+  export type ShortlistSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    homeownerId?: boolean
+    cleanerId?: boolean
+    createdAt?: boolean
+    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
+    cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["shortlist"]>
+
+  export type ShortlistSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    homeownerId?: boolean
+    cleanerId?: boolean
+    createdAt?: boolean
+    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
+    cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["shortlist"]>
+
+  export type ShortlistSelectScalar = {
+    id?: boolean
+    homeownerId?: boolean
+    cleanerId?: boolean
+    createdAt?: boolean
+  }
+
+  export type ShortlistOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "homeownerId" | "cleanerId" | "createdAt", ExtArgs["result"]["shortlist"]>
+  export type ShortlistInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
+    cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }
+  export type ShortlistIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
+    cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }
+  export type ShortlistIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
+    cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }
+
+  export type $ShortlistPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Shortlist"
+    objects: {
+      homeowner: Prisma.$UserAccountPayload<ExtArgs>
+      cleaner: Prisma.$UserAccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      homeownerId: string
+      cleanerId: string
+      createdAt: Date
+    }, ExtArgs["result"]["shortlist"]>
+    composites: {}
+  }
+
+  type ShortlistGetPayload<S extends boolean | null | undefined | ShortlistDefaultArgs> = $Result.GetResult<Prisma.$ShortlistPayload, S>
+
+  type ShortlistCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ShortlistFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ShortlistCountAggregateInputType | true
+    }
+
+  export interface ShortlistDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Shortlist'], meta: { name: 'Shortlist' } }
+    /**
+     * Find zero or one Shortlist that matches the filter.
+     * @param {ShortlistFindUniqueArgs} args - Arguments to find a Shortlist
+     * @example
+     * // Get one Shortlist
+     * const shortlist = await prisma.shortlist.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ShortlistFindUniqueArgs>(args: SelectSubset<T, ShortlistFindUniqueArgs<ExtArgs>>): Prisma__ShortlistClient<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Shortlist that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ShortlistFindUniqueOrThrowArgs} args - Arguments to find a Shortlist
+     * @example
+     * // Get one Shortlist
+     * const shortlist = await prisma.shortlist.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ShortlistFindUniqueOrThrowArgs>(args: SelectSubset<T, ShortlistFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ShortlistClient<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Shortlist that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShortlistFindFirstArgs} args - Arguments to find a Shortlist
+     * @example
+     * // Get one Shortlist
+     * const shortlist = await prisma.shortlist.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ShortlistFindFirstArgs>(args?: SelectSubset<T, ShortlistFindFirstArgs<ExtArgs>>): Prisma__ShortlistClient<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Shortlist that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShortlistFindFirstOrThrowArgs} args - Arguments to find a Shortlist
+     * @example
+     * // Get one Shortlist
+     * const shortlist = await prisma.shortlist.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ShortlistFindFirstOrThrowArgs>(args?: SelectSubset<T, ShortlistFindFirstOrThrowArgs<ExtArgs>>): Prisma__ShortlistClient<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Shortlists that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShortlistFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Shortlists
+     * const shortlists = await prisma.shortlist.findMany()
+     * 
+     * // Get first 10 Shortlists
+     * const shortlists = await prisma.shortlist.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const shortlistWithIdOnly = await prisma.shortlist.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ShortlistFindManyArgs>(args?: SelectSubset<T, ShortlistFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Shortlist.
+     * @param {ShortlistCreateArgs} args - Arguments to create a Shortlist.
+     * @example
+     * // Create one Shortlist
+     * const Shortlist = await prisma.shortlist.create({
+     *   data: {
+     *     // ... data to create a Shortlist
+     *   }
+     * })
+     * 
+     */
+    create<T extends ShortlistCreateArgs>(args: SelectSubset<T, ShortlistCreateArgs<ExtArgs>>): Prisma__ShortlistClient<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Shortlists.
+     * @param {ShortlistCreateManyArgs} args - Arguments to create many Shortlists.
+     * @example
+     * // Create many Shortlists
+     * const shortlist = await prisma.shortlist.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ShortlistCreateManyArgs>(args?: SelectSubset<T, ShortlistCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Shortlists and returns the data saved in the database.
+     * @param {ShortlistCreateManyAndReturnArgs} args - Arguments to create many Shortlists.
+     * @example
+     * // Create many Shortlists
+     * const shortlist = await prisma.shortlist.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Shortlists and only return the `id`
+     * const shortlistWithIdOnly = await prisma.shortlist.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ShortlistCreateManyAndReturnArgs>(args?: SelectSubset<T, ShortlistCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Shortlist.
+     * @param {ShortlistDeleteArgs} args - Arguments to delete one Shortlist.
+     * @example
+     * // Delete one Shortlist
+     * const Shortlist = await prisma.shortlist.delete({
+     *   where: {
+     *     // ... filter to delete one Shortlist
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ShortlistDeleteArgs>(args: SelectSubset<T, ShortlistDeleteArgs<ExtArgs>>): Prisma__ShortlistClient<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Shortlist.
+     * @param {ShortlistUpdateArgs} args - Arguments to update one Shortlist.
+     * @example
+     * // Update one Shortlist
+     * const shortlist = await prisma.shortlist.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ShortlistUpdateArgs>(args: SelectSubset<T, ShortlistUpdateArgs<ExtArgs>>): Prisma__ShortlistClient<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Shortlists.
+     * @param {ShortlistDeleteManyArgs} args - Arguments to filter Shortlists to delete.
+     * @example
+     * // Delete a few Shortlists
+     * const { count } = await prisma.shortlist.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ShortlistDeleteManyArgs>(args?: SelectSubset<T, ShortlistDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Shortlists.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShortlistUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Shortlists
+     * const shortlist = await prisma.shortlist.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ShortlistUpdateManyArgs>(args: SelectSubset<T, ShortlistUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Shortlists and returns the data updated in the database.
+     * @param {ShortlistUpdateManyAndReturnArgs} args - Arguments to update many Shortlists.
+     * @example
+     * // Update many Shortlists
+     * const shortlist = await prisma.shortlist.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Shortlists and only return the `id`
+     * const shortlistWithIdOnly = await prisma.shortlist.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ShortlistUpdateManyAndReturnArgs>(args: SelectSubset<T, ShortlistUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Shortlist.
+     * @param {ShortlistUpsertArgs} args - Arguments to update or create a Shortlist.
+     * @example
+     * // Update or create a Shortlist
+     * const shortlist = await prisma.shortlist.upsert({
+     *   create: {
+     *     // ... data to create a Shortlist
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Shortlist we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ShortlistUpsertArgs>(args: SelectSubset<T, ShortlistUpsertArgs<ExtArgs>>): Prisma__ShortlistClient<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Shortlists.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShortlistCountArgs} args - Arguments to filter Shortlists to count.
+     * @example
+     * // Count the number of Shortlists
+     * const count = await prisma.shortlist.count({
+     *   where: {
+     *     // ... the filter for the Shortlists we want to count
+     *   }
+     * })
+    **/
+    count<T extends ShortlistCountArgs>(
+      args?: Subset<T, ShortlistCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ShortlistCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Shortlist.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShortlistAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ShortlistAggregateArgs>(args: Subset<T, ShortlistAggregateArgs>): Prisma.PrismaPromise<GetShortlistAggregateType<T>>
+
+    /**
+     * Group by Shortlist.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShortlistGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ShortlistGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ShortlistGroupByArgs['orderBy'] }
+        : { orderBy?: ShortlistGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ShortlistGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetShortlistGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Shortlist model
+   */
+  readonly fields: ShortlistFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Shortlist.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ShortlistClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    homeowner<T extends UserAccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserAccountDefaultArgs<ExtArgs>>): Prisma__UserAccountClient<$Result.GetResult<Prisma.$UserAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    cleaner<T extends UserAccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserAccountDefaultArgs<ExtArgs>>): Prisma__UserAccountClient<$Result.GetResult<Prisma.$UserAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Shortlist model
+   */
+  interface ShortlistFieldRefs {
+    readonly id: FieldRef<"Shortlist", 'String'>
+    readonly homeownerId: FieldRef<"Shortlist", 'String'>
+    readonly cleanerId: FieldRef<"Shortlist", 'String'>
+    readonly createdAt: FieldRef<"Shortlist", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Shortlist findUnique
+   */
+  export type ShortlistFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistInclude<ExtArgs> | null
+    /**
+     * Filter, which Shortlist to fetch.
+     */
+    where: ShortlistWhereUniqueInput
+  }
+
+  /**
+   * Shortlist findUniqueOrThrow
+   */
+  export type ShortlistFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistInclude<ExtArgs> | null
+    /**
+     * Filter, which Shortlist to fetch.
+     */
+    where: ShortlistWhereUniqueInput
+  }
+
+  /**
+   * Shortlist findFirst
+   */
+  export type ShortlistFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistInclude<ExtArgs> | null
+    /**
+     * Filter, which Shortlist to fetch.
+     */
+    where?: ShortlistWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Shortlists to fetch.
+     */
+    orderBy?: ShortlistOrderByWithRelationInput | ShortlistOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Shortlists.
+     */
+    cursor?: ShortlistWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Shortlists from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Shortlists.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Shortlists.
+     */
+    distinct?: ShortlistScalarFieldEnum | ShortlistScalarFieldEnum[]
+  }
+
+  /**
+   * Shortlist findFirstOrThrow
+   */
+  export type ShortlistFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistInclude<ExtArgs> | null
+    /**
+     * Filter, which Shortlist to fetch.
+     */
+    where?: ShortlistWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Shortlists to fetch.
+     */
+    orderBy?: ShortlistOrderByWithRelationInput | ShortlistOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Shortlists.
+     */
+    cursor?: ShortlistWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Shortlists from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Shortlists.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Shortlists.
+     */
+    distinct?: ShortlistScalarFieldEnum | ShortlistScalarFieldEnum[]
+  }
+
+  /**
+   * Shortlist findMany
+   */
+  export type ShortlistFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistInclude<ExtArgs> | null
+    /**
+     * Filter, which Shortlists to fetch.
+     */
+    where?: ShortlistWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Shortlists to fetch.
+     */
+    orderBy?: ShortlistOrderByWithRelationInput | ShortlistOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Shortlists.
+     */
+    cursor?: ShortlistWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Shortlists from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Shortlists.
+     */
+    skip?: number
+    distinct?: ShortlistScalarFieldEnum | ShortlistScalarFieldEnum[]
+  }
+
+  /**
+   * Shortlist create
+   */
+  export type ShortlistCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Shortlist.
+     */
+    data: XOR<ShortlistCreateInput, ShortlistUncheckedCreateInput>
+  }
+
+  /**
+   * Shortlist createMany
+   */
+  export type ShortlistCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Shortlists.
+     */
+    data: ShortlistCreateManyInput | ShortlistCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Shortlist createManyAndReturn
+   */
+  export type ShortlistCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * The data used to create many Shortlists.
+     */
+    data: ShortlistCreateManyInput | ShortlistCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Shortlist update
+   */
+  export type ShortlistUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Shortlist.
+     */
+    data: XOR<ShortlistUpdateInput, ShortlistUncheckedUpdateInput>
+    /**
+     * Choose, which Shortlist to update.
+     */
+    where: ShortlistWhereUniqueInput
+  }
+
+  /**
+   * Shortlist updateMany
+   */
+  export type ShortlistUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Shortlists.
+     */
+    data: XOR<ShortlistUpdateManyMutationInput, ShortlistUncheckedUpdateManyInput>
+    /**
+     * Filter which Shortlists to update
+     */
+    where?: ShortlistWhereInput
+    /**
+     * Limit how many Shortlists to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Shortlist updateManyAndReturn
+   */
+  export type ShortlistUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * The data used to update Shortlists.
+     */
+    data: XOR<ShortlistUpdateManyMutationInput, ShortlistUncheckedUpdateManyInput>
+    /**
+     * Filter which Shortlists to update
+     */
+    where?: ShortlistWhereInput
+    /**
+     * Limit how many Shortlists to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Shortlist upsert
+   */
+  export type ShortlistUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Shortlist to update in case it exists.
+     */
+    where: ShortlistWhereUniqueInput
+    /**
+     * In case the Shortlist found by the `where` argument doesn't exist, create a new Shortlist with this data.
+     */
+    create: XOR<ShortlistCreateInput, ShortlistUncheckedCreateInput>
+    /**
+     * In case the Shortlist was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ShortlistUpdateInput, ShortlistUncheckedUpdateInput>
+  }
+
+  /**
+   * Shortlist delete
+   */
+  export type ShortlistDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistInclude<ExtArgs> | null
+    /**
+     * Filter which Shortlist to delete.
+     */
+    where: ShortlistWhereUniqueInput
+  }
+
+  /**
+   * Shortlist deleteMany
+   */
+  export type ShortlistDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Shortlists to delete
+     */
+    where?: ShortlistWhereInput
+    /**
+     * Limit how many Shortlists to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Shortlist without action
+   */
+  export type ShortlistDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shortlist
+     */
+    select?: ShortlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shortlist
+     */
+    omit?: ShortlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShortlistInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ConfirmedMatch
+   */
+
+  export type AggregateConfirmedMatch = {
+    _count: ConfirmedMatchCountAggregateOutputType | null
+    _min: ConfirmedMatchMinAggregateOutputType | null
+    _max: ConfirmedMatchMaxAggregateOutputType | null
+  }
+
+  export type ConfirmedMatchMinAggregateOutputType = {
+    id: string | null
+    serviceListingId: string | null
+    homeownerId: string | null
+    confirmationDate: Date | null
+  }
+
+  export type ConfirmedMatchMaxAggregateOutputType = {
+    id: string | null
+    serviceListingId: string | null
+    homeownerId: string | null
+    confirmationDate: Date | null
+  }
+
+  export type ConfirmedMatchCountAggregateOutputType = {
+    id: number
+    serviceListingId: number
+    homeownerId: number
+    confirmationDate: number
+    _all: number
+  }
+
+
+  export type ConfirmedMatchMinAggregateInputType = {
+    id?: true
+    serviceListingId?: true
+    homeownerId?: true
+    confirmationDate?: true
+  }
+
+  export type ConfirmedMatchMaxAggregateInputType = {
+    id?: true
+    serviceListingId?: true
+    homeownerId?: true
+    confirmationDate?: true
+  }
+
+  export type ConfirmedMatchCountAggregateInputType = {
+    id?: true
+    serviceListingId?: true
+    homeownerId?: true
+    confirmationDate?: true
+    _all?: true
+  }
+
+  export type ConfirmedMatchAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ConfirmedMatch to aggregate.
+     */
+    where?: ConfirmedMatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ConfirmedMatches to fetch.
+     */
+    orderBy?: ConfirmedMatchOrderByWithRelationInput | ConfirmedMatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ConfirmedMatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ConfirmedMatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ConfirmedMatches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ConfirmedMatches
+    **/
+    _count?: true | ConfirmedMatchCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ConfirmedMatchMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ConfirmedMatchMaxAggregateInputType
+  }
+
+  export type GetConfirmedMatchAggregateType<T extends ConfirmedMatchAggregateArgs> = {
+        [P in keyof T & keyof AggregateConfirmedMatch]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateConfirmedMatch[P]>
+      : GetScalarType<T[P], AggregateConfirmedMatch[P]>
+  }
+
+
+
+
+  export type ConfirmedMatchGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ConfirmedMatchWhereInput
+    orderBy?: ConfirmedMatchOrderByWithAggregationInput | ConfirmedMatchOrderByWithAggregationInput[]
+    by: ConfirmedMatchScalarFieldEnum[] | ConfirmedMatchScalarFieldEnum
+    having?: ConfirmedMatchScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ConfirmedMatchCountAggregateInputType | true
+    _min?: ConfirmedMatchMinAggregateInputType
+    _max?: ConfirmedMatchMaxAggregateInputType
+  }
+
+  export type ConfirmedMatchGroupByOutputType = {
+    id: string
+    serviceListingId: string
+    homeownerId: string
+    confirmationDate: Date
+    _count: ConfirmedMatchCountAggregateOutputType | null
+    _min: ConfirmedMatchMinAggregateOutputType | null
+    _max: ConfirmedMatchMaxAggregateOutputType | null
+  }
+
+  type GetConfirmedMatchGroupByPayload<T extends ConfirmedMatchGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ConfirmedMatchGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ConfirmedMatchGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ConfirmedMatchGroupByOutputType[P]>
+            : GetScalarType<T[P], ConfirmedMatchGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ConfirmedMatchSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    serviceListingId?: boolean
+    homeownerId?: boolean
+    confirmationDate?: boolean
+    serviceListing?: boolean | ServiceListingDefaultArgs<ExtArgs>
+    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["confirmedMatch"]>
+
+  export type ConfirmedMatchSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    serviceListingId?: boolean
+    homeownerId?: boolean
+    confirmationDate?: boolean
+    serviceListing?: boolean | ServiceListingDefaultArgs<ExtArgs>
+    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["confirmedMatch"]>
+
+  export type ConfirmedMatchSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    serviceListingId?: boolean
+    homeownerId?: boolean
+    confirmationDate?: boolean
+    serviceListing?: boolean | ServiceListingDefaultArgs<ExtArgs>
+    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["confirmedMatch"]>
+
+  export type ConfirmedMatchSelectScalar = {
+    id?: boolean
+    serviceListingId?: boolean
+    homeownerId?: boolean
+    confirmationDate?: boolean
+  }
+
+  export type ConfirmedMatchOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "serviceListingId" | "homeownerId" | "confirmationDate", ExtArgs["result"]["confirmedMatch"]>
+  export type ConfirmedMatchInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    serviceListing?: boolean | ServiceListingDefaultArgs<ExtArgs>
+    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }
+  export type ConfirmedMatchIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    serviceListing?: boolean | ServiceListingDefaultArgs<ExtArgs>
+    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }
+  export type ConfirmedMatchIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    serviceListing?: boolean | ServiceListingDefaultArgs<ExtArgs>
+    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }
+
+  export type $ConfirmedMatchPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ConfirmedMatch"
+    objects: {
+      serviceListing: Prisma.$ServiceListingPayload<ExtArgs>
+      homeowner: Prisma.$UserAccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      serviceListingId: string
+      homeownerId: string
+      confirmationDate: Date
+    }, ExtArgs["result"]["confirmedMatch"]>
+    composites: {}
+  }
+
+  type ConfirmedMatchGetPayload<S extends boolean | null | undefined | ConfirmedMatchDefaultArgs> = $Result.GetResult<Prisma.$ConfirmedMatchPayload, S>
+
+  type ConfirmedMatchCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ConfirmedMatchFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ConfirmedMatchCountAggregateInputType | true
+    }
+
+  export interface ConfirmedMatchDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ConfirmedMatch'], meta: { name: 'ConfirmedMatch' } }
+    /**
+     * Find zero or one ConfirmedMatch that matches the filter.
+     * @param {ConfirmedMatchFindUniqueArgs} args - Arguments to find a ConfirmedMatch
+     * @example
+     * // Get one ConfirmedMatch
+     * const confirmedMatch = await prisma.confirmedMatch.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ConfirmedMatchFindUniqueArgs>(args: SelectSubset<T, ConfirmedMatchFindUniqueArgs<ExtArgs>>): Prisma__ConfirmedMatchClient<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ConfirmedMatch that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ConfirmedMatchFindUniqueOrThrowArgs} args - Arguments to find a ConfirmedMatch
+     * @example
+     * // Get one ConfirmedMatch
+     * const confirmedMatch = await prisma.confirmedMatch.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ConfirmedMatchFindUniqueOrThrowArgs>(args: SelectSubset<T, ConfirmedMatchFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ConfirmedMatchClient<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ConfirmedMatch that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfirmedMatchFindFirstArgs} args - Arguments to find a ConfirmedMatch
+     * @example
+     * // Get one ConfirmedMatch
+     * const confirmedMatch = await prisma.confirmedMatch.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ConfirmedMatchFindFirstArgs>(args?: SelectSubset<T, ConfirmedMatchFindFirstArgs<ExtArgs>>): Prisma__ConfirmedMatchClient<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ConfirmedMatch that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfirmedMatchFindFirstOrThrowArgs} args - Arguments to find a ConfirmedMatch
+     * @example
+     * // Get one ConfirmedMatch
+     * const confirmedMatch = await prisma.confirmedMatch.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ConfirmedMatchFindFirstOrThrowArgs>(args?: SelectSubset<T, ConfirmedMatchFindFirstOrThrowArgs<ExtArgs>>): Prisma__ConfirmedMatchClient<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ConfirmedMatches that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfirmedMatchFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ConfirmedMatches
+     * const confirmedMatches = await prisma.confirmedMatch.findMany()
+     * 
+     * // Get first 10 ConfirmedMatches
+     * const confirmedMatches = await prisma.confirmedMatch.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const confirmedMatchWithIdOnly = await prisma.confirmedMatch.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ConfirmedMatchFindManyArgs>(args?: SelectSubset<T, ConfirmedMatchFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ConfirmedMatch.
+     * @param {ConfirmedMatchCreateArgs} args - Arguments to create a ConfirmedMatch.
+     * @example
+     * // Create one ConfirmedMatch
+     * const ConfirmedMatch = await prisma.confirmedMatch.create({
+     *   data: {
+     *     // ... data to create a ConfirmedMatch
+     *   }
+     * })
+     * 
+     */
+    create<T extends ConfirmedMatchCreateArgs>(args: SelectSubset<T, ConfirmedMatchCreateArgs<ExtArgs>>): Prisma__ConfirmedMatchClient<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ConfirmedMatches.
+     * @param {ConfirmedMatchCreateManyArgs} args - Arguments to create many ConfirmedMatches.
+     * @example
+     * // Create many ConfirmedMatches
+     * const confirmedMatch = await prisma.confirmedMatch.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ConfirmedMatchCreateManyArgs>(args?: SelectSubset<T, ConfirmedMatchCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ConfirmedMatches and returns the data saved in the database.
+     * @param {ConfirmedMatchCreateManyAndReturnArgs} args - Arguments to create many ConfirmedMatches.
+     * @example
+     * // Create many ConfirmedMatches
+     * const confirmedMatch = await prisma.confirmedMatch.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ConfirmedMatches and only return the `id`
+     * const confirmedMatchWithIdOnly = await prisma.confirmedMatch.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ConfirmedMatchCreateManyAndReturnArgs>(args?: SelectSubset<T, ConfirmedMatchCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ConfirmedMatch.
+     * @param {ConfirmedMatchDeleteArgs} args - Arguments to delete one ConfirmedMatch.
+     * @example
+     * // Delete one ConfirmedMatch
+     * const ConfirmedMatch = await prisma.confirmedMatch.delete({
+     *   where: {
+     *     // ... filter to delete one ConfirmedMatch
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ConfirmedMatchDeleteArgs>(args: SelectSubset<T, ConfirmedMatchDeleteArgs<ExtArgs>>): Prisma__ConfirmedMatchClient<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ConfirmedMatch.
+     * @param {ConfirmedMatchUpdateArgs} args - Arguments to update one ConfirmedMatch.
+     * @example
+     * // Update one ConfirmedMatch
+     * const confirmedMatch = await prisma.confirmedMatch.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ConfirmedMatchUpdateArgs>(args: SelectSubset<T, ConfirmedMatchUpdateArgs<ExtArgs>>): Prisma__ConfirmedMatchClient<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ConfirmedMatches.
+     * @param {ConfirmedMatchDeleteManyArgs} args - Arguments to filter ConfirmedMatches to delete.
+     * @example
+     * // Delete a few ConfirmedMatches
+     * const { count } = await prisma.confirmedMatch.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ConfirmedMatchDeleteManyArgs>(args?: SelectSubset<T, ConfirmedMatchDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ConfirmedMatches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfirmedMatchUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ConfirmedMatches
+     * const confirmedMatch = await prisma.confirmedMatch.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ConfirmedMatchUpdateManyArgs>(args: SelectSubset<T, ConfirmedMatchUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ConfirmedMatches and returns the data updated in the database.
+     * @param {ConfirmedMatchUpdateManyAndReturnArgs} args - Arguments to update many ConfirmedMatches.
+     * @example
+     * // Update many ConfirmedMatches
+     * const confirmedMatch = await prisma.confirmedMatch.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ConfirmedMatches and only return the `id`
+     * const confirmedMatchWithIdOnly = await prisma.confirmedMatch.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ConfirmedMatchUpdateManyAndReturnArgs>(args: SelectSubset<T, ConfirmedMatchUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ConfirmedMatch.
+     * @param {ConfirmedMatchUpsertArgs} args - Arguments to update or create a ConfirmedMatch.
+     * @example
+     * // Update or create a ConfirmedMatch
+     * const confirmedMatch = await prisma.confirmedMatch.upsert({
+     *   create: {
+     *     // ... data to create a ConfirmedMatch
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ConfirmedMatch we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ConfirmedMatchUpsertArgs>(args: SelectSubset<T, ConfirmedMatchUpsertArgs<ExtArgs>>): Prisma__ConfirmedMatchClient<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ConfirmedMatches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfirmedMatchCountArgs} args - Arguments to filter ConfirmedMatches to count.
+     * @example
+     * // Count the number of ConfirmedMatches
+     * const count = await prisma.confirmedMatch.count({
+     *   where: {
+     *     // ... the filter for the ConfirmedMatches we want to count
+     *   }
+     * })
+    **/
+    count<T extends ConfirmedMatchCountArgs>(
+      args?: Subset<T, ConfirmedMatchCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ConfirmedMatchCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ConfirmedMatch.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfirmedMatchAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ConfirmedMatchAggregateArgs>(args: Subset<T, ConfirmedMatchAggregateArgs>): Prisma.PrismaPromise<GetConfirmedMatchAggregateType<T>>
+
+    /**
+     * Group by ConfirmedMatch.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfirmedMatchGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ConfirmedMatchGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ConfirmedMatchGroupByArgs['orderBy'] }
+        : { orderBy?: ConfirmedMatchGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ConfirmedMatchGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetConfirmedMatchGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ConfirmedMatch model
+   */
+  readonly fields: ConfirmedMatchFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ConfirmedMatch.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ConfirmedMatchClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    serviceListing<T extends ServiceListingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ServiceListingDefaultArgs<ExtArgs>>): Prisma__ServiceListingClient<$Result.GetResult<Prisma.$ServiceListingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    homeowner<T extends UserAccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserAccountDefaultArgs<ExtArgs>>): Prisma__UserAccountClient<$Result.GetResult<Prisma.$UserAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ConfirmedMatch model
+   */
+  interface ConfirmedMatchFieldRefs {
+    readonly id: FieldRef<"ConfirmedMatch", 'String'>
+    readonly serviceListingId: FieldRef<"ConfirmedMatch", 'String'>
+    readonly homeownerId: FieldRef<"ConfirmedMatch", 'String'>
+    readonly confirmationDate: FieldRef<"ConfirmedMatch", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ConfirmedMatch findUnique
+   */
+  export type ConfirmedMatchFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchInclude<ExtArgs> | null
+    /**
+     * Filter, which ConfirmedMatch to fetch.
+     */
+    where: ConfirmedMatchWhereUniqueInput
+  }
+
+  /**
+   * ConfirmedMatch findUniqueOrThrow
+   */
+  export type ConfirmedMatchFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchInclude<ExtArgs> | null
+    /**
+     * Filter, which ConfirmedMatch to fetch.
+     */
+    where: ConfirmedMatchWhereUniqueInput
+  }
+
+  /**
+   * ConfirmedMatch findFirst
+   */
+  export type ConfirmedMatchFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchInclude<ExtArgs> | null
+    /**
+     * Filter, which ConfirmedMatch to fetch.
+     */
+    where?: ConfirmedMatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ConfirmedMatches to fetch.
+     */
+    orderBy?: ConfirmedMatchOrderByWithRelationInput | ConfirmedMatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ConfirmedMatches.
+     */
+    cursor?: ConfirmedMatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ConfirmedMatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ConfirmedMatches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ConfirmedMatches.
+     */
+    distinct?: ConfirmedMatchScalarFieldEnum | ConfirmedMatchScalarFieldEnum[]
+  }
+
+  /**
+   * ConfirmedMatch findFirstOrThrow
+   */
+  export type ConfirmedMatchFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchInclude<ExtArgs> | null
+    /**
+     * Filter, which ConfirmedMatch to fetch.
+     */
+    where?: ConfirmedMatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ConfirmedMatches to fetch.
+     */
+    orderBy?: ConfirmedMatchOrderByWithRelationInput | ConfirmedMatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ConfirmedMatches.
+     */
+    cursor?: ConfirmedMatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ConfirmedMatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ConfirmedMatches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ConfirmedMatches.
+     */
+    distinct?: ConfirmedMatchScalarFieldEnum | ConfirmedMatchScalarFieldEnum[]
+  }
+
+  /**
+   * ConfirmedMatch findMany
+   */
+  export type ConfirmedMatchFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchInclude<ExtArgs> | null
+    /**
+     * Filter, which ConfirmedMatches to fetch.
+     */
+    where?: ConfirmedMatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ConfirmedMatches to fetch.
+     */
+    orderBy?: ConfirmedMatchOrderByWithRelationInput | ConfirmedMatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ConfirmedMatches.
+     */
+    cursor?: ConfirmedMatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ConfirmedMatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ConfirmedMatches.
+     */
+    skip?: number
+    distinct?: ConfirmedMatchScalarFieldEnum | ConfirmedMatchScalarFieldEnum[]
+  }
+
+  /**
+   * ConfirmedMatch create
+   */
+  export type ConfirmedMatchCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ConfirmedMatch.
+     */
+    data: XOR<ConfirmedMatchCreateInput, ConfirmedMatchUncheckedCreateInput>
+  }
+
+  /**
+   * ConfirmedMatch createMany
+   */
+  export type ConfirmedMatchCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ConfirmedMatches.
+     */
+    data: ConfirmedMatchCreateManyInput | ConfirmedMatchCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ConfirmedMatch createManyAndReturn
+   */
+  export type ConfirmedMatchCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * The data used to create many ConfirmedMatches.
+     */
+    data: ConfirmedMatchCreateManyInput | ConfirmedMatchCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ConfirmedMatch update
+   */
+  export type ConfirmedMatchUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ConfirmedMatch.
+     */
+    data: XOR<ConfirmedMatchUpdateInput, ConfirmedMatchUncheckedUpdateInput>
+    /**
+     * Choose, which ConfirmedMatch to update.
+     */
+    where: ConfirmedMatchWhereUniqueInput
+  }
+
+  /**
+   * ConfirmedMatch updateMany
+   */
+  export type ConfirmedMatchUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ConfirmedMatches.
+     */
+    data: XOR<ConfirmedMatchUpdateManyMutationInput, ConfirmedMatchUncheckedUpdateManyInput>
+    /**
+     * Filter which ConfirmedMatches to update
+     */
+    where?: ConfirmedMatchWhereInput
+    /**
+     * Limit how many ConfirmedMatches to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ConfirmedMatch updateManyAndReturn
+   */
+  export type ConfirmedMatchUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * The data used to update ConfirmedMatches.
+     */
+    data: XOR<ConfirmedMatchUpdateManyMutationInput, ConfirmedMatchUncheckedUpdateManyInput>
+    /**
+     * Filter which ConfirmedMatches to update
+     */
+    where?: ConfirmedMatchWhereInput
+    /**
+     * Limit how many ConfirmedMatches to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ConfirmedMatch upsert
+   */
+  export type ConfirmedMatchUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ConfirmedMatch to update in case it exists.
+     */
+    where: ConfirmedMatchWhereUniqueInput
+    /**
+     * In case the ConfirmedMatch found by the `where` argument doesn't exist, create a new ConfirmedMatch with this data.
+     */
+    create: XOR<ConfirmedMatchCreateInput, ConfirmedMatchUncheckedCreateInput>
+    /**
+     * In case the ConfirmedMatch was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ConfirmedMatchUpdateInput, ConfirmedMatchUncheckedUpdateInput>
+  }
+
+  /**
+   * ConfirmedMatch delete
+   */
+  export type ConfirmedMatchDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchInclude<ExtArgs> | null
+    /**
+     * Filter which ConfirmedMatch to delete.
+     */
+    where: ConfirmedMatchWhereUniqueInput
+  }
+
+  /**
+   * ConfirmedMatch deleteMany
+   */
+  export type ConfirmedMatchDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ConfirmedMatches to delete
+     */
+    where?: ConfirmedMatchWhereInput
+    /**
+     * Limit how many ConfirmedMatches to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ConfirmedMatch without action
+   */
+  export type ConfirmedMatchDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfirmedMatch
+     */
+    select?: ConfirmedMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ConfirmedMatch
+     */
+    omit?: ConfirmedMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConfirmedMatchInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -5830,7 +8315,8 @@ export namespace Prisma {
     availability: 'availability',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    cleanerId: 'cleanerId'
+    cleanerId: 'cleanerId',
+    status: 'status'
   };
 
   export type ServiceListingScalarFieldEnum = (typeof ServiceListingScalarFieldEnum)[keyof typeof ServiceListingScalarFieldEnum]
@@ -5844,6 +8330,26 @@ export namespace Prisma {
   };
 
   export type ProfileViewScalarFieldEnum = (typeof ProfileViewScalarFieldEnum)[keyof typeof ProfileViewScalarFieldEnum]
+
+
+  export const ShortlistScalarFieldEnum: {
+    id: 'id',
+    homeownerId: 'homeownerId',
+    cleanerId: 'cleanerId',
+    createdAt: 'createdAt'
+  };
+
+  export type ShortlistScalarFieldEnum = (typeof ShortlistScalarFieldEnum)[keyof typeof ShortlistScalarFieldEnum]
+
+
+  export const ConfirmedMatchScalarFieldEnum: {
+    id: 'id',
+    serviceListingId: 'serviceListingId',
+    homeownerId: 'homeownerId',
+    confirmationDate: 'confirmationDate'
+  };
+
+  export type ConfirmedMatchScalarFieldEnum = (typeof ConfirmedMatchScalarFieldEnum)[keyof typeof ConfirmedMatchScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -5960,6 +8466,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'ServiceListingStatus'
+   */
+  export type EnumServiceListingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceListingStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'ServiceListingStatus[]'
+   */
+  export type ListEnumServiceListingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceListingStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -5992,6 +8512,9 @@ export namespace Prisma {
     serviceListings?: ServiceListingListRelationFilter
     profileViews?: ProfileViewListRelationFilter
     viewedOthers?: ProfileViewListRelationFilter
+    createdShortlists?: ShortlistListRelationFilter
+    shortlistedIn?: ShortlistListRelationFilter
+    confirmedMatchesAsHomeowner?: ConfirmedMatchListRelationFilter
   }
 
   export type UserAccountOrderByWithRelationInput = {
@@ -6007,6 +8530,9 @@ export namespace Prisma {
     serviceListings?: ServiceListingOrderByRelationAggregateInput
     profileViews?: ProfileViewOrderByRelationAggregateInput
     viewedOthers?: ProfileViewOrderByRelationAggregateInput
+    createdShortlists?: ShortlistOrderByRelationAggregateInput
+    shortlistedIn?: ShortlistOrderByRelationAggregateInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchOrderByRelationAggregateInput
   }
 
   export type UserAccountWhereUniqueInput = Prisma.AtLeast<{
@@ -6025,6 +8551,9 @@ export namespace Prisma {
     serviceListings?: ServiceListingListRelationFilter
     profileViews?: ProfileViewListRelationFilter
     viewedOthers?: ProfileViewListRelationFilter
+    createdShortlists?: ShortlistListRelationFilter
+    shortlistedIn?: ShortlistListRelationFilter
+    confirmedMatchesAsHomeowner?: ConfirmedMatchListRelationFilter
   }, "id" | "username" | "email">
 
   export type UserAccountOrderByWithAggregationInput = {
@@ -6129,7 +8658,9 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ServiceListing"> | Date | string
     updatedAt?: DateTimeFilter<"ServiceListing"> | Date | string
     cleanerId?: StringFilter<"ServiceListing"> | string
+    status?: EnumServiceListingStatusFilter<"ServiceListing"> | $Enums.ServiceListingStatus
     cleaner?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
+    confirmedMatches?: ConfirmedMatchListRelationFilter
   }
 
   export type ServiceListingOrderByWithRelationInput = {
@@ -6143,7 +8674,9 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     cleanerId?: SortOrder
+    status?: SortOrder
     cleaner?: UserAccountOrderByWithRelationInput
+    confirmedMatches?: ConfirmedMatchOrderByRelationAggregateInput
   }
 
   export type ServiceListingWhereUniqueInput = Prisma.AtLeast<{
@@ -6160,7 +8693,9 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ServiceListing"> | Date | string
     updatedAt?: DateTimeFilter<"ServiceListing"> | Date | string
     cleanerId?: StringFilter<"ServiceListing"> | string
+    status?: EnumServiceListingStatusFilter<"ServiceListing"> | $Enums.ServiceListingStatus
     cleaner?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
+    confirmedMatches?: ConfirmedMatchListRelationFilter
   }, "id">
 
   export type ServiceListingOrderByWithAggregationInput = {
@@ -6174,6 +8709,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     cleanerId?: SortOrder
+    status?: SortOrder
     _count?: ServiceListingCountOrderByAggregateInput
     _avg?: ServiceListingAvgOrderByAggregateInput
     _max?: ServiceListingMaxOrderByAggregateInput
@@ -6195,6 +8731,7 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"ServiceListing"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ServiceListing"> | Date | string
     cleanerId?: StringWithAggregatesFilter<"ServiceListing"> | string
+    status?: EnumServiceListingStatusWithAggregatesFilter<"ServiceListing"> | $Enums.ServiceListingStatus
   }
 
   export type ProfileViewWhereInput = {
@@ -6250,6 +8787,113 @@ export namespace Prisma {
     viewedAt?: DateTimeWithAggregatesFilter<"ProfileView"> | Date | string
   }
 
+  export type ShortlistWhereInput = {
+    AND?: ShortlistWhereInput | ShortlistWhereInput[]
+    OR?: ShortlistWhereInput[]
+    NOT?: ShortlistWhereInput | ShortlistWhereInput[]
+    id?: StringFilter<"Shortlist"> | string
+    homeownerId?: StringFilter<"Shortlist"> | string
+    cleanerId?: StringFilter<"Shortlist"> | string
+    createdAt?: DateTimeFilter<"Shortlist"> | Date | string
+    homeowner?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
+    cleaner?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
+  }
+
+  export type ShortlistOrderByWithRelationInput = {
+    id?: SortOrder
+    homeownerId?: SortOrder
+    cleanerId?: SortOrder
+    createdAt?: SortOrder
+    homeowner?: UserAccountOrderByWithRelationInput
+    cleaner?: UserAccountOrderByWithRelationInput
+  }
+
+  export type ShortlistWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    homeownerId_cleanerId?: ShortlistHomeownerIdCleanerIdCompoundUniqueInput
+    AND?: ShortlistWhereInput | ShortlistWhereInput[]
+    OR?: ShortlistWhereInput[]
+    NOT?: ShortlistWhereInput | ShortlistWhereInput[]
+    homeownerId?: StringFilter<"Shortlist"> | string
+    cleanerId?: StringFilter<"Shortlist"> | string
+    createdAt?: DateTimeFilter<"Shortlist"> | Date | string
+    homeowner?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
+    cleaner?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
+  }, "id" | "homeownerId_cleanerId">
+
+  export type ShortlistOrderByWithAggregationInput = {
+    id?: SortOrder
+    homeownerId?: SortOrder
+    cleanerId?: SortOrder
+    createdAt?: SortOrder
+    _count?: ShortlistCountOrderByAggregateInput
+    _max?: ShortlistMaxOrderByAggregateInput
+    _min?: ShortlistMinOrderByAggregateInput
+  }
+
+  export type ShortlistScalarWhereWithAggregatesInput = {
+    AND?: ShortlistScalarWhereWithAggregatesInput | ShortlistScalarWhereWithAggregatesInput[]
+    OR?: ShortlistScalarWhereWithAggregatesInput[]
+    NOT?: ShortlistScalarWhereWithAggregatesInput | ShortlistScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Shortlist"> | string
+    homeownerId?: StringWithAggregatesFilter<"Shortlist"> | string
+    cleanerId?: StringWithAggregatesFilter<"Shortlist"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Shortlist"> | Date | string
+  }
+
+  export type ConfirmedMatchWhereInput = {
+    AND?: ConfirmedMatchWhereInput | ConfirmedMatchWhereInput[]
+    OR?: ConfirmedMatchWhereInput[]
+    NOT?: ConfirmedMatchWhereInput | ConfirmedMatchWhereInput[]
+    id?: StringFilter<"ConfirmedMatch"> | string
+    serviceListingId?: StringFilter<"ConfirmedMatch"> | string
+    homeownerId?: StringFilter<"ConfirmedMatch"> | string
+    confirmationDate?: DateTimeFilter<"ConfirmedMatch"> | Date | string
+    serviceListing?: XOR<ServiceListingScalarRelationFilter, ServiceListingWhereInput>
+    homeowner?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
+  }
+
+  export type ConfirmedMatchOrderByWithRelationInput = {
+    id?: SortOrder
+    serviceListingId?: SortOrder
+    homeownerId?: SortOrder
+    confirmationDate?: SortOrder
+    serviceListing?: ServiceListingOrderByWithRelationInput
+    homeowner?: UserAccountOrderByWithRelationInput
+  }
+
+  export type ConfirmedMatchWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ConfirmedMatchWhereInput | ConfirmedMatchWhereInput[]
+    OR?: ConfirmedMatchWhereInput[]
+    NOT?: ConfirmedMatchWhereInput | ConfirmedMatchWhereInput[]
+    serviceListingId?: StringFilter<"ConfirmedMatch"> | string
+    homeownerId?: StringFilter<"ConfirmedMatch"> | string
+    confirmationDate?: DateTimeFilter<"ConfirmedMatch"> | Date | string
+    serviceListing?: XOR<ServiceListingScalarRelationFilter, ServiceListingWhereInput>
+    homeowner?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
+  }, "id">
+
+  export type ConfirmedMatchOrderByWithAggregationInput = {
+    id?: SortOrder
+    serviceListingId?: SortOrder
+    homeownerId?: SortOrder
+    confirmationDate?: SortOrder
+    _count?: ConfirmedMatchCountOrderByAggregateInput
+    _max?: ConfirmedMatchMaxOrderByAggregateInput
+    _min?: ConfirmedMatchMinOrderByAggregateInput
+  }
+
+  export type ConfirmedMatchScalarWhereWithAggregatesInput = {
+    AND?: ConfirmedMatchScalarWhereWithAggregatesInput | ConfirmedMatchScalarWhereWithAggregatesInput[]
+    OR?: ConfirmedMatchScalarWhereWithAggregatesInput[]
+    NOT?: ConfirmedMatchScalarWhereWithAggregatesInput | ConfirmedMatchScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ConfirmedMatch"> | string
+    serviceListingId?: StringWithAggregatesFilter<"ConfirmedMatch"> | string
+    homeownerId?: StringWithAggregatesFilter<"ConfirmedMatch"> | string
+    confirmationDate?: DateTimeWithAggregatesFilter<"ConfirmedMatch"> | Date | string
+  }
+
   export type UserAccountCreateInput = {
     id?: string
     username: string
@@ -6262,6 +8906,9 @@ export namespace Prisma {
     serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
     profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
     viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
   }
 
   export type UserAccountUncheckedCreateInput = {
@@ -6276,6 +8923,9 @@ export namespace Prisma {
     serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
     profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
     viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
   }
 
   export type UserAccountUpdateInput = {
@@ -6290,6 +8940,9 @@ export namespace Prisma {
     serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
     profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
     viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
   }
 
   export type UserAccountUncheckedUpdateInput = {
@@ -6304,6 +8957,9 @@ export namespace Prisma {
     serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
     profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
     viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
   }
 
   export type UserAccountCreateManyInput = {
@@ -6415,7 +9071,9 @@ export namespace Prisma {
     availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.ServiceListingStatus
     cleaner: UserAccountCreateNestedOneWithoutServiceListingsInput
+    confirmedMatches?: ConfirmedMatchCreateNestedManyWithoutServiceListingInput
   }
 
   export type ServiceListingUncheckedCreateInput = {
@@ -6429,6 +9087,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     cleanerId: string
+    status?: $Enums.ServiceListingStatus
+    confirmedMatches?: ConfirmedMatchUncheckedCreateNestedManyWithoutServiceListingInput
   }
 
   export type ServiceListingUpdateInput = {
@@ -6441,7 +9101,9 @@ export namespace Prisma {
     availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
     cleaner?: UserAccountUpdateOneRequiredWithoutServiceListingsNestedInput
+    confirmedMatches?: ConfirmedMatchUpdateManyWithoutServiceListingNestedInput
   }
 
   export type ServiceListingUncheckedUpdateInput = {
@@ -6455,6 +9117,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cleanerId?: StringFieldUpdateOperationsInput | string
+    status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
+    confirmedMatches?: ConfirmedMatchUncheckedUpdateManyWithoutServiceListingNestedInput
   }
 
   export type ServiceListingCreateManyInput = {
@@ -6468,6 +9132,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     cleanerId: string
+    status?: $Enums.ServiceListingStatus
   }
 
   export type ServiceListingUpdateManyMutationInput = {
@@ -6480,6 +9145,7 @@ export namespace Prisma {
     availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
   }
 
   export type ServiceListingUncheckedUpdateManyInput = {
@@ -6493,6 +9159,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cleanerId?: StringFieldUpdateOperationsInput | string
+    status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
   }
 
   export type ProfileViewCreateInput = {
@@ -6540,6 +9207,100 @@ export namespace Prisma {
     viewedProfileId?: StringFieldUpdateOperationsInput | string
     viewerId?: NullableStringFieldUpdateOperationsInput | string | null
     viewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShortlistCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    homeowner: UserAccountCreateNestedOneWithoutCreatedShortlistsInput
+    cleaner: UserAccountCreateNestedOneWithoutShortlistedInInput
+  }
+
+  export type ShortlistUncheckedCreateInput = {
+    id?: string
+    homeownerId: string
+    cleanerId: string
+    createdAt?: Date | string
+  }
+
+  export type ShortlistUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    homeowner?: UserAccountUpdateOneRequiredWithoutCreatedShortlistsNestedInput
+    cleaner?: UserAccountUpdateOneRequiredWithoutShortlistedInNestedInput
+  }
+
+  export type ShortlistUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    homeownerId?: StringFieldUpdateOperationsInput | string
+    cleanerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShortlistCreateManyInput = {
+    id?: string
+    homeownerId: string
+    cleanerId: string
+    createdAt?: Date | string
+  }
+
+  export type ShortlistUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShortlistUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    homeownerId?: StringFieldUpdateOperationsInput | string
+    cleanerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ConfirmedMatchCreateInput = {
+    id?: string
+    confirmationDate?: Date | string
+    serviceListing: ServiceListingCreateNestedOneWithoutConfirmedMatchesInput
+    homeowner: UserAccountCreateNestedOneWithoutConfirmedMatchesAsHomeownerInput
+  }
+
+  export type ConfirmedMatchUncheckedCreateInput = {
+    id?: string
+    serviceListingId: string
+    homeownerId: string
+    confirmationDate?: Date | string
+  }
+
+  export type ConfirmedMatchUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    confirmationDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    serviceListing?: ServiceListingUpdateOneRequiredWithoutConfirmedMatchesNestedInput
+    homeowner?: UserAccountUpdateOneRequiredWithoutConfirmedMatchesAsHomeownerNestedInput
+  }
+
+  export type ConfirmedMatchUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    serviceListingId?: StringFieldUpdateOperationsInput | string
+    homeownerId?: StringFieldUpdateOperationsInput | string
+    confirmationDate?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ConfirmedMatchCreateManyInput = {
+    id?: string
+    serviceListingId: string
+    homeownerId: string
+    confirmationDate?: Date | string
+  }
+
+  export type ConfirmedMatchUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    confirmationDate?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ConfirmedMatchUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    serviceListingId?: StringFieldUpdateOperationsInput | string
+    homeownerId?: StringFieldUpdateOperationsInput | string
+    confirmationDate?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -6607,6 +9368,18 @@ export namespace Prisma {
     none?: ProfileViewWhereInput
   }
 
+  export type ShortlistListRelationFilter = {
+    every?: ShortlistWhereInput
+    some?: ShortlistWhereInput
+    none?: ShortlistWhereInput
+  }
+
+  export type ConfirmedMatchListRelationFilter = {
+    every?: ConfirmedMatchWhereInput
+    some?: ConfirmedMatchWhereInput
+    none?: ConfirmedMatchWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -6617,6 +9390,14 @@ export namespace Prisma {
   }
 
   export type ProfileViewOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ShortlistOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ConfirmedMatchOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -6784,6 +9565,13 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type EnumServiceListingStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceListingStatus | EnumServiceListingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceListingStatus[] | ListEnumServiceListingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceListingStatus[] | ListEnumServiceListingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceListingStatusFilter<$PrismaModel> | $Enums.ServiceListingStatus
+  }
+
   export type UserAccountScalarRelationFilter = {
     is?: UserAccountWhereInput
     isNot?: UserAccountWhereInput
@@ -6800,6 +9588,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     cleanerId?: SortOrder
+    status?: SortOrder
   }
 
   export type ServiceListingAvgOrderByAggregateInput = {
@@ -6818,6 +9607,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     cleanerId?: SortOrder
+    status?: SortOrder
   }
 
   export type ServiceListingMinOrderByAggregateInput = {
@@ -6831,6 +9621,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     cleanerId?: SortOrder
+    status?: SortOrder
   }
 
   export type ServiceListingSumOrderByAggregateInput = {
@@ -6852,6 +9643,16 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type EnumServiceListingStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceListingStatus | EnumServiceListingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceListingStatus[] | ListEnumServiceListingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceListingStatus[] | ListEnumServiceListingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceListingStatusWithAggregatesFilter<$PrismaModel> | $Enums.ServiceListingStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumServiceListingStatusFilter<$PrismaModel>
+    _max?: NestedEnumServiceListingStatusFilter<$PrismaModel>
   }
 
   export type UserAccountNullableScalarRelationFilter = {
@@ -6878,6 +9679,58 @@ export namespace Prisma {
     viewedProfileId?: SortOrder
     viewerId?: SortOrder
     viewedAt?: SortOrder
+  }
+
+  export type ShortlistHomeownerIdCleanerIdCompoundUniqueInput = {
+    homeownerId: string
+    cleanerId: string
+  }
+
+  export type ShortlistCountOrderByAggregateInput = {
+    id?: SortOrder
+    homeownerId?: SortOrder
+    cleanerId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ShortlistMaxOrderByAggregateInput = {
+    id?: SortOrder
+    homeownerId?: SortOrder
+    cleanerId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ShortlistMinOrderByAggregateInput = {
+    id?: SortOrder
+    homeownerId?: SortOrder
+    cleanerId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ServiceListingScalarRelationFilter = {
+    is?: ServiceListingWhereInput
+    isNot?: ServiceListingWhereInput
+  }
+
+  export type ConfirmedMatchCountOrderByAggregateInput = {
+    id?: SortOrder
+    serviceListingId?: SortOrder
+    homeownerId?: SortOrder
+    confirmationDate?: SortOrder
+  }
+
+  export type ConfirmedMatchMaxOrderByAggregateInput = {
+    id?: SortOrder
+    serviceListingId?: SortOrder
+    homeownerId?: SortOrder
+    confirmationDate?: SortOrder
+  }
+
+  export type ConfirmedMatchMinOrderByAggregateInput = {
+    id?: SortOrder
+    serviceListingId?: SortOrder
+    homeownerId?: SortOrder
+    confirmationDate?: SortOrder
   }
 
   export type UserProfileCreateNestedOneWithoutUserAccountsInput = {
@@ -6907,6 +9760,27 @@ export namespace Prisma {
     connect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
   }
 
+  export type ShortlistCreateNestedManyWithoutHomeownerInput = {
+    create?: XOR<ShortlistCreateWithoutHomeownerInput, ShortlistUncheckedCreateWithoutHomeownerInput> | ShortlistCreateWithoutHomeownerInput[] | ShortlistUncheckedCreateWithoutHomeownerInput[]
+    connectOrCreate?: ShortlistCreateOrConnectWithoutHomeownerInput | ShortlistCreateOrConnectWithoutHomeownerInput[]
+    createMany?: ShortlistCreateManyHomeownerInputEnvelope
+    connect?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+  }
+
+  export type ShortlistCreateNestedManyWithoutCleanerInput = {
+    create?: XOR<ShortlistCreateWithoutCleanerInput, ShortlistUncheckedCreateWithoutCleanerInput> | ShortlistCreateWithoutCleanerInput[] | ShortlistUncheckedCreateWithoutCleanerInput[]
+    connectOrCreate?: ShortlistCreateOrConnectWithoutCleanerInput | ShortlistCreateOrConnectWithoutCleanerInput[]
+    createMany?: ShortlistCreateManyCleanerInputEnvelope
+    connect?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+  }
+
+  export type ConfirmedMatchCreateNestedManyWithoutHomeownerInput = {
+    create?: XOR<ConfirmedMatchCreateWithoutHomeownerInput, ConfirmedMatchUncheckedCreateWithoutHomeownerInput> | ConfirmedMatchCreateWithoutHomeownerInput[] | ConfirmedMatchUncheckedCreateWithoutHomeownerInput[]
+    connectOrCreate?: ConfirmedMatchCreateOrConnectWithoutHomeownerInput | ConfirmedMatchCreateOrConnectWithoutHomeownerInput[]
+    createMany?: ConfirmedMatchCreateManyHomeownerInputEnvelope
+    connect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+  }
+
   export type ServiceListingUncheckedCreateNestedManyWithoutCleanerInput = {
     create?: XOR<ServiceListingCreateWithoutCleanerInput, ServiceListingUncheckedCreateWithoutCleanerInput> | ServiceListingCreateWithoutCleanerInput[] | ServiceListingUncheckedCreateWithoutCleanerInput[]
     connectOrCreate?: ServiceListingCreateOrConnectWithoutCleanerInput | ServiceListingCreateOrConnectWithoutCleanerInput[]
@@ -6926,6 +9800,27 @@ export namespace Prisma {
     connectOrCreate?: ProfileViewCreateOrConnectWithoutViewerInput | ProfileViewCreateOrConnectWithoutViewerInput[]
     createMany?: ProfileViewCreateManyViewerInputEnvelope
     connect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+  }
+
+  export type ShortlistUncheckedCreateNestedManyWithoutHomeownerInput = {
+    create?: XOR<ShortlistCreateWithoutHomeownerInput, ShortlistUncheckedCreateWithoutHomeownerInput> | ShortlistCreateWithoutHomeownerInput[] | ShortlistUncheckedCreateWithoutHomeownerInput[]
+    connectOrCreate?: ShortlistCreateOrConnectWithoutHomeownerInput | ShortlistCreateOrConnectWithoutHomeownerInput[]
+    createMany?: ShortlistCreateManyHomeownerInputEnvelope
+    connect?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+  }
+
+  export type ShortlistUncheckedCreateNestedManyWithoutCleanerInput = {
+    create?: XOR<ShortlistCreateWithoutCleanerInput, ShortlistUncheckedCreateWithoutCleanerInput> | ShortlistCreateWithoutCleanerInput[] | ShortlistUncheckedCreateWithoutCleanerInput[]
+    connectOrCreate?: ShortlistCreateOrConnectWithoutCleanerInput | ShortlistCreateOrConnectWithoutCleanerInput[]
+    createMany?: ShortlistCreateManyCleanerInputEnvelope
+    connect?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+  }
+
+  export type ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput = {
+    create?: XOR<ConfirmedMatchCreateWithoutHomeownerInput, ConfirmedMatchUncheckedCreateWithoutHomeownerInput> | ConfirmedMatchCreateWithoutHomeownerInput[] | ConfirmedMatchUncheckedCreateWithoutHomeownerInput[]
+    connectOrCreate?: ConfirmedMatchCreateOrConnectWithoutHomeownerInput | ConfirmedMatchCreateOrConnectWithoutHomeownerInput[]
+    createMany?: ConfirmedMatchCreateManyHomeownerInputEnvelope
+    connect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -6992,6 +9887,48 @@ export namespace Prisma {
     deleteMany?: ProfileViewScalarWhereInput | ProfileViewScalarWhereInput[]
   }
 
+  export type ShortlistUpdateManyWithoutHomeownerNestedInput = {
+    create?: XOR<ShortlistCreateWithoutHomeownerInput, ShortlistUncheckedCreateWithoutHomeownerInput> | ShortlistCreateWithoutHomeownerInput[] | ShortlistUncheckedCreateWithoutHomeownerInput[]
+    connectOrCreate?: ShortlistCreateOrConnectWithoutHomeownerInput | ShortlistCreateOrConnectWithoutHomeownerInput[]
+    upsert?: ShortlistUpsertWithWhereUniqueWithoutHomeownerInput | ShortlistUpsertWithWhereUniqueWithoutHomeownerInput[]
+    createMany?: ShortlistCreateManyHomeownerInputEnvelope
+    set?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    disconnect?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    delete?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    connect?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    update?: ShortlistUpdateWithWhereUniqueWithoutHomeownerInput | ShortlistUpdateWithWhereUniqueWithoutHomeownerInput[]
+    updateMany?: ShortlistUpdateManyWithWhereWithoutHomeownerInput | ShortlistUpdateManyWithWhereWithoutHomeownerInput[]
+    deleteMany?: ShortlistScalarWhereInput | ShortlistScalarWhereInput[]
+  }
+
+  export type ShortlistUpdateManyWithoutCleanerNestedInput = {
+    create?: XOR<ShortlistCreateWithoutCleanerInput, ShortlistUncheckedCreateWithoutCleanerInput> | ShortlistCreateWithoutCleanerInput[] | ShortlistUncheckedCreateWithoutCleanerInput[]
+    connectOrCreate?: ShortlistCreateOrConnectWithoutCleanerInput | ShortlistCreateOrConnectWithoutCleanerInput[]
+    upsert?: ShortlistUpsertWithWhereUniqueWithoutCleanerInput | ShortlistUpsertWithWhereUniqueWithoutCleanerInput[]
+    createMany?: ShortlistCreateManyCleanerInputEnvelope
+    set?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    disconnect?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    delete?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    connect?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    update?: ShortlistUpdateWithWhereUniqueWithoutCleanerInput | ShortlistUpdateWithWhereUniqueWithoutCleanerInput[]
+    updateMany?: ShortlistUpdateManyWithWhereWithoutCleanerInput | ShortlistUpdateManyWithWhereWithoutCleanerInput[]
+    deleteMany?: ShortlistScalarWhereInput | ShortlistScalarWhereInput[]
+  }
+
+  export type ConfirmedMatchUpdateManyWithoutHomeownerNestedInput = {
+    create?: XOR<ConfirmedMatchCreateWithoutHomeownerInput, ConfirmedMatchUncheckedCreateWithoutHomeownerInput> | ConfirmedMatchCreateWithoutHomeownerInput[] | ConfirmedMatchUncheckedCreateWithoutHomeownerInput[]
+    connectOrCreate?: ConfirmedMatchCreateOrConnectWithoutHomeownerInput | ConfirmedMatchCreateOrConnectWithoutHomeownerInput[]
+    upsert?: ConfirmedMatchUpsertWithWhereUniqueWithoutHomeownerInput | ConfirmedMatchUpsertWithWhereUniqueWithoutHomeownerInput[]
+    createMany?: ConfirmedMatchCreateManyHomeownerInputEnvelope
+    set?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    disconnect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    delete?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    connect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    update?: ConfirmedMatchUpdateWithWhereUniqueWithoutHomeownerInput | ConfirmedMatchUpdateWithWhereUniqueWithoutHomeownerInput[]
+    updateMany?: ConfirmedMatchUpdateManyWithWhereWithoutHomeownerInput | ConfirmedMatchUpdateManyWithWhereWithoutHomeownerInput[]
+    deleteMany?: ConfirmedMatchScalarWhereInput | ConfirmedMatchScalarWhereInput[]
+  }
+
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
   }
@@ -7036,6 +9973,48 @@ export namespace Prisma {
     update?: ProfileViewUpdateWithWhereUniqueWithoutViewerInput | ProfileViewUpdateWithWhereUniqueWithoutViewerInput[]
     updateMany?: ProfileViewUpdateManyWithWhereWithoutViewerInput | ProfileViewUpdateManyWithWhereWithoutViewerInput[]
     deleteMany?: ProfileViewScalarWhereInput | ProfileViewScalarWhereInput[]
+  }
+
+  export type ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput = {
+    create?: XOR<ShortlistCreateWithoutHomeownerInput, ShortlistUncheckedCreateWithoutHomeownerInput> | ShortlistCreateWithoutHomeownerInput[] | ShortlistUncheckedCreateWithoutHomeownerInput[]
+    connectOrCreate?: ShortlistCreateOrConnectWithoutHomeownerInput | ShortlistCreateOrConnectWithoutHomeownerInput[]
+    upsert?: ShortlistUpsertWithWhereUniqueWithoutHomeownerInput | ShortlistUpsertWithWhereUniqueWithoutHomeownerInput[]
+    createMany?: ShortlistCreateManyHomeownerInputEnvelope
+    set?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    disconnect?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    delete?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    connect?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    update?: ShortlistUpdateWithWhereUniqueWithoutHomeownerInput | ShortlistUpdateWithWhereUniqueWithoutHomeownerInput[]
+    updateMany?: ShortlistUpdateManyWithWhereWithoutHomeownerInput | ShortlistUpdateManyWithWhereWithoutHomeownerInput[]
+    deleteMany?: ShortlistScalarWhereInput | ShortlistScalarWhereInput[]
+  }
+
+  export type ShortlistUncheckedUpdateManyWithoutCleanerNestedInput = {
+    create?: XOR<ShortlistCreateWithoutCleanerInput, ShortlistUncheckedCreateWithoutCleanerInput> | ShortlistCreateWithoutCleanerInput[] | ShortlistUncheckedCreateWithoutCleanerInput[]
+    connectOrCreate?: ShortlistCreateOrConnectWithoutCleanerInput | ShortlistCreateOrConnectWithoutCleanerInput[]
+    upsert?: ShortlistUpsertWithWhereUniqueWithoutCleanerInput | ShortlistUpsertWithWhereUniqueWithoutCleanerInput[]
+    createMany?: ShortlistCreateManyCleanerInputEnvelope
+    set?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    disconnect?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    delete?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    connect?: ShortlistWhereUniqueInput | ShortlistWhereUniqueInput[]
+    update?: ShortlistUpdateWithWhereUniqueWithoutCleanerInput | ShortlistUpdateWithWhereUniqueWithoutCleanerInput[]
+    updateMany?: ShortlistUpdateManyWithWhereWithoutCleanerInput | ShortlistUpdateManyWithWhereWithoutCleanerInput[]
+    deleteMany?: ShortlistScalarWhereInput | ShortlistScalarWhereInput[]
+  }
+
+  export type ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput = {
+    create?: XOR<ConfirmedMatchCreateWithoutHomeownerInput, ConfirmedMatchUncheckedCreateWithoutHomeownerInput> | ConfirmedMatchCreateWithoutHomeownerInput[] | ConfirmedMatchUncheckedCreateWithoutHomeownerInput[]
+    connectOrCreate?: ConfirmedMatchCreateOrConnectWithoutHomeownerInput | ConfirmedMatchCreateOrConnectWithoutHomeownerInput[]
+    upsert?: ConfirmedMatchUpsertWithWhereUniqueWithoutHomeownerInput | ConfirmedMatchUpsertWithWhereUniqueWithoutHomeownerInput[]
+    createMany?: ConfirmedMatchCreateManyHomeownerInputEnvelope
+    set?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    disconnect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    delete?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    connect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    update?: ConfirmedMatchUpdateWithWhereUniqueWithoutHomeownerInput | ConfirmedMatchUpdateWithWhereUniqueWithoutHomeownerInput[]
+    updateMany?: ConfirmedMatchUpdateManyWithWhereWithoutHomeownerInput | ConfirmedMatchUpdateManyWithWhereWithoutHomeownerInput[]
+    deleteMany?: ConfirmedMatchScalarWhereInput | ConfirmedMatchScalarWhereInput[]
   }
 
   export type UserProfileCreatepermissionsInput = {
@@ -7099,6 +10078,20 @@ export namespace Prisma {
     connect?: UserAccountWhereUniqueInput
   }
 
+  export type ConfirmedMatchCreateNestedManyWithoutServiceListingInput = {
+    create?: XOR<ConfirmedMatchCreateWithoutServiceListingInput, ConfirmedMatchUncheckedCreateWithoutServiceListingInput> | ConfirmedMatchCreateWithoutServiceListingInput[] | ConfirmedMatchUncheckedCreateWithoutServiceListingInput[]
+    connectOrCreate?: ConfirmedMatchCreateOrConnectWithoutServiceListingInput | ConfirmedMatchCreateOrConnectWithoutServiceListingInput[]
+    createMany?: ConfirmedMatchCreateManyServiceListingInputEnvelope
+    connect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+  }
+
+  export type ConfirmedMatchUncheckedCreateNestedManyWithoutServiceListingInput = {
+    create?: XOR<ConfirmedMatchCreateWithoutServiceListingInput, ConfirmedMatchUncheckedCreateWithoutServiceListingInput> | ConfirmedMatchCreateWithoutServiceListingInput[] | ConfirmedMatchUncheckedCreateWithoutServiceListingInput[]
+    connectOrCreate?: ConfirmedMatchCreateOrConnectWithoutServiceListingInput | ConfirmedMatchCreateOrConnectWithoutServiceListingInput[]
+    createMany?: ConfirmedMatchCreateManyServiceListingInputEnvelope
+    connect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+  }
+
   export type FloatFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -7107,12 +10100,44 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type EnumServiceListingStatusFieldUpdateOperationsInput = {
+    set?: $Enums.ServiceListingStatus
+  }
+
   export type UserAccountUpdateOneRequiredWithoutServiceListingsNestedInput = {
     create?: XOR<UserAccountCreateWithoutServiceListingsInput, UserAccountUncheckedCreateWithoutServiceListingsInput>
     connectOrCreate?: UserAccountCreateOrConnectWithoutServiceListingsInput
     upsert?: UserAccountUpsertWithoutServiceListingsInput
     connect?: UserAccountWhereUniqueInput
     update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutServiceListingsInput, UserAccountUpdateWithoutServiceListingsInput>, UserAccountUncheckedUpdateWithoutServiceListingsInput>
+  }
+
+  export type ConfirmedMatchUpdateManyWithoutServiceListingNestedInput = {
+    create?: XOR<ConfirmedMatchCreateWithoutServiceListingInput, ConfirmedMatchUncheckedCreateWithoutServiceListingInput> | ConfirmedMatchCreateWithoutServiceListingInput[] | ConfirmedMatchUncheckedCreateWithoutServiceListingInput[]
+    connectOrCreate?: ConfirmedMatchCreateOrConnectWithoutServiceListingInput | ConfirmedMatchCreateOrConnectWithoutServiceListingInput[]
+    upsert?: ConfirmedMatchUpsertWithWhereUniqueWithoutServiceListingInput | ConfirmedMatchUpsertWithWhereUniqueWithoutServiceListingInput[]
+    createMany?: ConfirmedMatchCreateManyServiceListingInputEnvelope
+    set?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    disconnect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    delete?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    connect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    update?: ConfirmedMatchUpdateWithWhereUniqueWithoutServiceListingInput | ConfirmedMatchUpdateWithWhereUniqueWithoutServiceListingInput[]
+    updateMany?: ConfirmedMatchUpdateManyWithWhereWithoutServiceListingInput | ConfirmedMatchUpdateManyWithWhereWithoutServiceListingInput[]
+    deleteMany?: ConfirmedMatchScalarWhereInput | ConfirmedMatchScalarWhereInput[]
+  }
+
+  export type ConfirmedMatchUncheckedUpdateManyWithoutServiceListingNestedInput = {
+    create?: XOR<ConfirmedMatchCreateWithoutServiceListingInput, ConfirmedMatchUncheckedCreateWithoutServiceListingInput> | ConfirmedMatchCreateWithoutServiceListingInput[] | ConfirmedMatchUncheckedCreateWithoutServiceListingInput[]
+    connectOrCreate?: ConfirmedMatchCreateOrConnectWithoutServiceListingInput | ConfirmedMatchCreateOrConnectWithoutServiceListingInput[]
+    upsert?: ConfirmedMatchUpsertWithWhereUniqueWithoutServiceListingInput | ConfirmedMatchUpsertWithWhereUniqueWithoutServiceListingInput[]
+    createMany?: ConfirmedMatchCreateManyServiceListingInputEnvelope
+    set?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    disconnect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    delete?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    connect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
+    update?: ConfirmedMatchUpdateWithWhereUniqueWithoutServiceListingInput | ConfirmedMatchUpdateWithWhereUniqueWithoutServiceListingInput[]
+    updateMany?: ConfirmedMatchUpdateManyWithWhereWithoutServiceListingInput | ConfirmedMatchUpdateManyWithWhereWithoutServiceListingInput[]
+    deleteMany?: ConfirmedMatchScalarWhereInput | ConfirmedMatchScalarWhereInput[]
   }
 
   export type UserAccountCreateNestedOneWithoutProfileViewsInput = {
@@ -7143,6 +10168,62 @@ export namespace Prisma {
     delete?: UserAccountWhereInput | boolean
     connect?: UserAccountWhereUniqueInput
     update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutViewedOthersInput, UserAccountUpdateWithoutViewedOthersInput>, UserAccountUncheckedUpdateWithoutViewedOthersInput>
+  }
+
+  export type UserAccountCreateNestedOneWithoutCreatedShortlistsInput = {
+    create?: XOR<UserAccountCreateWithoutCreatedShortlistsInput, UserAccountUncheckedCreateWithoutCreatedShortlistsInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutCreatedShortlistsInput
+    connect?: UserAccountWhereUniqueInput
+  }
+
+  export type UserAccountCreateNestedOneWithoutShortlistedInInput = {
+    create?: XOR<UserAccountCreateWithoutShortlistedInInput, UserAccountUncheckedCreateWithoutShortlistedInInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutShortlistedInInput
+    connect?: UserAccountWhereUniqueInput
+  }
+
+  export type UserAccountUpdateOneRequiredWithoutCreatedShortlistsNestedInput = {
+    create?: XOR<UserAccountCreateWithoutCreatedShortlistsInput, UserAccountUncheckedCreateWithoutCreatedShortlistsInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutCreatedShortlistsInput
+    upsert?: UserAccountUpsertWithoutCreatedShortlistsInput
+    connect?: UserAccountWhereUniqueInput
+    update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutCreatedShortlistsInput, UserAccountUpdateWithoutCreatedShortlistsInput>, UserAccountUncheckedUpdateWithoutCreatedShortlistsInput>
+  }
+
+  export type UserAccountUpdateOneRequiredWithoutShortlistedInNestedInput = {
+    create?: XOR<UserAccountCreateWithoutShortlistedInInput, UserAccountUncheckedCreateWithoutShortlistedInInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutShortlistedInInput
+    upsert?: UserAccountUpsertWithoutShortlistedInInput
+    connect?: UserAccountWhereUniqueInput
+    update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutShortlistedInInput, UserAccountUpdateWithoutShortlistedInInput>, UserAccountUncheckedUpdateWithoutShortlistedInInput>
+  }
+
+  export type ServiceListingCreateNestedOneWithoutConfirmedMatchesInput = {
+    create?: XOR<ServiceListingCreateWithoutConfirmedMatchesInput, ServiceListingUncheckedCreateWithoutConfirmedMatchesInput>
+    connectOrCreate?: ServiceListingCreateOrConnectWithoutConfirmedMatchesInput
+    connect?: ServiceListingWhereUniqueInput
+  }
+
+  export type UserAccountCreateNestedOneWithoutConfirmedMatchesAsHomeownerInput = {
+    create?: XOR<UserAccountCreateWithoutConfirmedMatchesAsHomeownerInput, UserAccountUncheckedCreateWithoutConfirmedMatchesAsHomeownerInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutConfirmedMatchesAsHomeownerInput
+    connect?: UserAccountWhereUniqueInput
+  }
+
+  export type ServiceListingUpdateOneRequiredWithoutConfirmedMatchesNestedInput = {
+    create?: XOR<ServiceListingCreateWithoutConfirmedMatchesInput, ServiceListingUncheckedCreateWithoutConfirmedMatchesInput>
+    connectOrCreate?: ServiceListingCreateOrConnectWithoutConfirmedMatchesInput
+    upsert?: ServiceListingUpsertWithoutConfirmedMatchesInput
+    connect?: ServiceListingWhereUniqueInput
+    update?: XOR<XOR<ServiceListingUpdateToOneWithWhereWithoutConfirmedMatchesInput, ServiceListingUpdateWithoutConfirmedMatchesInput>, ServiceListingUncheckedUpdateWithoutConfirmedMatchesInput>
+  }
+
+  export type UserAccountUpdateOneRequiredWithoutConfirmedMatchesAsHomeownerNestedInput = {
+    create?: XOR<UserAccountCreateWithoutConfirmedMatchesAsHomeownerInput, UserAccountUncheckedCreateWithoutConfirmedMatchesAsHomeownerInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutConfirmedMatchesAsHomeownerInput
+    upsert?: UserAccountUpsertWithoutConfirmedMatchesAsHomeownerInput
+    connect?: UserAccountWhereUniqueInput
+    update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutConfirmedMatchesAsHomeownerInput, UserAccountUpdateWithoutConfirmedMatchesAsHomeownerInput>, UserAccountUncheckedUpdateWithoutConfirmedMatchesAsHomeownerInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -7299,6 +10380,13 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type NestedEnumServiceListingStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceListingStatus | EnumServiceListingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceListingStatus[] | ListEnumServiceListingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceListingStatus[] | ListEnumServiceListingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceListingStatusFilter<$PrismaModel> | $Enums.ServiceListingStatus
+  }
+
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -7313,6 +10401,16 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type NestedEnumServiceListingStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceListingStatus | EnumServiceListingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceListingStatus[] | ListEnumServiceListingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceListingStatus[] | ListEnumServiceListingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceListingStatusWithAggregatesFilter<$PrismaModel> | $Enums.ServiceListingStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumServiceListingStatusFilter<$PrismaModel>
+    _max?: NestedEnumServiceListingStatusFilter<$PrismaModel>
   }
 
   export type UserProfileCreateWithoutUserAccountsInput = {
@@ -7348,6 +10446,8 @@ export namespace Prisma {
     availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.ServiceListingStatus
+    confirmedMatches?: ConfirmedMatchCreateNestedManyWithoutServiceListingInput
   }
 
   export type ServiceListingUncheckedCreateWithoutCleanerInput = {
@@ -7360,6 +10460,8 @@ export namespace Prisma {
     availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.ServiceListingStatus
+    confirmedMatches?: ConfirmedMatchUncheckedCreateNestedManyWithoutServiceListingInput
   }
 
   export type ServiceListingCreateOrConnectWithoutCleanerInput = {
@@ -7413,6 +10515,72 @@ export namespace Prisma {
 
   export type ProfileViewCreateManyViewerInputEnvelope = {
     data: ProfileViewCreateManyViewerInput | ProfileViewCreateManyViewerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ShortlistCreateWithoutHomeownerInput = {
+    id?: string
+    createdAt?: Date | string
+    cleaner: UserAccountCreateNestedOneWithoutShortlistedInInput
+  }
+
+  export type ShortlistUncheckedCreateWithoutHomeownerInput = {
+    id?: string
+    cleanerId: string
+    createdAt?: Date | string
+  }
+
+  export type ShortlistCreateOrConnectWithoutHomeownerInput = {
+    where: ShortlistWhereUniqueInput
+    create: XOR<ShortlistCreateWithoutHomeownerInput, ShortlistUncheckedCreateWithoutHomeownerInput>
+  }
+
+  export type ShortlistCreateManyHomeownerInputEnvelope = {
+    data: ShortlistCreateManyHomeownerInput | ShortlistCreateManyHomeownerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ShortlistCreateWithoutCleanerInput = {
+    id?: string
+    createdAt?: Date | string
+    homeowner: UserAccountCreateNestedOneWithoutCreatedShortlistsInput
+  }
+
+  export type ShortlistUncheckedCreateWithoutCleanerInput = {
+    id?: string
+    homeownerId: string
+    createdAt?: Date | string
+  }
+
+  export type ShortlistCreateOrConnectWithoutCleanerInput = {
+    where: ShortlistWhereUniqueInput
+    create: XOR<ShortlistCreateWithoutCleanerInput, ShortlistUncheckedCreateWithoutCleanerInput>
+  }
+
+  export type ShortlistCreateManyCleanerInputEnvelope = {
+    data: ShortlistCreateManyCleanerInput | ShortlistCreateManyCleanerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ConfirmedMatchCreateWithoutHomeownerInput = {
+    id?: string
+    confirmationDate?: Date | string
+    serviceListing: ServiceListingCreateNestedOneWithoutConfirmedMatchesInput
+  }
+
+  export type ConfirmedMatchUncheckedCreateWithoutHomeownerInput = {
+    id?: string
+    serviceListingId: string
+    confirmationDate?: Date | string
+  }
+
+  export type ConfirmedMatchCreateOrConnectWithoutHomeownerInput = {
+    where: ConfirmedMatchWhereUniqueInput
+    create: XOR<ConfirmedMatchCreateWithoutHomeownerInput, ConfirmedMatchUncheckedCreateWithoutHomeownerInput>
+  }
+
+  export type ConfirmedMatchCreateManyHomeownerInputEnvelope = {
+    data: ConfirmedMatchCreateManyHomeownerInput | ConfirmedMatchCreateManyHomeownerInput[]
     skipDuplicates?: boolean
   }
 
@@ -7475,6 +10643,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ServiceListing"> | Date | string
     updatedAt?: DateTimeFilter<"ServiceListing"> | Date | string
     cleanerId?: StringFilter<"ServiceListing"> | string
+    status?: EnumServiceListingStatusFilter<"ServiceListing"> | $Enums.ServiceListingStatus
   }
 
   export type ProfileViewUpsertWithWhereUniqueWithoutViewedProfileInput = {
@@ -7519,6 +10688,74 @@ export namespace Prisma {
     data: XOR<ProfileViewUpdateManyMutationInput, ProfileViewUncheckedUpdateManyWithoutViewerInput>
   }
 
+  export type ShortlistUpsertWithWhereUniqueWithoutHomeownerInput = {
+    where: ShortlistWhereUniqueInput
+    update: XOR<ShortlistUpdateWithoutHomeownerInput, ShortlistUncheckedUpdateWithoutHomeownerInput>
+    create: XOR<ShortlistCreateWithoutHomeownerInput, ShortlistUncheckedCreateWithoutHomeownerInput>
+  }
+
+  export type ShortlistUpdateWithWhereUniqueWithoutHomeownerInput = {
+    where: ShortlistWhereUniqueInput
+    data: XOR<ShortlistUpdateWithoutHomeownerInput, ShortlistUncheckedUpdateWithoutHomeownerInput>
+  }
+
+  export type ShortlistUpdateManyWithWhereWithoutHomeownerInput = {
+    where: ShortlistScalarWhereInput
+    data: XOR<ShortlistUpdateManyMutationInput, ShortlistUncheckedUpdateManyWithoutHomeownerInput>
+  }
+
+  export type ShortlistScalarWhereInput = {
+    AND?: ShortlistScalarWhereInput | ShortlistScalarWhereInput[]
+    OR?: ShortlistScalarWhereInput[]
+    NOT?: ShortlistScalarWhereInput | ShortlistScalarWhereInput[]
+    id?: StringFilter<"Shortlist"> | string
+    homeownerId?: StringFilter<"Shortlist"> | string
+    cleanerId?: StringFilter<"Shortlist"> | string
+    createdAt?: DateTimeFilter<"Shortlist"> | Date | string
+  }
+
+  export type ShortlistUpsertWithWhereUniqueWithoutCleanerInput = {
+    where: ShortlistWhereUniqueInput
+    update: XOR<ShortlistUpdateWithoutCleanerInput, ShortlistUncheckedUpdateWithoutCleanerInput>
+    create: XOR<ShortlistCreateWithoutCleanerInput, ShortlistUncheckedCreateWithoutCleanerInput>
+  }
+
+  export type ShortlistUpdateWithWhereUniqueWithoutCleanerInput = {
+    where: ShortlistWhereUniqueInput
+    data: XOR<ShortlistUpdateWithoutCleanerInput, ShortlistUncheckedUpdateWithoutCleanerInput>
+  }
+
+  export type ShortlistUpdateManyWithWhereWithoutCleanerInput = {
+    where: ShortlistScalarWhereInput
+    data: XOR<ShortlistUpdateManyMutationInput, ShortlistUncheckedUpdateManyWithoutCleanerInput>
+  }
+
+  export type ConfirmedMatchUpsertWithWhereUniqueWithoutHomeownerInput = {
+    where: ConfirmedMatchWhereUniqueInput
+    update: XOR<ConfirmedMatchUpdateWithoutHomeownerInput, ConfirmedMatchUncheckedUpdateWithoutHomeownerInput>
+    create: XOR<ConfirmedMatchCreateWithoutHomeownerInput, ConfirmedMatchUncheckedCreateWithoutHomeownerInput>
+  }
+
+  export type ConfirmedMatchUpdateWithWhereUniqueWithoutHomeownerInput = {
+    where: ConfirmedMatchWhereUniqueInput
+    data: XOR<ConfirmedMatchUpdateWithoutHomeownerInput, ConfirmedMatchUncheckedUpdateWithoutHomeownerInput>
+  }
+
+  export type ConfirmedMatchUpdateManyWithWhereWithoutHomeownerInput = {
+    where: ConfirmedMatchScalarWhereInput
+    data: XOR<ConfirmedMatchUpdateManyMutationInput, ConfirmedMatchUncheckedUpdateManyWithoutHomeownerInput>
+  }
+
+  export type ConfirmedMatchScalarWhereInput = {
+    AND?: ConfirmedMatchScalarWhereInput | ConfirmedMatchScalarWhereInput[]
+    OR?: ConfirmedMatchScalarWhereInput[]
+    NOT?: ConfirmedMatchScalarWhereInput | ConfirmedMatchScalarWhereInput[]
+    id?: StringFilter<"ConfirmedMatch"> | string
+    serviceListingId?: StringFilter<"ConfirmedMatch"> | string
+    homeownerId?: StringFilter<"ConfirmedMatch"> | string
+    confirmationDate?: DateTimeFilter<"ConfirmedMatch"> | Date | string
+  }
+
   export type UserAccountCreateWithoutUserProfileInput = {
     id?: string
     username: string
@@ -7530,6 +10767,9 @@ export namespace Prisma {
     serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
     profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
     viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
   }
 
   export type UserAccountUncheckedCreateWithoutUserProfileInput = {
@@ -7543,6 +10783,9 @@ export namespace Prisma {
     serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
     profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
     viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
   }
 
   export type UserAccountCreateOrConnectWithoutUserProfileInput = {
@@ -7596,6 +10839,9 @@ export namespace Prisma {
     userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
     profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
     viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
   }
 
   export type UserAccountUncheckedCreateWithoutServiceListingsInput = {
@@ -7609,11 +10855,36 @@ export namespace Prisma {
     userProfileId?: string | null
     profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
     viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
   }
 
   export type UserAccountCreateOrConnectWithoutServiceListingsInput = {
     where: UserAccountWhereUniqueInput
     create: XOR<UserAccountCreateWithoutServiceListingsInput, UserAccountUncheckedCreateWithoutServiceListingsInput>
+  }
+
+  export type ConfirmedMatchCreateWithoutServiceListingInput = {
+    id?: string
+    confirmationDate?: Date | string
+    homeowner: UserAccountCreateNestedOneWithoutConfirmedMatchesAsHomeownerInput
+  }
+
+  export type ConfirmedMatchUncheckedCreateWithoutServiceListingInput = {
+    id?: string
+    homeownerId: string
+    confirmationDate?: Date | string
+  }
+
+  export type ConfirmedMatchCreateOrConnectWithoutServiceListingInput = {
+    where: ConfirmedMatchWhereUniqueInput
+    create: XOR<ConfirmedMatchCreateWithoutServiceListingInput, ConfirmedMatchUncheckedCreateWithoutServiceListingInput>
+  }
+
+  export type ConfirmedMatchCreateManyServiceListingInputEnvelope = {
+    data: ConfirmedMatchCreateManyServiceListingInput | ConfirmedMatchCreateManyServiceListingInput[]
+    skipDuplicates?: boolean
   }
 
   export type UserAccountUpsertWithoutServiceListingsInput = {
@@ -7638,6 +10909,9 @@ export namespace Prisma {
     userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
     profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
     viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutServiceListingsInput = {
@@ -7651,6 +10925,25 @@ export namespace Prisma {
     userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
     profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
     viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
+  }
+
+  export type ConfirmedMatchUpsertWithWhereUniqueWithoutServiceListingInput = {
+    where: ConfirmedMatchWhereUniqueInput
+    update: XOR<ConfirmedMatchUpdateWithoutServiceListingInput, ConfirmedMatchUncheckedUpdateWithoutServiceListingInput>
+    create: XOR<ConfirmedMatchCreateWithoutServiceListingInput, ConfirmedMatchUncheckedCreateWithoutServiceListingInput>
+  }
+
+  export type ConfirmedMatchUpdateWithWhereUniqueWithoutServiceListingInput = {
+    where: ConfirmedMatchWhereUniqueInput
+    data: XOR<ConfirmedMatchUpdateWithoutServiceListingInput, ConfirmedMatchUncheckedUpdateWithoutServiceListingInput>
+  }
+
+  export type ConfirmedMatchUpdateManyWithWhereWithoutServiceListingInput = {
+    where: ConfirmedMatchScalarWhereInput
+    data: XOR<ConfirmedMatchUpdateManyMutationInput, ConfirmedMatchUncheckedUpdateManyWithoutServiceListingInput>
   }
 
   export type UserAccountCreateWithoutProfileViewsInput = {
@@ -7664,6 +10957,9 @@ export namespace Prisma {
     userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
     serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
     viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
   }
 
   export type UserAccountUncheckedCreateWithoutProfileViewsInput = {
@@ -7677,6 +10973,9 @@ export namespace Prisma {
     userProfileId?: string | null
     serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
     viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
   }
 
   export type UserAccountCreateOrConnectWithoutProfileViewsInput = {
@@ -7695,6 +10994,9 @@ export namespace Prisma {
     userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
     serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
     profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
+    createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
   }
 
   export type UserAccountUncheckedCreateWithoutViewedOthersInput = {
@@ -7708,6 +11010,9 @@ export namespace Prisma {
     userProfileId?: string | null
     serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
     profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
+    createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
   }
 
   export type UserAccountCreateOrConnectWithoutViewedOthersInput = {
@@ -7737,6 +11042,9 @@ export namespace Prisma {
     userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
     serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
     viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutProfileViewsInput = {
@@ -7750,6 +11058,9 @@ export namespace Prisma {
     userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
     viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
   }
 
   export type UserAccountUpsertWithoutViewedOthersInput = {
@@ -7774,6 +11085,9 @@ export namespace Prisma {
     userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
     serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
     profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
+    createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutViewedOthersInput = {
@@ -7787,6 +11101,321 @@ export namespace Prisma {
     userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
     profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
+    createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
+  }
+
+  export type UserAccountCreateWithoutCreatedShortlistsInput = {
+    id?: string
+    username: string
+    email: string
+    password: string
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
+    serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
+    shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
+  }
+
+  export type UserAccountUncheckedCreateWithoutCreatedShortlistsInput = {
+    id?: string
+    username: string
+    email: string
+    password: string
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userProfileId?: string | null
+    serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
+    shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
+  }
+
+  export type UserAccountCreateOrConnectWithoutCreatedShortlistsInput = {
+    where: UserAccountWhereUniqueInput
+    create: XOR<UserAccountCreateWithoutCreatedShortlistsInput, UserAccountUncheckedCreateWithoutCreatedShortlistsInput>
+  }
+
+  export type UserAccountCreateWithoutShortlistedInInput = {
+    id?: string
+    username: string
+    email: string
+    password: string
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
+    serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
+  }
+
+  export type UserAccountUncheckedCreateWithoutShortlistedInInput = {
+    id?: string
+    username: string
+    email: string
+    password: string
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userProfileId?: string | null
+    serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
+  }
+
+  export type UserAccountCreateOrConnectWithoutShortlistedInInput = {
+    where: UserAccountWhereUniqueInput
+    create: XOR<UserAccountCreateWithoutShortlistedInInput, UserAccountUncheckedCreateWithoutShortlistedInInput>
+  }
+
+  export type UserAccountUpsertWithoutCreatedShortlistsInput = {
+    update: XOR<UserAccountUpdateWithoutCreatedShortlistsInput, UserAccountUncheckedUpdateWithoutCreatedShortlistsInput>
+    create: XOR<UserAccountCreateWithoutCreatedShortlistsInput, UserAccountUncheckedCreateWithoutCreatedShortlistsInput>
+    where?: UserAccountWhereInput
+  }
+
+  export type UserAccountUpdateToOneWithWhereWithoutCreatedShortlistsInput = {
+    where?: UserAccountWhereInput
+    data: XOR<UserAccountUpdateWithoutCreatedShortlistsInput, UserAccountUncheckedUpdateWithoutCreatedShortlistsInput>
+  }
+
+  export type UserAccountUpdateWithoutCreatedShortlistsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
+    serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
+    shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
+  }
+
+  export type UserAccountUncheckedUpdateWithoutCreatedShortlistsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
+    shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
+  }
+
+  export type UserAccountUpsertWithoutShortlistedInInput = {
+    update: XOR<UserAccountUpdateWithoutShortlistedInInput, UserAccountUncheckedUpdateWithoutShortlistedInInput>
+    create: XOR<UserAccountCreateWithoutShortlistedInInput, UserAccountUncheckedCreateWithoutShortlistedInInput>
+    where?: UserAccountWhereInput
+  }
+
+  export type UserAccountUpdateToOneWithWhereWithoutShortlistedInInput = {
+    where?: UserAccountWhereInput
+    data: XOR<UserAccountUpdateWithoutShortlistedInInput, UserAccountUncheckedUpdateWithoutShortlistedInInput>
+  }
+
+  export type UserAccountUpdateWithoutShortlistedInInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
+    serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
+  }
+
+  export type UserAccountUncheckedUpdateWithoutShortlistedInInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
+  }
+
+  export type ServiceListingCreateWithoutConfirmedMatchesInput = {
+    id?: string
+    serviceType: string
+    title: string
+    description: string
+    ratePerHr: number
+    duration: number
+    availability: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: $Enums.ServiceListingStatus
+    cleaner: UserAccountCreateNestedOneWithoutServiceListingsInput
+  }
+
+  export type ServiceListingUncheckedCreateWithoutConfirmedMatchesInput = {
+    id?: string
+    serviceType: string
+    title: string
+    description: string
+    ratePerHr: number
+    duration: number
+    availability: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    cleanerId: string
+    status?: $Enums.ServiceListingStatus
+  }
+
+  export type ServiceListingCreateOrConnectWithoutConfirmedMatchesInput = {
+    where: ServiceListingWhereUniqueInput
+    create: XOR<ServiceListingCreateWithoutConfirmedMatchesInput, ServiceListingUncheckedCreateWithoutConfirmedMatchesInput>
+  }
+
+  export type UserAccountCreateWithoutConfirmedMatchesAsHomeownerInput = {
+    id?: string
+    username: string
+    email: string
+    password: string
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
+    serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
+  }
+
+  export type UserAccountUncheckedCreateWithoutConfirmedMatchesAsHomeownerInput = {
+    id?: string
+    username: string
+    email: string
+    password: string
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userProfileId?: string | null
+    serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
+  }
+
+  export type UserAccountCreateOrConnectWithoutConfirmedMatchesAsHomeownerInput = {
+    where: UserAccountWhereUniqueInput
+    create: XOR<UserAccountCreateWithoutConfirmedMatchesAsHomeownerInput, UserAccountUncheckedCreateWithoutConfirmedMatchesAsHomeownerInput>
+  }
+
+  export type ServiceListingUpsertWithoutConfirmedMatchesInput = {
+    update: XOR<ServiceListingUpdateWithoutConfirmedMatchesInput, ServiceListingUncheckedUpdateWithoutConfirmedMatchesInput>
+    create: XOR<ServiceListingCreateWithoutConfirmedMatchesInput, ServiceListingUncheckedCreateWithoutConfirmedMatchesInput>
+    where?: ServiceListingWhereInput
+  }
+
+  export type ServiceListingUpdateToOneWithWhereWithoutConfirmedMatchesInput = {
+    where?: ServiceListingWhereInput
+    data: XOR<ServiceListingUpdateWithoutConfirmedMatchesInput, ServiceListingUncheckedUpdateWithoutConfirmedMatchesInput>
+  }
+
+  export type ServiceListingUpdateWithoutConfirmedMatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    serviceType?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    ratePerHr?: FloatFieldUpdateOperationsInput | number
+    duration?: FloatFieldUpdateOperationsInput | number
+    availability?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
+    cleaner?: UserAccountUpdateOneRequiredWithoutServiceListingsNestedInput
+  }
+
+  export type ServiceListingUncheckedUpdateWithoutConfirmedMatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    serviceType?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    ratePerHr?: FloatFieldUpdateOperationsInput | number
+    duration?: FloatFieldUpdateOperationsInput | number
+    availability?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cleanerId?: StringFieldUpdateOperationsInput | string
+    status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
+  }
+
+  export type UserAccountUpsertWithoutConfirmedMatchesAsHomeownerInput = {
+    update: XOR<UserAccountUpdateWithoutConfirmedMatchesAsHomeownerInput, UserAccountUncheckedUpdateWithoutConfirmedMatchesAsHomeownerInput>
+    create: XOR<UserAccountCreateWithoutConfirmedMatchesAsHomeownerInput, UserAccountUncheckedCreateWithoutConfirmedMatchesAsHomeownerInput>
+    where?: UserAccountWhereInput
+  }
+
+  export type UserAccountUpdateToOneWithWhereWithoutConfirmedMatchesAsHomeownerInput = {
+    where?: UserAccountWhereInput
+    data: XOR<UserAccountUpdateWithoutConfirmedMatchesAsHomeownerInput, UserAccountUncheckedUpdateWithoutConfirmedMatchesAsHomeownerInput>
+  }
+
+  export type UserAccountUpdateWithoutConfirmedMatchesAsHomeownerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
+    serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
+  }
+
+  export type UserAccountUncheckedUpdateWithoutConfirmedMatchesAsHomeownerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
   }
 
   export type ServiceListingCreateManyCleanerInput = {
@@ -7799,6 +11428,7 @@ export namespace Prisma {
     availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.ServiceListingStatus
   }
 
   export type ProfileViewCreateManyViewedProfileInput = {
@@ -7813,6 +11443,24 @@ export namespace Prisma {
     viewedAt?: Date | string
   }
 
+  export type ShortlistCreateManyHomeownerInput = {
+    id?: string
+    cleanerId: string
+    createdAt?: Date | string
+  }
+
+  export type ShortlistCreateManyCleanerInput = {
+    id?: string
+    homeownerId: string
+    createdAt?: Date | string
+  }
+
+  export type ConfirmedMatchCreateManyHomeownerInput = {
+    id?: string
+    serviceListingId: string
+    confirmationDate?: Date | string
+  }
+
   export type ServiceListingUpdateWithoutCleanerInput = {
     id?: StringFieldUpdateOperationsInput | string
     serviceType?: StringFieldUpdateOperationsInput | string
@@ -7823,6 +11471,8 @@ export namespace Prisma {
     availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
+    confirmedMatches?: ConfirmedMatchUpdateManyWithoutServiceListingNestedInput
   }
 
   export type ServiceListingUncheckedUpdateWithoutCleanerInput = {
@@ -7835,6 +11485,8 @@ export namespace Prisma {
     availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
+    confirmedMatches?: ConfirmedMatchUncheckedUpdateManyWithoutServiceListingNestedInput
   }
 
   export type ServiceListingUncheckedUpdateManyWithoutCleanerInput = {
@@ -7847,6 +11499,7 @@ export namespace Prisma {
     availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
   }
 
   export type ProfileViewUpdateWithoutViewedProfileInput = {
@@ -7885,6 +11538,60 @@ export namespace Prisma {
     viewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ShortlistUpdateWithoutHomeownerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cleaner?: UserAccountUpdateOneRequiredWithoutShortlistedInNestedInput
+  }
+
+  export type ShortlistUncheckedUpdateWithoutHomeownerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    cleanerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShortlistUncheckedUpdateManyWithoutHomeownerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    cleanerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShortlistUpdateWithoutCleanerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    homeowner?: UserAccountUpdateOneRequiredWithoutCreatedShortlistsNestedInput
+  }
+
+  export type ShortlistUncheckedUpdateWithoutCleanerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    homeownerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShortlistUncheckedUpdateManyWithoutCleanerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    homeownerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ConfirmedMatchUpdateWithoutHomeownerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    confirmationDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    serviceListing?: ServiceListingUpdateOneRequiredWithoutConfirmedMatchesNestedInput
+  }
+
+  export type ConfirmedMatchUncheckedUpdateWithoutHomeownerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    serviceListingId?: StringFieldUpdateOperationsInput | string
+    confirmationDate?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ConfirmedMatchUncheckedUpdateManyWithoutHomeownerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    serviceListingId?: StringFieldUpdateOperationsInput | string
+    confirmationDate?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UserAccountCreateManyUserProfileInput = {
     id?: string
     username: string
@@ -7906,6 +11613,9 @@ export namespace Prisma {
     serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
     profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
     viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutUserProfileInput = {
@@ -7919,6 +11629,9 @@ export namespace Prisma {
     serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
     profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
     viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
   }
 
   export type UserAccountUncheckedUpdateManyWithoutUserProfileInput = {
@@ -7929,6 +11642,30 @@ export namespace Prisma {
     status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ConfirmedMatchCreateManyServiceListingInput = {
+    id?: string
+    homeownerId: string
+    confirmationDate?: Date | string
+  }
+
+  export type ConfirmedMatchUpdateWithoutServiceListingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    confirmationDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    homeowner?: UserAccountUpdateOneRequiredWithoutConfirmedMatchesAsHomeownerNestedInput
+  }
+
+  export type ConfirmedMatchUncheckedUpdateWithoutServiceListingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    homeownerId?: StringFieldUpdateOperationsInput | string
+    confirmationDate?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ConfirmedMatchUncheckedUpdateManyWithoutServiceListingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    homeownerId?: StringFieldUpdateOperationsInput | string
+    confirmationDate?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

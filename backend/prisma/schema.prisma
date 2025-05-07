@@ -34,6 +34,14 @@ model UserAccount {
   // Relations for ProfileView
   profileViews      ProfileView[] @relation("ViewedProfile") // Profiles views this user received
   viewedOthers      ProfileView[] @relation("ProfileViewer") // Profiles this user viewed
+
+  // Relations for Shortlist
+  createdShortlists Shortlist[]   @relation("HomeownerShortlists") // Shortlists created by this user (if Homeowner)
+  shortlistedIn     Shortlist[]   @relation("CleanerShortlistedIn") // Instances where this user (if Cleaner) was shortlisted
+
+  // Relations for ConfirmedMatch
+  confirmedMatchesAsHomeowner ConfirmedMatch[] @relation("HomeownerMatches") // Matches this user (as Homeowner) has confirmed
+  // Cleaners are linked to ConfirmedMatch via their ServiceListings
 }
 
 // Define standard permissions
@@ -81,9 +89,20 @@ model ServiceListing {
   cleanerId String
   cleaner   UserAccount @relation(fields: [cleanerId], references: [id])
 
+  // Relation to ConfirmedMatches
+  confirmedMatches ConfirmedMatch[]
+
+  status ServiceListingStatus @default(ACTIVE) // Status of the listing
+
   @@index([cleanerId]) // Index for faster lookups by cleaner
+  @@index([cleanerId, status]) // For cleaners to view their listings by status
 }
 
+enum ServiceListingStatus {
+  ACTIVE
+  SUSPENDED
+  // ARCHIVED // Future potential status
+}
 
 enum UserStatus {
   ACTIVE
@@ -104,3 +123,43 @@ model ProfileView {
   @@index([viewedProfileId, viewedAt])
   @@index([viewerId])
 }
+
+// Model to track when a Homeowner shortlists a Cleaner
+model Shortlist {
+  id            String   @id @default(cuid())
+  homeownerId   String   // ID of the UserAccount (Homeowner) who created the shortlist
+  homeowner     UserAccount @relation("HomeownerShortlists", fields: [homeownerId], references: [id], onDelete: Cascade)
+  cleanerId     String   // ID of the UserAccount (Cleaner) who was shortlisted
+  cleaner       UserAccount @relation("CleanerShortlistedIn", fields: [cleanerId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+
+  @@unique([homeownerId, cleanerId]) // A homeowner can shortlist a cleaner only once
+  @@index([homeownerId])
+  @@index([cleanerId])
+}
+
+// Model to track confirmed matches between a Homeowner and a Cleaner's ServiceListing
+model ConfirmedMatch {
+  id               String         @id @default(cuid())
+  serviceListingId String
+  serviceListing   ServiceListing @relation(fields: [serviceListingId], references: [id], onDelete: Cascade) // If listing deleted, match is removed
+  homeownerId      String
+  homeowner        UserAccount    @relation("HomeownerMatches", fields: [homeownerId], references: [id], onDelete: Cascade) // If homeowner deleted, match is removed
+  confirmationDate DateTime       @default(now()) // Date the match was confirmed
+  // status        MatchStatus @default(CONFIRMED) // Optional: For future expansion (e.g., COMPLETED, CANCELLED_BY_HOMEOWNER, CANCELLED_BY_CLEANER)
+
+  @@index([serviceListingId])
+  @@index([homeownerId])
+  @@index([confirmationDate])
+  @@index([serviceListingId, confirmationDate]) // For cleaner's view, filtering by date
+}
+
+// Optional: Enum for MatchStatus if more states are needed beyond "confirmed"
+// enum MatchStatus {
+//   PENDING_CONFIRMATION
+//   CONFIRMED
+//   COMPLETED
+//   CANCELLED_BY_HOMEOWNER
+//   CANCELLED_BY_CLEANER
+//   EXPIRED
+// }

@@ -3,8 +3,9 @@ const cleanerInsightsController = require('../controllers/cleanerInsightsControl
 
 const router = express.Router();
 
-const cleanerInsightsController = new cleanerInsightsController.CleanerInsightsController();
+const controllerInstance = new cleanerInsightsController.CleanerInsightsController();
 
-router.get('/profile-views', (req, res) => cleanerInsightsController.fetchViewStats(req, res));
+router.get('/profile-views', (req, res) => controllerInstance.fetchViewStats(req, res));
+router.get('/shortlist-count', (req, res) => controllerInstance.fetchShortlistCount(req, res));
 
 module.exports = router;

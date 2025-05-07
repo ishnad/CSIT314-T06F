@@ -1,14 +1,21 @@
-const { CreateServiceListingController, GetServiceListingController } = require('../../src/controllers/serviceListingController');
+const {
+    CreateServiceListingController,
+    GetServiceListingController,
+    EditServiceListingController,
+    SuspendServiceListingController,
+    SearchServiceListingsController
+} = require('../../src/controllers/serviceListingController');
 const ServiceListingEntity = require('../../src/entities/serviceListingEntity');
 
 // Mock the ServiceListingEntity
 jest.mock('../../src/entities/serviceListingEntity');
 
 // --- Mock Express Request/Response ---
-const mockRequest = (body = {}, user = null, params = {}) => ({ // Add params for route parameters
+const mockRequest = (body = {}, user = null, params = {}, query = {}) => ({ // Add query for query parameters
     body,
     user,
     params,
+    query, // Assign the query object to req.query
 });
 
 const mockResponse = () => {
@@ -316,5 +323,378 @@ describe('GetServiceListingController', () => {
         expect(ServiceListingEntity.prototype.getListingDetails).toHaveBeenCalledWith(listingId, mockCleanerOwner.id);
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.json).toHaveBeenCalledWith({ error: 'An unexpected error occurred while retrieving the service listing.' });
+    });
+});
+
+// --- Test Suite for EditServiceListingController ---
+describe('EditServiceListingController', () => {
+    let controller;
+    let req;
+    let res;
+    const listingId = 'listing-to-edit-xyz';
+    const mockCleanerUser = {
+        id: 'cleaner-user-id-abc',
+        username: 'editorCleaner',
+        profile: { name: 'Cleaner' }
+    };
+    const mockNonCleanerUser = {
+        id: 'homeowner-user-id-def',
+        username: 'editorHomeowner',
+        profile: { name: 'Homeowner' }
+    };
+    const validUpdateBody = {
+        serviceType: 'Gardening',
+        description: 'Lawn mowing and hedge trimming.',
+        ratePerHr: '40.50', // String from body
+        availability: new Date().toISOString(),
+    };
+    const expectedEntityUpdateData = {
+        serviceType: validUpdateBody.serviceType,
+        description: validUpdateBody.description,
+        ratePerHr: 40.50, // Parsed number
+        availability: validUpdateBody.availability,
+    };
+    const mockUpdatedListing = { // Mock successful result from entity
+        id: listingId,
+        ...expectedEntityUpdateData,
+        title: 'Original Title',
+        duration: 3,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        cleanerId: mockCleanerUser.id,
+        cleanerUsername: mockCleanerUser.username,
+    };
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        ServiceListingEntity.mockClear();
+        // Mock the entity method for editing
+        ServiceListingEntity.prototype.editServiceListing = jest.fn();
+        controller = new EditServiceListingController(); // Use the correct imported class
+        res = mockResponse();
+    });
+
+    it('should edit listing successfully for an authenticated Cleaner', async () => {
+        req = mockRequest(validUpdateBody, mockCleanerUser, { id: listingId });
+        ServiceListingEntity.prototype.editServiceListing.mockResolvedValue(mockUpdatedListing);
+
+        await controller.editServiceListing(req, res);
+
+        expect(ServiceListingEntity.prototype.editServiceListing).toHaveBeenCalledWith(listingId, mockCleanerUser.id, expectedEntityUpdateData);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({
+            message: 'Service listing updated successfully.',
+            listing: mockUpdatedListing
+        });
+    });
+    
+    it('should handle partial updates (only description and ratePerHr)', async () => {
+        const partialBody = { description: "New Desc", ratePerHr: "55" };
+        const expectedPartialEntityData = { description: "New Desc", ratePerHr: 55 };
+        const mockPartialUpdatedListing = { ...mockUpdatedListing, ...expectedPartialEntityData };
+        req = mockRequest(partialBody, mockCleanerUser, { id: listingId });
+        ServiceListingEntity.prototype.editServiceListing.mockResolvedValue(mockPartialUpdatedListing);
+
+        await controller.editServiceListing(req, res);
+        expect(ServiceListingEntity.prototype.editServiceListing).toHaveBeenCalledWith(listingId, mockCleanerUser.id, expectedPartialEntityData);
+        expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+
+    it('should return 401 if user is not authenticated', async () => {
+        req = mockRequest(validUpdateBody, null, { id: listingId });
+        await controller.editServiceListing(req, res);
+        expect(ServiceListingEntity.prototype.editServiceListing).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Authentication required.' });
+    });
+
+    it('should return 403 if authenticated user is not a Cleaner', async () => {
+        req = mockRequest(validUpdateBody, mockNonCleanerUser, { id: listingId });
+        await controller.editServiceListing(req, res);
+        expect(ServiceListingEntity.prototype.editServiceListing).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Forbidden: Only Cleaners can edit service listings.' });
+    });
+
+    it('should return 400 if listing ID is missing from params', async () => {
+        req = mockRequest(validUpdateBody, mockCleanerUser, {}); // No id in params
+        await controller.editServiceListing(req, res);
+        expect(ServiceListingEntity.prototype.editServiceListing).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Listing ID is required in the URL path.' });
+    });
+
+    it('should return 400 if no editable fields are provided in request body', async () => {
+        req = mockRequest({}, mockCleanerUser, { id: listingId }); // Empty body
+        await controller.editServiceListing(req, res);
+        expect(ServiceListingEntity.prototype.editServiceListing).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: 'No fields provided for update. Please provide serviceType, description, ratePerHr, or availability.' });
+    });
+    
+    it('should return 400 if ratePerHr is not a valid number string', async () => {
+        const invalidRateBody = { ...validUpdateBody, ratePerHr: 'abc' };
+        req = mockRequest(invalidRateBody, mockCleanerUser, { id: listingId });
+        await controller.editServiceListing(req, res);
+        expect(ServiceListingEntity.prototype.editServiceListing).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: 'ratePerHr must be a valid number.' });
+    });
+
+    it('should return error from entity if editing fails (e.g., validation error in entity)', async () => {
+        req = mockRequest(validUpdateBody, mockCleanerUser, { id: listingId });
+        const errorResponse = { error: { status: 400, error: 'Availability must be a valid ISO 8601 date string.' } };
+        ServiceListingEntity.prototype.editServiceListing.mockResolvedValue(errorResponse);
+
+        await controller.editServiceListing(req, res);
+        expect(ServiceListingEntity.prototype.editServiceListing).toHaveBeenCalledWith(listingId, mockCleanerUser.id, expectedEntityUpdateData);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Availability must be a valid ISO 8601 date string.' });
+    });
+
+    it('should return 404 if entity reports listing not found', async () => {
+        req = mockRequest(validUpdateBody, mockCleanerUser, { id: listingId });
+        const errorResponse = { error: { status: 404, error: `Service listing with ID ${listingId} not found.` } };
+        ServiceListingEntity.prototype.editServiceListing.mockResolvedValue(errorResponse);
+        await controller.editServiceListing(req, res);
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({ error: `Service listing with ID ${listingId} not found.` });
+    });
+    
+    it('should return 403 if entity reports user does not own the listing', async () => {
+        req = mockRequest(validUpdateBody, mockCleanerUser, { id: listingId });
+        const errorResponse = { error: { status: 403, error: 'Forbidden: You do not have permission to edit this listing.' } };
+        ServiceListingEntity.prototype.editServiceListing.mockResolvedValue(errorResponse);
+        await controller.editServiceListing(req, res);
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Forbidden: You do not have permission to edit this listing.' });
+    });
+
+    it('should return 500 on unexpected controller error', async () => {
+        req = mockRequest(validUpdateBody, mockCleanerUser, { id: listingId });
+        const error = new Error("Critical failure");
+        ServiceListingEntity.prototype.editServiceListing.mockRejectedValue(error);
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        await controller.editServiceListing(req, res);
+        consoleErrorSpy.mockRestore();
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ error: 'An unexpected error occurred while editing the service listing.' });
+    });
+});
+
+// --- Test Suite for SuspendServiceListingController ---
+describe('SuspendServiceListingController', () => {
+    let controller;
+    let req;
+    let res;
+    const listingId = 'listing-to-suspend-abc';
+    const mockCleanerUser = {
+        id: 'cleaner-user-id-suspend',
+        username: 'suspenderCleaner',
+        profile: { name: 'Cleaner' }
+    };
+    const mockNonCleanerUser = {
+        id: 'homeowner-user-id-suspend',
+        username: 'suspenderHomeowner',
+        profile: { name: 'Homeowner' }
+    };
+    const mockSuspendedListingData = { // Mock successful result from entity
+        id: listingId,
+        title: 'Suspended Service',
+        status: 'SUSPENDED',
+        // ... other fields
+    };
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        ServiceListingEntity.mockClear();
+        // Mock the entity method for suspending
+        ServiceListingEntity.prototype.suspendServiceListing = jest.fn();
+        controller = new SuspendServiceListingController(); // Use the correct imported class
+        res = mockResponse();
+    });
+
+    it('should suspend listing successfully for an authenticated Cleaner', async () => {
+        req = mockRequest({}, mockCleanerUser, { id: listingId });
+        ServiceListingEntity.prototype.suspendServiceListing.mockResolvedValue(mockSuspendedListingData);
+
+        await controller.suspendServiceListing(req, res);
+
+        expect(ServiceListingEntity.prototype.suspendServiceListing).toHaveBeenCalledWith(listingId, mockCleanerUser.id);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({
+            message: 'Service listing suspended successfully.',
+            listing: mockSuspendedListingData
+        });
+    });
+
+    it('should return 401 if user is not authenticated', async () => {
+        req = mockRequest({}, null, { id: listingId });
+        await controller.suspendServiceListing(req, res);
+        expect(ServiceListingEntity.prototype.suspendServiceListing).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Authentication required.' });
+    });
+
+    it('should return 403 if authenticated user is not a Cleaner', async () => {
+        req = mockRequest({}, mockNonCleanerUser, { id: listingId });
+        await controller.suspendServiceListing(req, res);
+        expect(ServiceListingEntity.prototype.suspendServiceListing).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Forbidden: Only Cleaners can suspend service listings.' });
+    });
+
+    it('should return 400 if listing ID is missing from params', async () => {
+        req = mockRequest({}, mockCleanerUser, {}); // No id in params
+        await controller.suspendServiceListing(req, res);
+        expect(ServiceListingEntity.prototype.suspendServiceListing).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Listing ID is required in the URL path.' });
+    });
+
+    it('should return error from entity if suspending fails (e.g., listing not found)', async () => {
+        req = mockRequest({}, mockCleanerUser, { id: listingId });
+        const errorResponse = { error: { status: 404, error: `Service listing with ID ${listingId} not found.` } };
+        ServiceListingEntity.prototype.suspendServiceListing.mockResolvedValue(errorResponse);
+
+        await controller.suspendServiceListing(req, res);
+        expect(ServiceListingEntity.prototype.suspendServiceListing).toHaveBeenCalledWith(listingId, mockCleanerUser.id);
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({ error: `Service listing with ID ${listingId} not found.` });
+    });
+    
+    it('should return 400 if entity reports listing already suspended', async () => {
+        req = mockRequest({}, mockCleanerUser, { id: listingId });
+        const errorResponse = { error: { status: 400, error: 'Service listing is already suspended.' } };
+        ServiceListingEntity.prototype.suspendServiceListing.mockResolvedValue(errorResponse);
+        await controller.suspendServiceListing(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Service listing is already suspended.' });
+    });
+
+    it('should return 500 on unexpected controller error', async () => {
+        req = mockRequest({}, mockCleanerUser, { id: listingId });
+        const error = new Error("Critical failure during suspension");
+        ServiceListingEntity.prototype.suspendServiceListing.mockRejectedValue(error);
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        await controller.suspendServiceListing(req, res);
+        consoleErrorSpy.mockRestore();
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ error: 'An unexpected error occurred while suspending the service listing.' });
+    });
+});
+
+// --- Test Suite for SearchServiceListingsController ---
+describe('SearchServiceListingsController', () => {
+    let controller;
+    let req;
+    let res;
+    const mockSearcherUser = {
+        id: 'cleaner-user-id-searcher',
+        username: 'searcherCleaner',
+        profile: { name: 'Cleaner' }
+    };
+     const mockNonCleanerSearcherUser = {
+        id: 'homeowner-user-id-searcher',
+        username: 'searcherHomeowner',
+        profile: { name: 'Homeowner' }
+    };
+    const mockSearchResults = [
+        { id: 'listing1', title: 'Found Listing 1' },
+        { id: 'listing2', title: 'Found Listing 2' }
+    ];
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        ServiceListingEntity.mockClear();
+        ServiceListingEntity.prototype.searchListings = jest.fn();
+        controller = new SearchServiceListingsController(); // Use the correct imported class
+        res = mockResponse();
+    });
+
+    it('should return search results successfully for an authenticated Cleaner', async () => {
+        const queryParams = { keyword: 'clean', serviceType: 'Deep Clean' };
+        req = mockRequest({}, mockSearcherUser, {}, queryParams);
+        ServiceListingEntity.prototype.searchListings.mockResolvedValue(mockSearchResults);
+
+        await controller.searchListings(req, res);
+
+        expect(ServiceListingEntity.prototype.searchListings).toHaveBeenCalledWith(mockSearcherUser.id, queryParams);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(mockSearchResults);
+    });
+    
+    it('should parse numeric rates from query params', async () => {
+        const queryParams = { minRate: '10.5', maxRate: '20' };
+        const expectedFilters = { minRate: 10.5, maxRate: 20 };
+        req = mockRequest({}, mockSearcherUser, {}, queryParams);
+        ServiceListingEntity.prototype.searchListings.mockResolvedValue(mockSearchResults);
+
+        await controller.searchListings(req, res);
+        expect(ServiceListingEntity.prototype.searchListings).toHaveBeenCalledWith(mockSearcherUser.id, expectedFilters);
+    });
+
+    it('should return 400 if minRate is not a number', async () => {
+        req = mockRequest({}, mockSearcherUser, {}, { minRate: 'abc' });
+        await controller.searchListings(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: 'minRate must be a valid number.' });
+    });
+    
+    it('should return 400 if maxRate is not a number', async () => {
+        req = mockRequest({}, mockSearcherUser, {}, { maxRate: 'xyz' });
+        await controller.searchListings(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: 'maxRate must be a valid number.' });
+    });
+
+    it('should return "No matching listings found." message if entity provides it', async () => {
+        req = mockRequest({}, mockSearcherUser, {}, { keyword: 'nothing' });
+        const noResultsResponse = { message: "No matching listings found." };
+        ServiceListingEntity.prototype.searchListings.mockResolvedValue(noResultsResponse);
+
+        await controller.searchListings(req, res);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(noResultsResponse);
+    });
+
+    it('should return 401 if user is not authenticated', async () => {
+        req = mockRequest({}, null, {}, { keyword: 'any' });
+        await controller.searchListings(req, res);
+        expect(ServiceListingEntity.prototype.searchListings).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Authentication required to search listings.' });
+    });
+    
+    it('should return 403 if user is not a Cleaner', async () => {
+        req = mockRequest({}, mockNonCleanerSearcherUser, {}, { keyword: 'any' });
+        await controller.searchListings(req, res);
+        expect(ServiceListingEntity.prototype.searchListings).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Forbidden: Only Cleaners can perform this search.' });
+    });
+
+    it('should return error from entity if searching fails (e.g., invalid date format in entity)', async () => {
+        const queryParams = { availabilityStartDate: 'invalid-date' };
+        req = mockRequest({}, mockSearcherUser, {}, queryParams);
+        const entityErrorResponse = { error: { status: 400, error: 'Invalid availability start date format. Use YYYY-MM-DD.' } };
+        ServiceListingEntity.prototype.searchListings.mockResolvedValue(entityErrorResponse);
+
+        await controller.searchListings(req, res);
+        expect(ServiceListingEntity.prototype.searchListings).toHaveBeenCalledWith(mockSearcherUser.id, queryParams);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Invalid availability start date format. Use YYYY-MM-DD.' });
+    });
+
+    it('should return 500 on unexpected controller error', async () => {
+        req = mockRequest({}, mockSearcherUser, {}, { keyword: 'test' });
+        const error = new Error("Critical failure in search");
+        ServiceListingEntity.prototype.searchListings.mockRejectedValue(error);
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        await controller.searchListings(req, res);
+        consoleErrorSpy.mockRestore();
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ error: 'An unexpected error occurred while searching service listings.' });
     });
 });

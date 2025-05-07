@@ -37,10 +37,11 @@ describe('CleanerInsightsController', () => {
         ProfileInsightsEntity.mockClear(); 
         
         // Mock the constructor of ProfileInsightsEntity to return an instance
-        // that has a jest.fn() for fetchViewStats.
+        // that has jest.fn() for its methods.
         ProfileInsightsEntity.mockImplementation(() => {
             return {
-                fetchViewStats: jest.fn()
+                fetchViewStats: jest.fn(),
+                fetchShortlistCount: jest.fn() // Add mock for the new method
             };
         });
         
@@ -120,6 +121,78 @@ describe('CleanerInsightsController', () => {
             expect(mockProfileInsightsEntityInstance.fetchViewStats).toHaveBeenCalledWith(mockCleanerUser.id);
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.json).toHaveBeenCalledWith({ error: 'An unexpected error occurred while fetching profile view statistics.' });
+        });
+    });
+
+    describe('fetchShortlistCount', () => {
+        it('should return shortlist count successfully for an authenticated Cleaner', async () => {
+            req = mockRequest(mockCleanerUser);
+            const mockShortlistData = { shortlistCount: 7 };
+            mockProfileInsightsEntityInstance.fetchShortlistCount.mockResolvedValue(mockShortlistData);
+
+            await controller.fetchShortlistCount(req, res);
+
+            expect(mockProfileInsightsEntityInstance.fetchShortlistCount).toHaveBeenCalledWith(mockCleanerUser.id);
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith(mockShortlistData);
+        });
+
+        it('should return "You have not been shortlisted yet" message if entity provides it', async () => {
+            req = mockRequest(mockCleanerUser);
+            const noShortlistResponse = { message: "You have not been shortlisted yet" };
+            mockProfileInsightsEntityInstance.fetchShortlistCount.mockResolvedValue(noShortlistResponse);
+
+            await controller.fetchShortlistCount(req, res);
+
+            expect(mockProfileInsightsEntityInstance.fetchShortlistCount).toHaveBeenCalledWith(mockCleanerUser.id);
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith(noShortlistResponse);
+        });
+
+        it('should return 401 if user is not authenticated', async () => {
+            req = mockRequest(null); // Simulates no authenticated user
+
+            await controller.fetchShortlistCount(req, res);
+
+            expect(mockProfileInsightsEntityInstance.fetchShortlistCount).not.toHaveBeenCalled();
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Authentication required.' });
+        });
+
+        it('should return 403 if authenticated user is not a Cleaner', async () => {
+            req = mockRequest(mockNonCleanerUser); // User is authenticated but not a Cleaner
+
+            await controller.fetchShortlistCount(req, res);
+
+            expect(mockProfileInsightsEntityInstance.fetchShortlistCount).not.toHaveBeenCalled();
+            expect(res.status).toHaveBeenCalledWith(403);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Forbidden: Only Cleaners can view shortlist count.' });
+        });
+
+        it('should return error from entity if fetching shortlist count fails', async () => {
+            req = mockRequest(mockCleanerUser);
+            const entityErrorResponse = { error: { status: 500, error: 'Database query failed for shortlist.' } };
+            mockProfileInsightsEntityInstance.fetchShortlistCount.mockResolvedValue(entityErrorResponse);
+
+            await controller.fetchShortlistCount(req, res);
+
+            expect(mockProfileInsightsEntityInstance.fetchShortlistCount).toHaveBeenCalledWith(mockCleanerUser.id);
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Database query failed for shortlist.' });
+        });
+
+        it('should return 500 on unexpected controller error (if entity method throws for shortlist)', async () => {
+            req = mockRequest(mockCleanerUser);
+            const unexpectedError = new Error("Critical failure in entity shortlist method");
+            mockProfileInsightsEntityInstance.fetchShortlistCount.mockRejectedValue(unexpectedError);
+
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            await controller.fetchShortlistCount(req, res);
+            consoleErrorSpy.mockRestore();
+
+            expect(mockProfileInsightsEntityInstance.fetchShortlistCount).toHaveBeenCalledWith(mockCleanerUser.id);
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({ error: 'An unexpected error occurred while fetching shortlist count.' });
         });
     });
 });

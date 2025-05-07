@@ -7,6 +7,9 @@ jest.mock('../../src/generated/prisma', () => {
             findMany: jest.fn(),
             count: jest.fn(),
         },
+        shortlist: { // Add mock for shortlist
+            count: jest.fn(),
+        }
     };
     return {
         PrismaClient: jest.fn(() => mockPrisma),
@@ -171,6 +174,47 @@ describe('ProfileInsightsEntity', () => {
             consoleErrorSpy.mockRestore();
             
             expect(result).toEqual({ error: { status: 500, error: 'Failed to retrieve profile view statistics due to a server error.' } });
+        });
+    });
+
+    describe('fetchShortlistCount', () => {
+        const cleanerUserId = 'cleaner-shortlist-id-456';
+
+        it('should return shortlist count if cleaner has been shortlisted', async () => {
+            const mockCount = 5;
+            mockPrismaClient.shortlist.count.mockResolvedValue(mockCount);
+
+            const result = await entity.fetchShortlistCount(cleanerUserId);
+
+            expect(mockPrismaClient.shortlist.count).toHaveBeenCalledWith({
+                where: { cleanerId: cleanerUserId },
+            });
+            expect(result).toEqual({ shortlistCount: mockCount });
+        });
+
+        it('should return "You have not been shortlisted yet" if count is zero', async () => {
+            mockPrismaClient.shortlist.count.mockResolvedValue(0);
+
+            const result = await entity.fetchShortlistCount(cleanerUserId);
+
+            expect(mockPrismaClient.shortlist.count).toHaveBeenCalledWith({
+                where: { cleanerId: cleanerUserId },
+            });
+            expect(result).toEqual({ message: "You have not been shortlisted yet" });
+        });
+
+        it('should return 500 error if prisma shortlist count fails', async () => {
+            const dbError = new Error('DB shortlist count error');
+            mockPrismaClient.shortlist.count.mockRejectedValue(dbError);
+            
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await entity.fetchShortlistCount(cleanerUserId);
+            consoleErrorSpy.mockRestore();
+
+            expect(mockPrismaClient.shortlist.count).toHaveBeenCalledWith({
+                where: { cleanerId: cleanerUserId },
+            });
+            expect(result).toEqual({ error: { status: 500, error: 'Failed to retrieve shortlist count due to a server error.' } });
         });
     });
 });

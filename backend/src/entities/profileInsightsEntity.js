@@ -79,6 +79,31 @@ class ProfileInsightsEntity {
             return { error: { status: 500, error: 'Failed to retrieve profile view statistics due to a server error.' } };
         }
     }
+
+    /**
+     * Fetches the number of times a cleaner has been shortlisted by homeowners.
+     * @param {string} cleanerUserId - The ID of the cleaner.
+     * @returns {Promise<object>} An object containing the shortlist count or a message if not shortlisted, or an error object.
+     */
+    async fetchShortlistCount(cleanerUserId) {
+        try {
+            const count = await this.prisma.shortlist.count({
+                where: {
+                    cleanerId: cleanerUserId,
+                },
+            });
+
+            if (count === 0) {
+                return { message: "You have not been shortlisted yet" };
+            }
+
+            return { shortlistCount: count };
+
+        } catch (error) {
+            console.error(`Error fetching shortlist count for cleaner ${cleanerUserId}:`, error);
+            return { error: { status: 500, error: 'Failed to retrieve shortlist count due to a server error.' } };
+        }
+    }
 }
 
 module.exports = ProfileInsightsEntity;

@@ -113,3 +113,194 @@ module.exports = {
     CreateServiceListingController,
     GetServiceListingController
 };
+
+class EditServiceListingController {
+    constructor() {
+        this.serviceListingEntity = new ServiceListingEntity();
+    }
+
+    /**
+     * Handles the HTTP request to edit an existing service listing.
+     * @param {object} req - Express request object.
+     * @param {object} res - Express response object.
+     */
+    async editServiceListing(req, res) {
+        const listingId = req.params.id;
+        const cleanerId = req.user?.id;
+        const userProfileName = req.user?.profile?.name;
+
+        // --- Authorization Check ---
+        if (!cleanerId) {
+            return res.status(401).json({ error: 'Authentication required.' });
+        }
+        if (userProfileName !== 'Cleaner') {
+            return res.status(403).json({ error: 'Forbidden: Only Cleaners can edit service listings.' });
+        }
+        if (!listingId) {
+            return res.status(400).json({ error: 'Listing ID is required in the URL path.' });
+        }
+        // --- End Authorization Check ---
+
+        const { serviceType, description, ratePerHr, availability } = req.body;
+        const updateData = {};
+
+        // Only include fields in updateData if they are present in the request body
+        if (serviceType !== undefined) updateData.serviceType = serviceType;
+        if (description !== undefined) updateData.description = description;
+        if (ratePerHr !== undefined) {
+            const numericRate = parseFloat(ratePerHr);
+            if (isNaN(numericRate)) {
+                return res.status(400).json({ error: 'ratePerHr must be a valid number.' });
+            }
+            updateData.ratePerHr = numericRate;
+        }
+        if (availability !== undefined) updateData.availability = availability;
+
+
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ error: 'No fields provided for update. Please provide serviceType, description, ratePerHr, or availability.' });
+        }
+
+        try {
+            const result = await this.serviceListingEntity.editServiceListing(listingId, cleanerId, updateData);
+
+            if (result.error) {
+                res.status(result.error.status).json({ error: result.error.error });
+            } else {
+                res.status(200).json({ message: 'Service listing updated successfully.', listing: result });
+            }
+        } catch (error) {
+            console.error(`Controller error editing service listing ${listingId}:`, error);
+            res.status(500).json({ error: 'An unexpected error occurred while editing the service listing.' });
+        }
+    }
+}
+
+module.exports = {
+    CreateServiceListingController,
+    GetServiceListingController,
+    EditServiceListingController
+};
+
+class SuspendServiceListingController {
+    constructor() {
+        this.serviceListingEntity = new ServiceListingEntity();
+    }
+
+    /**
+     * Handles the HTTP request to suspend an existing service listing.
+     * @param {object} req - Express request object.
+     * @param {object} res - Express response object.
+     */
+    async suspendServiceListing(req, res) {
+        const listingId = req.params.id;
+        const cleanerId = req.user?.id;
+        const userProfileName = req.user?.profile?.name;
+
+        // --- Authorization Check ---
+        if (!cleanerId) {
+            return res.status(401).json({ error: 'Authentication required.' });
+        }
+        if (userProfileName !== 'Cleaner') {
+            return res.status(403).json({ error: 'Forbidden: Only Cleaners can suspend service listings.' });
+        }
+        if (!listingId) {
+            return res.status(400).json({ error: 'Listing ID is required in the URL path.' });
+        }
+        // --- End Authorization Check ---
+
+        try {
+            const result = await this.serviceListingEntity.suspendServiceListing(listingId, cleanerId);
+
+            if (result.error) {
+                res.status(result.error.status).json({ error: result.error.error });
+            } else {
+                res.status(200).json({ message: 'Service listing suspended successfully.', listing: result });
+            }
+        } catch (error) {
+            console.error(`Controller error suspending service listing ${listingId}:`, error);
+            res.status(500).json({ error: 'An unexpected error occurred while suspending the service listing.' });
+        }
+    }
+}
+
+module.exports = {
+    CreateServiceListingController,
+    GetServiceListingController,
+    EditServiceListingController,
+    SuspendServiceListingController
+};
+
+class SearchServiceListingsController {
+    constructor() {
+        this.serviceListingEntity = new ServiceListingEntity();
+    }
+
+    /**
+     * Handles the HTTP request to search for service listings.
+     * @param {object} req - Express request object.
+     * @param {object} res - Express response object.
+     */
+    async searchListings(req, res) {
+        const searcherCleanerId = req.user?.id; // ID of the user performing the search
+        const userProfileName = req.user?.profile?.name;
+
+        // Authorization: Ensure user is authenticated
+        if (!searcherCleanerId) {
+            return res.status(401).json({ error: 'Authentication required to search listings.' });
+        }
+        // Optional: Restrict to Cleaners if desired, though BCE implies any logged-in user might search
+        // For CL23, the actor is "Cleaner", so this check is appropriate.
+        if (userProfileName !== 'Cleaner') {
+            return res.status(403).json({ error: 'Forbidden: Only Cleaners can perform this search.' });
+        }
+
+
+        // Extract filters from query parameters
+        const { keyword, serviceType, minRate, maxRate, availabilityStartDate, availabilityEndDate } = req.query;
+        const filters = {};
+
+        if (keyword) filters.keyword = keyword;
+        if (serviceType) filters.serviceType = serviceType;
+        if (minRate) {
+            const numMinRate = parseFloat(minRate);
+            if (!isNaN(numMinRate)) filters.minRate = numMinRate;
+            else return res.status(400).json({ error: 'minRate must be a valid number.'});
+        }
+        if (maxRate) {
+            const numMaxRate = parseFloat(maxRate);
+            if (!isNaN(numMaxRate)) filters.maxRate = numMaxRate;
+            else return res.status(400).json({ error: 'maxRate must be a valid number.'});
+        }
+        if (availabilityStartDate) filters.availabilityStartDate = availabilityStartDate;
+        if (availabilityEndDate) filters.availabilityEndDate = availabilityEndDate;
+
+        try {
+            const result = await this.serviceListingEntity.searchListings(searcherCleanerId, filters);
+
+            if (result.error) {
+                return res.status(result.error.status).json({ error: result.error.error });
+            }
+            
+            if (result.message) { // e.g., "No matching listings found."
+                return res.status(200).json(result);
+            }
+
+            // Success: return the list of listings
+            res.status(200).json(result);
+
+        } catch (error) {
+            console.error(`Controller error searching service listings:`, error);
+            res.status(500).json({ error: 'An unexpected error occurred while searching service listings.' });
+        }
+    }
+}
+
+
+module.exports = {
+    CreateServiceListingController,
+    GetServiceListingController,
+    EditServiceListingController,
+    SuspendServiceListingController,
+    SearchServiceListingsController
+};

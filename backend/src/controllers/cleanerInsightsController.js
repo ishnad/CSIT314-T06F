@@ -46,6 +46,41 @@ class CleanerInsightsController {
             res.status(500).json({ error: 'An unexpected error occurred while fetching profile view statistics.' });
         }
     }
+
+    /**
+     * Handles the HTTP request to fetch the shortlist count for the authenticated cleaner.
+     * @param {object} req - Express request object.
+     * @param {object} res - Express response object.
+     */
+    async fetchShortlistCount(req, res) {
+        const cleanerId = req.user?.id;
+        const userProfileName = req.user?.profile?.name;
+
+        // Authorization: Ensure user is authenticated
+        if (!cleanerId) {
+            return res.status(401).json({ error: 'Authentication required.' });
+        }
+
+        // Authorization: Ensure user is a 'Cleaner'
+        if (userProfileName !== 'Cleaner') {
+            return res.status(403).json({ error: 'Forbidden: Only Cleaners can view shortlist count.' });
+        }
+
+        try {
+            const result = await this.profileInsightsEntity.fetchShortlistCount(cleanerId);
+
+            if (result.error) {
+                return res.status(result.error.status).json({ error: result.error.error });
+            }
+            
+            // Handle "You have not been shortlisted yet" message or success
+            res.status(200).json(result);
+
+        } catch (error) {
+            console.error(`Controller error fetching shortlist count for cleaner ${cleanerId}:`, error);
+            res.status(500).json({ error: 'An unexpected error occurred while fetching shortlist count.' });
+        }
+    }
 }
 
 module.exports = { CleanerInsightsController };

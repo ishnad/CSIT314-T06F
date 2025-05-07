@@ -150,7 +150,8 @@ exports.Prisma.ServiceListingScalarFieldEnum = {
   availability: 'availability',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  cleanerId: 'cleanerId'
+  cleanerId: 'cleanerId',
+  status: 'status'
 };
 
 exports.Prisma.ProfileViewScalarFieldEnum = {
@@ -158,6 +159,20 @@ exports.Prisma.ProfileViewScalarFieldEnum = {
   viewedProfileId: 'viewedProfileId',
   viewerId: 'viewerId',
   viewedAt: 'viewedAt'
+};
+
+exports.Prisma.ShortlistScalarFieldEnum = {
+  id: 'id',
+  homeownerId: 'homeownerId',
+  cleanerId: 'cleanerId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.ConfirmedMatchScalarFieldEnum = {
+  id: 'id',
+  serviceListingId: 'serviceListingId',
+  homeownerId: 'homeownerId',
+  confirmationDate: 'confirmationDate'
 };
 
 exports.Prisma.SortOrder = {
@@ -193,11 +208,18 @@ exports.Permission = exports.$Enums.Permission = {
   VIEW_REPORTS: 'VIEW_REPORTS'
 };
 
+exports.ServiceListingStatus = exports.$Enums.ServiceListingStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED'
+};
+
 exports.Prisma.ModelName = {
   UserAccount: 'UserAccount',
   UserProfile: 'UserProfile',
   ServiceListing: 'ServiceListing',
-  ProfileView: 'ProfileView'
+  ProfileView: 'ProfileView',
+  Shortlist: 'Shortlist',
+  ConfirmedMatch: 'ConfirmedMatch'
 };
 
 /**
