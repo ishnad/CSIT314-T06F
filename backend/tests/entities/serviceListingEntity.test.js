@@ -43,87 +43,6 @@ describe('ServiceListingEntity', () => {
         mockPrismaClient = new PrismaClient();
     });
 
-    // --- Test validateInput ---
-    describe('validateInput', () => {
-        const validData = {
-            serviceType: 'Deep Clean',
-            title: 'My Awesome Deep Clean Service',
-            description: 'Very thorough cleaning.',
-            ratePerHr: 25.50,
-            duration: 3,
-            availability: new Date().toISOString(),
-            cleanerId: 'cleaner-user-id-123',
-        };
-
-        it('should return null for valid input', () => {
-            expect(serviceListingEntity.validateInput(validData)).toBeNull();
-        });
-
-        it('should return error if title is missing (as it is checked first)', () => {
-            const missingFields = { ...validData, title: undefined };
-            // Because title is checked early, its specific error is returned first
-            expect(serviceListingEntity.validateInput(missingFields)).toEqual({
-                status: 400,
-                error: 'Title must be a non-empty string.',
-            });
-        });
-
-        it('should return error for invalid ratePerHr', () => {
-            const invalidRate = { ...validData, ratePerHr: -10 };
-            expect(serviceListingEntity.validateInput(invalidRate)).toEqual({
-                status: 400,
-                error: 'Rate per hour must be a positive number.',
-            });
-             const nonNumericRate = { ...validData, ratePerHr: 'abc' };
-             expect(serviceListingEntity.validateInput(nonNumericRate)).toEqual({
-                status: 400,
-                error: 'Rate per hour must be a positive number.',
-            });
-        });
-
-        it('should return error if duration is required but missing', () => {
-           const missingDuration = { ...validData, duration: undefined };
-           expect(serviceListingEntity.validateInput(missingDuration)).toEqual({
-               status: 400,
-               error: 'Duration is required.',
-           });
-        });
-
-        it('should return error if duration is not a positive number', () => {
-            const zeroDuration = { ...validData, duration: 0 };
-            expect(serviceListingEntity.validateInput(zeroDuration)).toEqual({
-                status: 400,
-                error: 'Duration must be a positive number.',
-            });
-            const negativeDuration = { ...validData, duration: -1 };
-            expect(serviceListingEntity.validateInput(negativeDuration)).toEqual({
-                status: 400,
-                error: 'Duration must be a positive number.',
-            });
-            const nonNumericDuration = { ...validData, duration: 'abc' };
-             expect(serviceListingEntity.validateInput(nonNumericDuration)).toEqual({
-                status: 400,
-                error: 'Duration must be a positive number.',
-            });
-        });
-
-        it('should return error for invalid availability date string', () => {
-            const invalidDate = { ...validData, availability: 'not-a-date' };
-            expect(serviceListingEntity.validateInput(invalidDate)).toEqual({
-                status: 400,
-                error: 'Availability must be a valid ISO 8601 date string.',
-            });
-        });
-
-         it('should return error for empty string fields', () => {
-            const emptyTitle = { ...validData, title: '   ' };
-            expect(serviceListingEntity.validateInput(emptyTitle)).toEqual({
-                status: 400,
-                error: 'Title must be a non-empty string.',
-            });
-        });
-    });
-
     // --- Test createServiceListing ---
     describe('createServiceListing', () => {
         const validDate = new Date();
@@ -202,16 +121,97 @@ describe('ServiceListingEntity', () => {
             expect(result).toEqual(expectedListingResult);
         });
 
-        it('should return validation error if input is invalid', async () => {
-            const invalidData = { ...listingData, ratePerHr: -5 };
-            const expectedError = { error: { status: 400, error: 'Rate per hour must be a positive number.' } };
-
+        // --- Inlined Validation Tests ---
+        it('should return validation error if serviceType is missing', async () => {
+            const invalidData = { ...listingData, serviceType: undefined };
+            const expectedError = { error: { status: 400, error: 'Service Type must be a non-empty string.' } };
             const result = await serviceListingEntity.createServiceListing(invalidData);
-
             expect(result).toEqual(expectedError);
             expect(mockPrismaClient.userAccount.findUnique).not.toHaveBeenCalled();
             expect(mockPrismaClient.serviceListing.create).not.toHaveBeenCalled();
         });
+
+        it('should return validation error if title is missing', async () => {
+            const invalidData = { ...listingData, title: undefined };
+            const expectedError = { error: { status: 400, error: 'Title must be a non-empty string.' } };
+            const result = await serviceListingEntity.createServiceListing(invalidData);
+            expect(result).toEqual(expectedError);
+            expect(mockPrismaClient.userAccount.findUnique).not.toHaveBeenCalled();
+            expect(mockPrismaClient.serviceListing.create).not.toHaveBeenCalled();
+        });
+
+        it('should return validation error if description is missing', async () => {
+            const invalidData = { ...listingData, description: undefined };
+            const expectedError = { error: { status: 400, error: 'Description must be a non-empty string.' } };
+            const result = await serviceListingEntity.createServiceListing(invalidData);
+            expect(result).toEqual(expectedError);
+            expect(mockPrismaClient.userAccount.findUnique).not.toHaveBeenCalled();
+            expect(mockPrismaClient.serviceListing.create).not.toHaveBeenCalled();
+        });
+
+        it('should return validation error if ratePerHr is missing', async () => {
+            const invalidData = { ...listingData, ratePerHr: undefined };
+            const expectedError = { error: { status: 400, error: 'Rate per hour is required.' } };
+            const result = await serviceListingEntity.createServiceListing(invalidData);
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return validation error if duration is missing', async () => {
+            const invalidData = { ...listingData, duration: undefined };
+            const expectedError = { error: { status: 400, error: 'Duration is required.' } };
+            const result = await serviceListingEntity.createServiceListing(invalidData);
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return validation error if availability is missing', async () => {
+            const invalidData = { ...listingData, availability: undefined };
+            const expectedError = { error: { status: 400, error: 'Availability is required and must be a string.' } };
+            const result = await serviceListingEntity.createServiceListing(invalidData);
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return validation error if cleanerId is missing', async () => {
+            const invalidData = { ...listingData, cleanerId: undefined };
+            const expectedError = { error: { status: 400, error: 'Cleaner ID must be provided.' } };
+            const result = await serviceListingEntity.createServiceListing(invalidData);
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return validation error for non-positive ratePerHr', async () => {
+            const invalidData = { ...listingData, ratePerHr: -5 };
+            const expectedError = { error: { status: 400, error: 'Rate per hour must be a positive number.' } };
+            const result = await serviceListingEntity.createServiceListing(invalidData);
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return validation error for non-numeric ratePerHr', async () => {
+            const invalidData = { ...listingData, ratePerHr: "abc" };
+            const expectedError = { error: { status: 400, error: 'Rate per hour must be a positive number.' } };
+            const result = await serviceListingEntity.createServiceListing(invalidData);
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return validation error for non-positive duration', async () => {
+            const invalidData = { ...listingData, duration: 0 };
+            const expectedError = { error: { status: 400, error: 'Duration must be a positive number.' } };
+            const result = await serviceListingEntity.createServiceListing(invalidData);
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return validation error for non-numeric duration', async () => {
+            const invalidData = { ...listingData, duration: "two" };
+            const expectedError = { error: { status: 400, error: 'Duration must be a positive number.' } };
+            const result = await serviceListingEntity.createServiceListing(invalidData);
+            expect(result).toEqual(expectedError);
+        });
+
+        it('should return validation error for invalid availability date string', async () => {
+            const invalidData = { ...listingData, availability: 'not-a-date' };
+            const expectedError = { error: { status: 400, error: 'Availability must be a valid ISO 8601 date string.' } };
+            const result = await serviceListingEntity.createServiceListing(invalidData);
+            expect(result).toEqual(expectedError);
+        });
+         // --- End Inlined Validation Tests ---
 
         it('should return 404 error if cleaner user is not found', async () => {
             // Mock cleaner check -> not found

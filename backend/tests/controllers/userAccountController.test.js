@@ -58,13 +58,13 @@ describe('UserAccount Controllers (excluding Login)', () => {
 
         it('should create user successfully', async () => {
             req = mockRequest({}, userData);
-            UserAccountEntity.prototype.createUserAccount.mockResolvedValue(createdUser);
+            UserAccountEntity.prototype.createUserAccount.mockResolvedValue(true);
 
             await controller.createUserAccount(req, res);
 
             expect(UserAccountEntity.prototype.createUserAccount).toHaveBeenCalledWith(userData);
             expect(res.status).toHaveBeenCalledWith(201);
-            expect(res.json).toHaveBeenCalledWith(createdUser);
+            expect(res.json).toHaveBeenCalledWith({ message: 'User account created successfully.' });
         });
 
         it('should return 400 if userProfileName is missing', async () => {

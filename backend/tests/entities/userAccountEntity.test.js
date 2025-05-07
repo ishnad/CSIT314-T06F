@@ -61,7 +61,7 @@ describe('UserAccountEntity', () => {
             createdAt: new Date(),
         };
 
-        it('should create a user successfully', async () => {
+        it('should create a user successfully and return true', async () => {
             // Mock Prisma calls
             mockPrismaClient.userAccount.findUnique.mockResolvedValue(null); // Username doesn't exist
             mockPrismaClient.userProfile.findUnique.mockResolvedValue(mockProfile); // Profile exists
@@ -83,14 +83,8 @@ describe('UserAccountEntity', () => {
                 },
                 include: { userProfile: { select: { name: true, permissions: true } } },
             });
-            // Expect email in the returned result
-            expect(result).toEqual({
-                id: createdUser.id,
-                username: createdUser.username,
-                email: createdUser.email, // Add email expectation
-                userProfile: createdUser.userProfile.name,
-                createdAt: createdUser.createdAt,
-            });
+            // Expect true on successful creation
+            expect(result).toBe(true);
         });
 
         it('should return error if user profile name is missing', async () => {

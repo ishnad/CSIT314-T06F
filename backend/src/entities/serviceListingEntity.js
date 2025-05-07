@@ -6,7 +6,7 @@ class ServiceListingEntity {
     }
 
     /**
-     * Validates the input data for creating a service listing.
+     * Creates a new service listing in the database.
      * @param {object} listingData - Data for the new listing.
      * @param {string} listingData.serviceType - Type of service.
      * @param {string} listingData.title - Title of the listing.
@@ -15,62 +15,44 @@ class ServiceListingEntity {
      * @param {number} listingData.duration - Estimated duration in hours.
      * @param {string} listingData.availability - ISO 8601 date string for availability.
      * @param {string} listingData.cleanerId - ID of the user creating the listing.
-     * @returns {object|null} Error object { status: number, error: string } or null if valid.
-     */
-    validateInput({ serviceType, title, description, ratePerHr, duration, availability, cleanerId }) {
-        // Check for presence and basic type/format of required fields
-        if (!serviceType || typeof serviceType !== 'string' || serviceType.trim().length === 0) {
-            return { status: 400, error: 'Service Type must be a non-empty string.' };
-        }
-        if (!title || typeof title !== 'string' || title.trim().length === 0) {
-            return { status: 400, error: 'Title must be a non-empty string.' };
-        }
-        if (!description || typeof description !== 'string' || description.trim().length === 0) {
-            return { status: 400, error: 'Description must be a non-empty string.' };
-        }
-        // Check presence specifically for numbers before checking value
-        if (ratePerHr === undefined || ratePerHr === null) {
-            return { status: 400, error: 'Rate per hour is required.' };
-        }
-        if (duration === undefined || duration === null) {
-            return { status: 400, error: 'Duration is required.' };
-        }
-        if (!availability || typeof availability !== 'string') {
-             return { status: 400, error: 'Availability is required and must be a string.' };
-        }
-        if (!cleanerId || typeof cleanerId !== 'string' || cleanerId.trim().length === 0) {
-             return { status: 400, error: 'Cleaner ID must be provided.' };
-        }
-
-        // Now check types and values for numeric fields
-        if (typeof ratePerHr !== 'number' || ratePerHr <= 0) {
-            return { status: 400, error: 'Rate per hour must be a positive number.' };
-        }
-        if (typeof duration !== 'number' || duration <= 0) {
-            return { status: 400, error: 'Duration must be a positive number.' };
-        }
-
-        // Check date validity
-        if (isNaN(Date.parse(availability))) {
-             return { status: 400, error: 'Availability must be a valid ISO 8601 date string.' };
-        }
-
-        return null; // Input is valid
-    }
-
-    /**
-     * Creates a new service listing in the database.
-     * @param {object} listingData - Data for the new listing (validated).
      * @returns {Promise<object>} The created listing object or an error object.
      */
     async createServiceListing(listingData) {
-        const validationError = this.validateInput(listingData);
-        if (validationError) {
-            return { error: validationError };
-        }
-
-        // Destructure validated data
+        // Destructure data first for validation
         const { serviceType, title, description, ratePerHr, duration, availability, cleanerId } = listingData;
+
+        // --- Inlined Validation Logic ---
+        if (!serviceType || typeof serviceType !== 'string' || serviceType.trim().length === 0) {
+            return { error: { status: 400, error: 'Service Type must be a non-empty string.' }};
+        }
+        if (!title || typeof title !== 'string' || title.trim().length === 0) {
+            return { error: { status: 400, error: 'Title must be a non-empty string.' }};
+        }
+        if (!description || typeof description !== 'string' || description.trim().length === 0) {
+            return { error: { status: 400, error: 'Description must be a non-empty string.' }};
+        }
+        if (ratePerHr === undefined || ratePerHr === null) {
+            return { error: { status: 400, error: 'Rate per hour is required.' }};
+        }
+        if (duration === undefined || duration === null) {
+            return { error: { status: 400, error: 'Duration is required.' }};
+        }
+        if (!availability || typeof availability !== 'string') {
+             return { error: { status: 400, error: 'Availability is required and must be a string.' }};
+        }
+        if (!cleanerId || typeof cleanerId !== 'string' || cleanerId.trim().length === 0) {
+             return { error: { status: 400, error: 'Cleaner ID must be provided.' }};
+        }
+        if (typeof ratePerHr !== 'number' || ratePerHr <= 0) {
+            return { error: { status: 400, error: 'Rate per hour must be a positive number.' }};
+        }
+        if (typeof duration !== 'number' || duration <= 0) {
+            return { error: { status: 400, error: 'Duration must be a positive number.' }};
+        }
+        if (isNaN(Date.parse(availability))) {
+             return { error: { status: 400, error: 'Availability must be a valid ISO 8601 date string.' }};
+        }
+        // --- End Inlined Validation Logic ---
 
         try {
             // Verify cleanerId exists and is actually a 'Cleaner' profile user

@@ -7,26 +7,15 @@ class UserAccountEntity {
         this.SALT_ROUNDS = 10;
     }
 
-    // Validation updated to include ID and check status format later
-    validateEditInput(id, username, userProfileName, email, status) {
-        if (!id || !username || !userProfileName || !email || !status) {
-            return {
-                status: 400,
-                error: 'ID, username, userProfileName, email, and status are required'
-            };
-        }
-        
-        if (!email.includes('@')) {
-            return {
-                status: 400,
-                error: 'Invalid email format'
-            };
-        }
-
-        return null;
-    }
-
-    // Updated signature to accept ID first
+    /**
+     * Edits an existing user account.
+     * @param {string} id - The ID of the user account to edit.
+     * @param {string} username - The new username.
+     * @param {string} userProfileName - The name of the new user profile.
+     * @param {string} email - The new email address.
+     * @param {string} status - The new status for the user account (case-insensitive, will be converted to uppercase).
+     * @returns {Promise<object|{error: {status: number, error: string}}>} The updated user object or an error object.
+     */
     async editUserAccount(id, username, userProfileName, email, status) {
         // Basic validation first (presence of fields)
         if (!id || !username || !userProfileName || !email || !status) {
@@ -100,7 +89,15 @@ class UserAccountEntity {
         }
     }
 
-    // Updated to accept userProfileName and email
+    /**
+     * Creates a new user account.
+     * @param {object} userData - Data for the new user.
+     * @param {string} userData.username - The username for the new account.
+     * @param {string} userData.password - The password for the new account.
+     * @param {string} userData.email - The email address for the new account.
+     * @param {string} userData.userProfileName - The name of the user profile to associate with the account.
+     * @returns {Promise<boolean|{error: {status: number, error: string}}>} True if successful, or an error object.
+     */
     async createUserAccount({ username, password, email, userProfileName }) {
         if (!userProfileName) {
              return { error: { status: 400, error: 'User profile name is required.' } };
@@ -140,16 +137,17 @@ class UserAccountEntity {
             include: { userProfile: { select: { name: true, permissions: true } } }
         });
 
-        return {
-            id: newUser.id,
-            username: newUser.username,
-            email: newUser.email,
-            userProfile: newUser.userProfile.name, // Keep name for simplicity here
-            permissions: newUser.userProfile.permissions, // Add permissions
-            createdAt: newUser.createdAt,
-        };
+        // If newUser is created successfully, Prisma returns the object.
+        // If it failed, an error would have been thrown and caught by the controller's try/catch,
+        // or by specific error handling within this method if we added more.
+        return true;
     }
 
+    /**
+     * Checks if a username already exists in the database.
+     * @param {string} username - The username to check.
+     * @returns {Promise<{status: number, error: string}|null>} An error object if username exists, otherwise null.
+     */
     async checkUsernameExists(username) {
         const existingUser = await this.prisma.userAccount.findUnique({
             where: { username },
@@ -164,10 +162,21 @@ class UserAccountEntity {
         return null;
     }
 
+    /**
+     * Hashes a password using bcrypt.
+     * @param {string} password - The password to hash.
+     * @returns {Promise<string>} The hashed password.
+     */
     async hashPassword(password) {
         return await bcrypt.hash(password, this.SALT_ROUNDS);
     }
 
+    /**
+     * Retrieves a list of user accounts, optionally filtered.
+     * @param {string} [filter] - The field to filter by (e.g., 'username', 'email', 'userProfile', 'status').
+     * @param {string} [keyword] - The keyword to use for filtering.
+     * @returns {Promise<Array<object>>} A list of user account objects.
+     */
     async viewUserAccount(filter, keyword) {
         const whereClause = {};
 
@@ -209,6 +218,11 @@ class UserAccountEntity {
         }));
     }
 
+    /**
+     * Suspends a user account by setting its status to SUSPENDED.
+     * @param {string} username - The username of the account to suspend.
+     * @returns {Promise<boolean>} True if successful, false otherwise.
+     */
     async suspendUserAccount(username) {
         try {
             // Find user by username first to ensure it exists
@@ -229,6 +243,13 @@ class UserAccountEntity {
         }
     }
 
+    /**
+     * Searches for user accounts based on a filter and keyword.
+     * @param {string} filter - The field to filter by (e.g., 'username', 'email', 'userProfile', 'status').
+     * @param {string} [keyword] - The keyword to search for.
+     * @returns {Promise<Array<object>>} A list of user account objects matching the search criteria.
+     * @throws {Error} If the filter parameter is missing.
+     */
     async searchUserAccount(filter, keyword) {
         if (!filter) {
             throw new Error('Filter parameter is required for search');
@@ -277,6 +298,14 @@ class UserAccountEntity {
         }));
     }
 
+    /**
+     * Verifies login credentials for an admin user.
+     * Checks username, password, status (must be ACTIVE), and profile permissions (must include ADMIN_PRIVILEGES).
+     * @param {object} credentials - The login credentials.
+     * @param {string} credentials.username - The username.
+     * @param {string} credentials.password - The password.
+     * @returns {Promise<boolean>} True if credentials are valid for an admin, false otherwise.
+     */
     async verifyLoginCredentials({ username, password }) {
         const user = await this.prisma.userAccount.findUnique({
             where: { username },

@@ -5,6 +5,11 @@ class CreateUserAccountController {
         this.userEntity = new UserAccountEntity();
     }
 
+    /**
+     * Handles the HTTP request to create a new user account.
+     * @param {import('express').Request} req - Express request object.
+     * @param {import('express').Response} res - Express response object.
+     */
     async createUserAccount(req, res) {
         // Expect userProfileName and email
         const { username, password, email, userProfileName } = req.body;
@@ -23,8 +28,12 @@ class CreateUserAccountController {
             // Check if entity returned an error
             if (result.error) {
                  res.status(result.error.status).json({ error: result.error.error });
+            } else if (result === true) {
+                 res.status(201).json({ message: 'User account created successfully.' });
             } else {
-                 res.status(201).json(result);
+                // Should not happen if entity behaves as expected (true or error object)
+                console.error("Controller error: createUserAccount entity returned unexpected value:", result);
+                res.status(500).json({ error: 'Failed to create user due to an unexpected internal state.' });
             }
 
         } catch (error) {
@@ -41,6 +50,11 @@ class ViewUserAccountController {
         this.userEntity = new UserAccountEntity();
     }
 
+    /**
+     * Handles the HTTP request to view user accounts, with optional filtering.
+     * @param {import('express').Request} req - Express request object.
+     * @param {import('express').Response} res - Express response object.
+     */
     async viewUserAccount(req, res) {
         const { filter, keyword } = req.query;
 
@@ -65,6 +79,11 @@ class EditUserAccountController {
         this.userEntity = new UserAccountEntity();
     }
 
+    /**
+     * Handles the HTTP request to edit an existing user account.
+     * @param {import('express').Request} req - Express request object.
+     * @param {import('express').Response} res - Express response object.
+     */
     async editUserAccount(req, res) {
         // Expect id, username, userProfileName, email, status
         const { id, username, userProfileName, email, status } = req.body;
@@ -101,6 +120,11 @@ class SuspendUserAccountController {
         this.userEntity = new UserAccountEntity();
     }
 
+    /**
+     * Handles the HTTP request to suspend a user account.
+     * @param {import('express').Request} req - Express request object.
+     * @param {import('express').Response} res - Express response object.
+     */
     async suspendUserAccount(req, res) {
         const { username } = req.body;
 
@@ -123,6 +147,11 @@ class SearchUserAccountController {
         this.userEntity = new UserAccountEntity();
     }
 
+    /**
+     * Handles the HTTP request to search for user accounts.
+     * @param {import('express').Request} req - Express request object.
+     * @param {import('express').Response} res - Express response object.
+     */
     async searchUserAccount(req, res) {
         const { filter, keyword } = req.query;
 
