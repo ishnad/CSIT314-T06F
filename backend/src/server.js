@@ -11,7 +11,7 @@ const userProfileRoutes = require('./routes/userProfileRoutes');
 const authRoutes = require('./routes/authRoutes');
 const serviceListingRoutes = require('./routes/serviceListingRoutes');
 const cleanerInsightsRoutes = require('./routes/cleanerInsightsRoutes');
-const confirmedMatchesRoutes = require('./routes/confirmedMatchesRoutes'); // New import
+const confirmedMatchesRoutes = require('./routes/confirmedMatchesRoutes');
 
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware to parse JSON bodies
@@ -22,7 +22,6 @@ app.use('/api/profiles', userProfileRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/listings', serviceListingRoutes);
 app.use('/api/insights/cleaner', cleanerInsightsRoutes);
-// Mount the confirmed matches routes
 app.use('/api/matches', confirmedMatchesRoutes);
 
 

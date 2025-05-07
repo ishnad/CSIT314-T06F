@@ -108,12 +108,6 @@ class GetServiceListingController {
     }
 }
 
-
-module.exports = {
-    CreateServiceListingController,
-    GetServiceListingController
-};
-
 class EditServiceListingController {
     constructor() {
         this.serviceListingEntity = new ServiceListingEntity();
@@ -176,12 +170,6 @@ class EditServiceListingController {
     }
 }
 
-module.exports = {
-    CreateServiceListingController,
-    GetServiceListingController,
-    EditServiceListingController
-};
-
 class SuspendServiceListingController {
     constructor() {
         this.serviceListingEntity = new ServiceListingEntity();
@@ -223,13 +211,6 @@ class SuspendServiceListingController {
         }
     }
 }
-
-module.exports = {
-    CreateServiceListingController,
-    GetServiceListingController,
-    EditServiceListingController,
-    SuspendServiceListingController
-};
 
 class SearchServiceListingsController {
     constructor() {
