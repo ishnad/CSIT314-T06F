@@ -10,19 +10,17 @@ const userAccountRoutes = require('./routes/userAccountRoutes');
 const userProfileRoutes = require('./routes/userProfileRoutes');
 const authRoutes = require('./routes/authRoutes');
 const serviceListingRoutes = require('./routes/serviceListingRoutes');
+const cleanerInsightsRoutes = require('./routes/cleanerInsightsRoutes');
 
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware to parse JSON bodies
 
 // --- API routes ---
-// Mount the user account routes under the /api/users path
 app.use('/api/users', userAccountRoutes);
-// Mount the user profile routes under the /api/profiles path
 app.use('/api/profiles', userProfileRoutes);
-// Mount the authentication routes under the /api/auth path
 app.use('/api/auth', authRoutes);
-// Mount the service listing routes under the /api/listings path
 app.use('/api/listings', serviceListingRoutes);
+app.use('/api/insights/cleaner', cleanerInsightsRoutes);
 
 // Health Check Route
 app.get('/api/health', (req, res) => {

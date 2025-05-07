@@ -28,6 +28,11 @@ export type UserProfile = $Result.DefaultSelection<Prisma.$UserProfilePayload>
  * 
  */
 export type ServiceListing = $Result.DefaultSelection<Prisma.$ServiceListingPayload>
+/**
+ * Model ProfileView
+ * 
+ */
+export type ProfileView = $Result.DefaultSelection<Prisma.$ProfileViewPayload>
 
 /**
  * Enums
@@ -228,6 +233,16 @@ export class PrismaClient<
     * ```
     */
   get serviceListing(): Prisma.ServiceListingDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.profileView`: Exposes CRUD operations for the **ProfileView** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ProfileViews
+    * const profileViews = await prisma.profileView.findMany()
+    * ```
+    */
+  get profileView(): Prisma.ProfileViewDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -670,7 +685,8 @@ export namespace Prisma {
   export const ModelName: {
     UserAccount: 'UserAccount',
     UserProfile: 'UserProfile',
-    ServiceListing: 'ServiceListing'
+    ServiceListing: 'ServiceListing',
+    ProfileView: 'ProfileView'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -689,7 +705,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "userAccount" | "userProfile" | "serviceListing"
+      modelProps: "userAccount" | "userProfile" | "serviceListing" | "profileView"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -915,6 +931,80 @@ export namespace Prisma {
           }
         }
       }
+      ProfileView: {
+        payload: Prisma.$ProfileViewPayload<ExtArgs>
+        fields: Prisma.ProfileViewFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ProfileViewFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileViewPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ProfileViewFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileViewPayload>
+          }
+          findFirst: {
+            args: Prisma.ProfileViewFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileViewPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ProfileViewFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileViewPayload>
+          }
+          findMany: {
+            args: Prisma.ProfileViewFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileViewPayload>[]
+          }
+          create: {
+            args: Prisma.ProfileViewCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileViewPayload>
+          }
+          createMany: {
+            args: Prisma.ProfileViewCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ProfileViewCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileViewPayload>[]
+          }
+          delete: {
+            args: Prisma.ProfileViewDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileViewPayload>
+          }
+          update: {
+            args: Prisma.ProfileViewUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileViewPayload>
+          }
+          deleteMany: {
+            args: Prisma.ProfileViewDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ProfileViewUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ProfileViewUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileViewPayload>[]
+          }
+          upsert: {
+            args: Prisma.ProfileViewUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileViewPayload>
+          }
+          aggregate: {
+            args: Prisma.ProfileViewAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateProfileView>
+          }
+          groupBy: {
+            args: Prisma.ProfileViewGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ProfileViewGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ProfileViewCountArgs<ExtArgs>
+            result: $Utils.Optional<ProfileViewCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1002,6 +1092,7 @@ export namespace Prisma {
     userAccount?: UserAccountOmit
     userProfile?: UserProfileOmit
     serviceListing?: ServiceListingOmit
+    profileView?: ProfileViewOmit
   }
 
   /* Types for Logging */
@@ -1097,10 +1188,14 @@ export namespace Prisma {
 
   export type UserAccountCountOutputType = {
     serviceListings: number
+    profileViews: number
+    viewedOthers: number
   }
 
   export type UserAccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     serviceListings?: boolean | UserAccountCountOutputTypeCountServiceListingsArgs
+    profileViews?: boolean | UserAccountCountOutputTypeCountProfileViewsArgs
+    viewedOthers?: boolean | UserAccountCountOutputTypeCountViewedOthersArgs
   }
 
   // Custom InputTypes
@@ -1119,6 +1214,20 @@ export namespace Prisma {
    */
   export type UserAccountCountOutputTypeCountServiceListingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ServiceListingWhereInput
+  }
+
+  /**
+   * UserAccountCountOutputType without action
+   */
+  export type UserAccountCountOutputTypeCountProfileViewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProfileViewWhereInput
+  }
+
+  /**
+   * UserAccountCountOutputType without action
+   */
+  export type UserAccountCountOutputTypeCountViewedOthersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProfileViewWhereInput
   }
 
 
@@ -1347,6 +1456,8 @@ export namespace Prisma {
     userProfileId?: boolean
     userProfile?: boolean | UserAccount$userProfileArgs<ExtArgs>
     serviceListings?: boolean | UserAccount$serviceListingsArgs<ExtArgs>
+    profileViews?: boolean | UserAccount$profileViewsArgs<ExtArgs>
+    viewedOthers?: boolean | UserAccount$viewedOthersArgs<ExtArgs>
     _count?: boolean | UserAccountCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["userAccount"]>
 
@@ -1389,6 +1500,8 @@ export namespace Prisma {
   export type UserAccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     userProfile?: boolean | UserAccount$userProfileArgs<ExtArgs>
     serviceListings?: boolean | UserAccount$serviceListingsArgs<ExtArgs>
+    profileViews?: boolean | UserAccount$profileViewsArgs<ExtArgs>
+    viewedOthers?: boolean | UserAccount$viewedOthersArgs<ExtArgs>
     _count?: boolean | UserAccountCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserAccountIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1403,6 +1516,8 @@ export namespace Prisma {
     objects: {
       userProfile: Prisma.$UserProfilePayload<ExtArgs> | null
       serviceListings: Prisma.$ServiceListingPayload<ExtArgs>[]
+      profileViews: Prisma.$ProfileViewPayload<ExtArgs>[]
+      viewedOthers: Prisma.$ProfileViewPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -1809,6 +1924,8 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     userProfile<T extends UserAccount$userProfileArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$userProfileArgs<ExtArgs>>): Prisma__UserProfileClient<$Result.GetResult<Prisma.$UserProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     serviceListings<T extends UserAccount$serviceListingsArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$serviceListingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceListingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    profileViews<T extends UserAccount$profileViewsArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$profileViewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    viewedOthers<T extends UserAccount$viewedOthersArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$viewedOthersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2282,6 +2399,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ServiceListingScalarFieldEnum | ServiceListingScalarFieldEnum[]
+  }
+
+  /**
+   * UserAccount.profileViews
+   */
+  export type UserAccount$profileViewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewInclude<ExtArgs> | null
+    where?: ProfileViewWhereInput
+    orderBy?: ProfileViewOrderByWithRelationInput | ProfileViewOrderByWithRelationInput[]
+    cursor?: ProfileViewWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProfileViewScalarFieldEnum | ProfileViewScalarFieldEnum[]
+  }
+
+  /**
+   * UserAccount.viewedOthers
+   */
+  export type UserAccount$viewedOthersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewInclude<ExtArgs> | null
+    where?: ProfileViewWhereInput
+    orderBy?: ProfileViewOrderByWithRelationInput | ProfileViewOrderByWithRelationInput[]
+    cursor?: ProfileViewWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProfileViewScalarFieldEnum | ProfileViewScalarFieldEnum[]
   }
 
   /**
@@ -4544,6 +4709,1078 @@ export namespace Prisma {
 
 
   /**
+   * Model ProfileView
+   */
+
+  export type AggregateProfileView = {
+    _count: ProfileViewCountAggregateOutputType | null
+    _min: ProfileViewMinAggregateOutputType | null
+    _max: ProfileViewMaxAggregateOutputType | null
+  }
+
+  export type ProfileViewMinAggregateOutputType = {
+    id: string | null
+    viewedProfileId: string | null
+    viewerId: string | null
+    viewedAt: Date | null
+  }
+
+  export type ProfileViewMaxAggregateOutputType = {
+    id: string | null
+    viewedProfileId: string | null
+    viewerId: string | null
+    viewedAt: Date | null
+  }
+
+  export type ProfileViewCountAggregateOutputType = {
+    id: number
+    viewedProfileId: number
+    viewerId: number
+    viewedAt: number
+    _all: number
+  }
+
+
+  export type ProfileViewMinAggregateInputType = {
+    id?: true
+    viewedProfileId?: true
+    viewerId?: true
+    viewedAt?: true
+  }
+
+  export type ProfileViewMaxAggregateInputType = {
+    id?: true
+    viewedProfileId?: true
+    viewerId?: true
+    viewedAt?: true
+  }
+
+  export type ProfileViewCountAggregateInputType = {
+    id?: true
+    viewedProfileId?: true
+    viewerId?: true
+    viewedAt?: true
+    _all?: true
+  }
+
+  export type ProfileViewAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProfileView to aggregate.
+     */
+    where?: ProfileViewWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProfileViews to fetch.
+     */
+    orderBy?: ProfileViewOrderByWithRelationInput | ProfileViewOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ProfileViewWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProfileViews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProfileViews.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ProfileViews
+    **/
+    _count?: true | ProfileViewCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ProfileViewMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ProfileViewMaxAggregateInputType
+  }
+
+  export type GetProfileViewAggregateType<T extends ProfileViewAggregateArgs> = {
+        [P in keyof T & keyof AggregateProfileView]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateProfileView[P]>
+      : GetScalarType<T[P], AggregateProfileView[P]>
+  }
+
+
+
+
+  export type ProfileViewGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProfileViewWhereInput
+    orderBy?: ProfileViewOrderByWithAggregationInput | ProfileViewOrderByWithAggregationInput[]
+    by: ProfileViewScalarFieldEnum[] | ProfileViewScalarFieldEnum
+    having?: ProfileViewScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ProfileViewCountAggregateInputType | true
+    _min?: ProfileViewMinAggregateInputType
+    _max?: ProfileViewMaxAggregateInputType
+  }
+
+  export type ProfileViewGroupByOutputType = {
+    id: string
+    viewedProfileId: string
+    viewerId: string | null
+    viewedAt: Date
+    _count: ProfileViewCountAggregateOutputType | null
+    _min: ProfileViewMinAggregateOutputType | null
+    _max: ProfileViewMaxAggregateOutputType | null
+  }
+
+  type GetProfileViewGroupByPayload<T extends ProfileViewGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ProfileViewGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ProfileViewGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ProfileViewGroupByOutputType[P]>
+            : GetScalarType<T[P], ProfileViewGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ProfileViewSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    viewedProfileId?: boolean
+    viewerId?: boolean
+    viewedAt?: boolean
+    viewedProfile?: boolean | UserAccountDefaultArgs<ExtArgs>
+    viewer?: boolean | ProfileView$viewerArgs<ExtArgs>
+  }, ExtArgs["result"]["profileView"]>
+
+  export type ProfileViewSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    viewedProfileId?: boolean
+    viewerId?: boolean
+    viewedAt?: boolean
+    viewedProfile?: boolean | UserAccountDefaultArgs<ExtArgs>
+    viewer?: boolean | ProfileView$viewerArgs<ExtArgs>
+  }, ExtArgs["result"]["profileView"]>
+
+  export type ProfileViewSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    viewedProfileId?: boolean
+    viewerId?: boolean
+    viewedAt?: boolean
+    viewedProfile?: boolean | UserAccountDefaultArgs<ExtArgs>
+    viewer?: boolean | ProfileView$viewerArgs<ExtArgs>
+  }, ExtArgs["result"]["profileView"]>
+
+  export type ProfileViewSelectScalar = {
+    id?: boolean
+    viewedProfileId?: boolean
+    viewerId?: boolean
+    viewedAt?: boolean
+  }
+
+  export type ProfileViewOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "viewedProfileId" | "viewerId" | "viewedAt", ExtArgs["result"]["profileView"]>
+  export type ProfileViewInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    viewedProfile?: boolean | UserAccountDefaultArgs<ExtArgs>
+    viewer?: boolean | ProfileView$viewerArgs<ExtArgs>
+  }
+  export type ProfileViewIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    viewedProfile?: boolean | UserAccountDefaultArgs<ExtArgs>
+    viewer?: boolean | ProfileView$viewerArgs<ExtArgs>
+  }
+  export type ProfileViewIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    viewedProfile?: boolean | UserAccountDefaultArgs<ExtArgs>
+    viewer?: boolean | ProfileView$viewerArgs<ExtArgs>
+  }
+
+  export type $ProfileViewPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ProfileView"
+    objects: {
+      viewedProfile: Prisma.$UserAccountPayload<ExtArgs>
+      viewer: Prisma.$UserAccountPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      viewedProfileId: string
+      viewerId: string | null
+      viewedAt: Date
+    }, ExtArgs["result"]["profileView"]>
+    composites: {}
+  }
+
+  type ProfileViewGetPayload<S extends boolean | null | undefined | ProfileViewDefaultArgs> = $Result.GetResult<Prisma.$ProfileViewPayload, S>
+
+  type ProfileViewCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ProfileViewFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ProfileViewCountAggregateInputType | true
+    }
+
+  export interface ProfileViewDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ProfileView'], meta: { name: 'ProfileView' } }
+    /**
+     * Find zero or one ProfileView that matches the filter.
+     * @param {ProfileViewFindUniqueArgs} args - Arguments to find a ProfileView
+     * @example
+     * // Get one ProfileView
+     * const profileView = await prisma.profileView.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ProfileViewFindUniqueArgs>(args: SelectSubset<T, ProfileViewFindUniqueArgs<ExtArgs>>): Prisma__ProfileViewClient<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ProfileView that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ProfileViewFindUniqueOrThrowArgs} args - Arguments to find a ProfileView
+     * @example
+     * // Get one ProfileView
+     * const profileView = await prisma.profileView.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ProfileViewFindUniqueOrThrowArgs>(args: SelectSubset<T, ProfileViewFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ProfileViewClient<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProfileView that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileViewFindFirstArgs} args - Arguments to find a ProfileView
+     * @example
+     * // Get one ProfileView
+     * const profileView = await prisma.profileView.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ProfileViewFindFirstArgs>(args?: SelectSubset<T, ProfileViewFindFirstArgs<ExtArgs>>): Prisma__ProfileViewClient<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProfileView that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileViewFindFirstOrThrowArgs} args - Arguments to find a ProfileView
+     * @example
+     * // Get one ProfileView
+     * const profileView = await prisma.profileView.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ProfileViewFindFirstOrThrowArgs>(args?: SelectSubset<T, ProfileViewFindFirstOrThrowArgs<ExtArgs>>): Prisma__ProfileViewClient<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ProfileViews that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileViewFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ProfileViews
+     * const profileViews = await prisma.profileView.findMany()
+     * 
+     * // Get first 10 ProfileViews
+     * const profileViews = await prisma.profileView.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const profileViewWithIdOnly = await prisma.profileView.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ProfileViewFindManyArgs>(args?: SelectSubset<T, ProfileViewFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ProfileView.
+     * @param {ProfileViewCreateArgs} args - Arguments to create a ProfileView.
+     * @example
+     * // Create one ProfileView
+     * const ProfileView = await prisma.profileView.create({
+     *   data: {
+     *     // ... data to create a ProfileView
+     *   }
+     * })
+     * 
+     */
+    create<T extends ProfileViewCreateArgs>(args: SelectSubset<T, ProfileViewCreateArgs<ExtArgs>>): Prisma__ProfileViewClient<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ProfileViews.
+     * @param {ProfileViewCreateManyArgs} args - Arguments to create many ProfileViews.
+     * @example
+     * // Create many ProfileViews
+     * const profileView = await prisma.profileView.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ProfileViewCreateManyArgs>(args?: SelectSubset<T, ProfileViewCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ProfileViews and returns the data saved in the database.
+     * @param {ProfileViewCreateManyAndReturnArgs} args - Arguments to create many ProfileViews.
+     * @example
+     * // Create many ProfileViews
+     * const profileView = await prisma.profileView.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ProfileViews and only return the `id`
+     * const profileViewWithIdOnly = await prisma.profileView.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ProfileViewCreateManyAndReturnArgs>(args?: SelectSubset<T, ProfileViewCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ProfileView.
+     * @param {ProfileViewDeleteArgs} args - Arguments to delete one ProfileView.
+     * @example
+     * // Delete one ProfileView
+     * const ProfileView = await prisma.profileView.delete({
+     *   where: {
+     *     // ... filter to delete one ProfileView
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ProfileViewDeleteArgs>(args: SelectSubset<T, ProfileViewDeleteArgs<ExtArgs>>): Prisma__ProfileViewClient<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ProfileView.
+     * @param {ProfileViewUpdateArgs} args - Arguments to update one ProfileView.
+     * @example
+     * // Update one ProfileView
+     * const profileView = await prisma.profileView.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ProfileViewUpdateArgs>(args: SelectSubset<T, ProfileViewUpdateArgs<ExtArgs>>): Prisma__ProfileViewClient<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ProfileViews.
+     * @param {ProfileViewDeleteManyArgs} args - Arguments to filter ProfileViews to delete.
+     * @example
+     * // Delete a few ProfileViews
+     * const { count } = await prisma.profileView.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ProfileViewDeleteManyArgs>(args?: SelectSubset<T, ProfileViewDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProfileViews.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileViewUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ProfileViews
+     * const profileView = await prisma.profileView.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ProfileViewUpdateManyArgs>(args: SelectSubset<T, ProfileViewUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProfileViews and returns the data updated in the database.
+     * @param {ProfileViewUpdateManyAndReturnArgs} args - Arguments to update many ProfileViews.
+     * @example
+     * // Update many ProfileViews
+     * const profileView = await prisma.profileView.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ProfileViews and only return the `id`
+     * const profileViewWithIdOnly = await prisma.profileView.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ProfileViewUpdateManyAndReturnArgs>(args: SelectSubset<T, ProfileViewUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ProfileView.
+     * @param {ProfileViewUpsertArgs} args - Arguments to update or create a ProfileView.
+     * @example
+     * // Update or create a ProfileView
+     * const profileView = await prisma.profileView.upsert({
+     *   create: {
+     *     // ... data to create a ProfileView
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ProfileView we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ProfileViewUpsertArgs>(args: SelectSubset<T, ProfileViewUpsertArgs<ExtArgs>>): Prisma__ProfileViewClient<$Result.GetResult<Prisma.$ProfileViewPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ProfileViews.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileViewCountArgs} args - Arguments to filter ProfileViews to count.
+     * @example
+     * // Count the number of ProfileViews
+     * const count = await prisma.profileView.count({
+     *   where: {
+     *     // ... the filter for the ProfileViews we want to count
+     *   }
+     * })
+    **/
+    count<T extends ProfileViewCountArgs>(
+      args?: Subset<T, ProfileViewCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ProfileViewCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ProfileView.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileViewAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ProfileViewAggregateArgs>(args: Subset<T, ProfileViewAggregateArgs>): Prisma.PrismaPromise<GetProfileViewAggregateType<T>>
+
+    /**
+     * Group by ProfileView.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileViewGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ProfileViewGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ProfileViewGroupByArgs['orderBy'] }
+        : { orderBy?: ProfileViewGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ProfileViewGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetProfileViewGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ProfileView model
+   */
+  readonly fields: ProfileViewFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ProfileView.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ProfileViewClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    viewedProfile<T extends UserAccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserAccountDefaultArgs<ExtArgs>>): Prisma__UserAccountClient<$Result.GetResult<Prisma.$UserAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    viewer<T extends ProfileView$viewerArgs<ExtArgs> = {}>(args?: Subset<T, ProfileView$viewerArgs<ExtArgs>>): Prisma__UserAccountClient<$Result.GetResult<Prisma.$UserAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ProfileView model
+   */
+  interface ProfileViewFieldRefs {
+    readonly id: FieldRef<"ProfileView", 'String'>
+    readonly viewedProfileId: FieldRef<"ProfileView", 'String'>
+    readonly viewerId: FieldRef<"ProfileView", 'String'>
+    readonly viewedAt: FieldRef<"ProfileView", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ProfileView findUnique
+   */
+  export type ProfileViewFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewInclude<ExtArgs> | null
+    /**
+     * Filter, which ProfileView to fetch.
+     */
+    where: ProfileViewWhereUniqueInput
+  }
+
+  /**
+   * ProfileView findUniqueOrThrow
+   */
+  export type ProfileViewFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewInclude<ExtArgs> | null
+    /**
+     * Filter, which ProfileView to fetch.
+     */
+    where: ProfileViewWhereUniqueInput
+  }
+
+  /**
+   * ProfileView findFirst
+   */
+  export type ProfileViewFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewInclude<ExtArgs> | null
+    /**
+     * Filter, which ProfileView to fetch.
+     */
+    where?: ProfileViewWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProfileViews to fetch.
+     */
+    orderBy?: ProfileViewOrderByWithRelationInput | ProfileViewOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProfileViews.
+     */
+    cursor?: ProfileViewWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProfileViews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProfileViews.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProfileViews.
+     */
+    distinct?: ProfileViewScalarFieldEnum | ProfileViewScalarFieldEnum[]
+  }
+
+  /**
+   * ProfileView findFirstOrThrow
+   */
+  export type ProfileViewFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewInclude<ExtArgs> | null
+    /**
+     * Filter, which ProfileView to fetch.
+     */
+    where?: ProfileViewWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProfileViews to fetch.
+     */
+    orderBy?: ProfileViewOrderByWithRelationInput | ProfileViewOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProfileViews.
+     */
+    cursor?: ProfileViewWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProfileViews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProfileViews.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProfileViews.
+     */
+    distinct?: ProfileViewScalarFieldEnum | ProfileViewScalarFieldEnum[]
+  }
+
+  /**
+   * ProfileView findMany
+   */
+  export type ProfileViewFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewInclude<ExtArgs> | null
+    /**
+     * Filter, which ProfileViews to fetch.
+     */
+    where?: ProfileViewWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProfileViews to fetch.
+     */
+    orderBy?: ProfileViewOrderByWithRelationInput | ProfileViewOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ProfileViews.
+     */
+    cursor?: ProfileViewWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProfileViews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProfileViews.
+     */
+    skip?: number
+    distinct?: ProfileViewScalarFieldEnum | ProfileViewScalarFieldEnum[]
+  }
+
+  /**
+   * ProfileView create
+   */
+  export type ProfileViewCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ProfileView.
+     */
+    data: XOR<ProfileViewCreateInput, ProfileViewUncheckedCreateInput>
+  }
+
+  /**
+   * ProfileView createMany
+   */
+  export type ProfileViewCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ProfileViews.
+     */
+    data: ProfileViewCreateManyInput | ProfileViewCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ProfileView createManyAndReturn
+   */
+  export type ProfileViewCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * The data used to create many ProfileViews.
+     */
+    data: ProfileViewCreateManyInput | ProfileViewCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ProfileView update
+   */
+  export type ProfileViewUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ProfileView.
+     */
+    data: XOR<ProfileViewUpdateInput, ProfileViewUncheckedUpdateInput>
+    /**
+     * Choose, which ProfileView to update.
+     */
+    where: ProfileViewWhereUniqueInput
+  }
+
+  /**
+   * ProfileView updateMany
+   */
+  export type ProfileViewUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ProfileViews.
+     */
+    data: XOR<ProfileViewUpdateManyMutationInput, ProfileViewUncheckedUpdateManyInput>
+    /**
+     * Filter which ProfileViews to update
+     */
+    where?: ProfileViewWhereInput
+    /**
+     * Limit how many ProfileViews to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProfileView updateManyAndReturn
+   */
+  export type ProfileViewUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * The data used to update ProfileViews.
+     */
+    data: XOR<ProfileViewUpdateManyMutationInput, ProfileViewUncheckedUpdateManyInput>
+    /**
+     * Filter which ProfileViews to update
+     */
+    where?: ProfileViewWhereInput
+    /**
+     * Limit how many ProfileViews to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ProfileView upsert
+   */
+  export type ProfileViewUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ProfileView to update in case it exists.
+     */
+    where: ProfileViewWhereUniqueInput
+    /**
+     * In case the ProfileView found by the `where` argument doesn't exist, create a new ProfileView with this data.
+     */
+    create: XOR<ProfileViewCreateInput, ProfileViewUncheckedCreateInput>
+    /**
+     * In case the ProfileView was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ProfileViewUpdateInput, ProfileViewUncheckedUpdateInput>
+  }
+
+  /**
+   * ProfileView delete
+   */
+  export type ProfileViewDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewInclude<ExtArgs> | null
+    /**
+     * Filter which ProfileView to delete.
+     */
+    where: ProfileViewWhereUniqueInput
+  }
+
+  /**
+   * ProfileView deleteMany
+   */
+  export type ProfileViewDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProfileViews to delete
+     */
+    where?: ProfileViewWhereInput
+    /**
+     * Limit how many ProfileViews to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProfileView.viewer
+   */
+  export type ProfileView$viewerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserAccount
+     */
+    select?: UserAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserAccount
+     */
+    omit?: UserAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserAccountInclude<ExtArgs> | null
+    where?: UserAccountWhereInput
+  }
+
+  /**
+   * ProfileView without action
+   */
+  export type ProfileViewDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileView
+     */
+    select?: ProfileViewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileView
+     */
+    omit?: ProfileViewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileViewInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -4597,6 +5834,16 @@ export namespace Prisma {
   };
 
   export type ServiceListingScalarFieldEnum = (typeof ServiceListingScalarFieldEnum)[keyof typeof ServiceListingScalarFieldEnum]
+
+
+  export const ProfileViewScalarFieldEnum: {
+    id: 'id',
+    viewedProfileId: 'viewedProfileId',
+    viewerId: 'viewerId',
+    viewedAt: 'viewedAt'
+  };
+
+  export type ProfileViewScalarFieldEnum = (typeof ProfileViewScalarFieldEnum)[keyof typeof ProfileViewScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -4743,6 +5990,8 @@ export namespace Prisma {
     userProfileId?: StringNullableFilter<"UserAccount"> | string | null
     userProfile?: XOR<UserProfileNullableScalarRelationFilter, UserProfileWhereInput> | null
     serviceListings?: ServiceListingListRelationFilter
+    profileViews?: ProfileViewListRelationFilter
+    viewedOthers?: ProfileViewListRelationFilter
   }
 
   export type UserAccountOrderByWithRelationInput = {
@@ -4756,6 +6005,8 @@ export namespace Prisma {
     userProfileId?: SortOrderInput | SortOrder
     userProfile?: UserProfileOrderByWithRelationInput
     serviceListings?: ServiceListingOrderByRelationAggregateInput
+    profileViews?: ProfileViewOrderByRelationAggregateInput
+    viewedOthers?: ProfileViewOrderByRelationAggregateInput
   }
 
   export type UserAccountWhereUniqueInput = Prisma.AtLeast<{
@@ -4772,6 +6023,8 @@ export namespace Prisma {
     userProfileId?: StringNullableFilter<"UserAccount"> | string | null
     userProfile?: XOR<UserProfileNullableScalarRelationFilter, UserProfileWhereInput> | null
     serviceListings?: ServiceListingListRelationFilter
+    profileViews?: ProfileViewListRelationFilter
+    viewedOthers?: ProfileViewListRelationFilter
   }, "id" | "username" | "email">
 
   export type UserAccountOrderByWithAggregationInput = {
@@ -4944,6 +6197,59 @@ export namespace Prisma {
     cleanerId?: StringWithAggregatesFilter<"ServiceListing"> | string
   }
 
+  export type ProfileViewWhereInput = {
+    AND?: ProfileViewWhereInput | ProfileViewWhereInput[]
+    OR?: ProfileViewWhereInput[]
+    NOT?: ProfileViewWhereInput | ProfileViewWhereInput[]
+    id?: StringFilter<"ProfileView"> | string
+    viewedProfileId?: StringFilter<"ProfileView"> | string
+    viewerId?: StringNullableFilter<"ProfileView"> | string | null
+    viewedAt?: DateTimeFilter<"ProfileView"> | Date | string
+    viewedProfile?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
+    viewer?: XOR<UserAccountNullableScalarRelationFilter, UserAccountWhereInput> | null
+  }
+
+  export type ProfileViewOrderByWithRelationInput = {
+    id?: SortOrder
+    viewedProfileId?: SortOrder
+    viewerId?: SortOrderInput | SortOrder
+    viewedAt?: SortOrder
+    viewedProfile?: UserAccountOrderByWithRelationInput
+    viewer?: UserAccountOrderByWithRelationInput
+  }
+
+  export type ProfileViewWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ProfileViewWhereInput | ProfileViewWhereInput[]
+    OR?: ProfileViewWhereInput[]
+    NOT?: ProfileViewWhereInput | ProfileViewWhereInput[]
+    viewedProfileId?: StringFilter<"ProfileView"> | string
+    viewerId?: StringNullableFilter<"ProfileView"> | string | null
+    viewedAt?: DateTimeFilter<"ProfileView"> | Date | string
+    viewedProfile?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
+    viewer?: XOR<UserAccountNullableScalarRelationFilter, UserAccountWhereInput> | null
+  }, "id">
+
+  export type ProfileViewOrderByWithAggregationInput = {
+    id?: SortOrder
+    viewedProfileId?: SortOrder
+    viewerId?: SortOrderInput | SortOrder
+    viewedAt?: SortOrder
+    _count?: ProfileViewCountOrderByAggregateInput
+    _max?: ProfileViewMaxOrderByAggregateInput
+    _min?: ProfileViewMinOrderByAggregateInput
+  }
+
+  export type ProfileViewScalarWhereWithAggregatesInput = {
+    AND?: ProfileViewScalarWhereWithAggregatesInput | ProfileViewScalarWhereWithAggregatesInput[]
+    OR?: ProfileViewScalarWhereWithAggregatesInput[]
+    NOT?: ProfileViewScalarWhereWithAggregatesInput | ProfileViewScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ProfileView"> | string
+    viewedProfileId?: StringWithAggregatesFilter<"ProfileView"> | string
+    viewerId?: StringNullableWithAggregatesFilter<"ProfileView"> | string | null
+    viewedAt?: DateTimeWithAggregatesFilter<"ProfileView"> | Date | string
+  }
+
   export type UserAccountCreateInput = {
     id?: string
     username: string
@@ -4954,6 +6260,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
     serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
   }
 
   export type UserAccountUncheckedCreateInput = {
@@ -4966,6 +6274,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     userProfileId?: string | null
     serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
   }
 
   export type UserAccountUpdateInput = {
@@ -4978,6 +6288,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
     serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
   }
 
   export type UserAccountUncheckedUpdateInput = {
@@ -4990,6 +6302,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
   }
 
   export type UserAccountCreateManyInput = {
@@ -5181,6 +6495,53 @@ export namespace Prisma {
     cleanerId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type ProfileViewCreateInput = {
+    id?: string
+    viewedAt?: Date | string
+    viewedProfile: UserAccountCreateNestedOneWithoutProfileViewsInput
+    viewer?: UserAccountCreateNestedOneWithoutViewedOthersInput
+  }
+
+  export type ProfileViewUncheckedCreateInput = {
+    id?: string
+    viewedProfileId: string
+    viewerId?: string | null
+    viewedAt?: Date | string
+  }
+
+  export type ProfileViewUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    viewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    viewedProfile?: UserAccountUpdateOneRequiredWithoutProfileViewsNestedInput
+    viewer?: UserAccountUpdateOneWithoutViewedOthersNestedInput
+  }
+
+  export type ProfileViewUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    viewedProfileId?: StringFieldUpdateOperationsInput | string
+    viewerId?: NullableStringFieldUpdateOperationsInput | string | null
+    viewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfileViewCreateManyInput = {
+    id?: string
+    viewedProfileId: string
+    viewerId?: string | null
+    viewedAt?: Date | string
+  }
+
+  export type ProfileViewUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    viewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfileViewUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    viewedProfileId?: StringFieldUpdateOperationsInput | string
+    viewerId?: NullableStringFieldUpdateOperationsInput | string | null
+    viewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -5240,12 +6601,22 @@ export namespace Prisma {
     none?: ServiceListingWhereInput
   }
 
+  export type ProfileViewListRelationFilter = {
+    every?: ProfileViewWhereInput
+    some?: ProfileViewWhereInput
+    none?: ProfileViewWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
   }
 
   export type ServiceListingOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ProfileViewOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -5483,6 +6854,32 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
+  export type UserAccountNullableScalarRelationFilter = {
+    is?: UserAccountWhereInput | null
+    isNot?: UserAccountWhereInput | null
+  }
+
+  export type ProfileViewCountOrderByAggregateInput = {
+    id?: SortOrder
+    viewedProfileId?: SortOrder
+    viewerId?: SortOrder
+    viewedAt?: SortOrder
+  }
+
+  export type ProfileViewMaxOrderByAggregateInput = {
+    id?: SortOrder
+    viewedProfileId?: SortOrder
+    viewerId?: SortOrder
+    viewedAt?: SortOrder
+  }
+
+  export type ProfileViewMinOrderByAggregateInput = {
+    id?: SortOrder
+    viewedProfileId?: SortOrder
+    viewerId?: SortOrder
+    viewedAt?: SortOrder
+  }
+
   export type UserProfileCreateNestedOneWithoutUserAccountsInput = {
     create?: XOR<UserProfileCreateWithoutUserAccountsInput, UserProfileUncheckedCreateWithoutUserAccountsInput>
     connectOrCreate?: UserProfileCreateOrConnectWithoutUserAccountsInput
@@ -5496,11 +6893,39 @@ export namespace Prisma {
     connect?: ServiceListingWhereUniqueInput | ServiceListingWhereUniqueInput[]
   }
 
+  export type ProfileViewCreateNestedManyWithoutViewedProfileInput = {
+    create?: XOR<ProfileViewCreateWithoutViewedProfileInput, ProfileViewUncheckedCreateWithoutViewedProfileInput> | ProfileViewCreateWithoutViewedProfileInput[] | ProfileViewUncheckedCreateWithoutViewedProfileInput[]
+    connectOrCreate?: ProfileViewCreateOrConnectWithoutViewedProfileInput | ProfileViewCreateOrConnectWithoutViewedProfileInput[]
+    createMany?: ProfileViewCreateManyViewedProfileInputEnvelope
+    connect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+  }
+
+  export type ProfileViewCreateNestedManyWithoutViewerInput = {
+    create?: XOR<ProfileViewCreateWithoutViewerInput, ProfileViewUncheckedCreateWithoutViewerInput> | ProfileViewCreateWithoutViewerInput[] | ProfileViewUncheckedCreateWithoutViewerInput[]
+    connectOrCreate?: ProfileViewCreateOrConnectWithoutViewerInput | ProfileViewCreateOrConnectWithoutViewerInput[]
+    createMany?: ProfileViewCreateManyViewerInputEnvelope
+    connect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+  }
+
   export type ServiceListingUncheckedCreateNestedManyWithoutCleanerInput = {
     create?: XOR<ServiceListingCreateWithoutCleanerInput, ServiceListingUncheckedCreateWithoutCleanerInput> | ServiceListingCreateWithoutCleanerInput[] | ServiceListingUncheckedCreateWithoutCleanerInput[]
     connectOrCreate?: ServiceListingCreateOrConnectWithoutCleanerInput | ServiceListingCreateOrConnectWithoutCleanerInput[]
     createMany?: ServiceListingCreateManyCleanerInputEnvelope
     connect?: ServiceListingWhereUniqueInput | ServiceListingWhereUniqueInput[]
+  }
+
+  export type ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput = {
+    create?: XOR<ProfileViewCreateWithoutViewedProfileInput, ProfileViewUncheckedCreateWithoutViewedProfileInput> | ProfileViewCreateWithoutViewedProfileInput[] | ProfileViewUncheckedCreateWithoutViewedProfileInput[]
+    connectOrCreate?: ProfileViewCreateOrConnectWithoutViewedProfileInput | ProfileViewCreateOrConnectWithoutViewedProfileInput[]
+    createMany?: ProfileViewCreateManyViewedProfileInputEnvelope
+    connect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+  }
+
+  export type ProfileViewUncheckedCreateNestedManyWithoutViewerInput = {
+    create?: XOR<ProfileViewCreateWithoutViewerInput, ProfileViewUncheckedCreateWithoutViewerInput> | ProfileViewCreateWithoutViewerInput[] | ProfileViewUncheckedCreateWithoutViewerInput[]
+    connectOrCreate?: ProfileViewCreateOrConnectWithoutViewerInput | ProfileViewCreateOrConnectWithoutViewerInput[]
+    createMany?: ProfileViewCreateManyViewerInputEnvelope
+    connect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -5539,6 +6964,34 @@ export namespace Prisma {
     deleteMany?: ServiceListingScalarWhereInput | ServiceListingScalarWhereInput[]
   }
 
+  export type ProfileViewUpdateManyWithoutViewedProfileNestedInput = {
+    create?: XOR<ProfileViewCreateWithoutViewedProfileInput, ProfileViewUncheckedCreateWithoutViewedProfileInput> | ProfileViewCreateWithoutViewedProfileInput[] | ProfileViewUncheckedCreateWithoutViewedProfileInput[]
+    connectOrCreate?: ProfileViewCreateOrConnectWithoutViewedProfileInput | ProfileViewCreateOrConnectWithoutViewedProfileInput[]
+    upsert?: ProfileViewUpsertWithWhereUniqueWithoutViewedProfileInput | ProfileViewUpsertWithWhereUniqueWithoutViewedProfileInput[]
+    createMany?: ProfileViewCreateManyViewedProfileInputEnvelope
+    set?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    disconnect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    delete?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    connect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    update?: ProfileViewUpdateWithWhereUniqueWithoutViewedProfileInput | ProfileViewUpdateWithWhereUniqueWithoutViewedProfileInput[]
+    updateMany?: ProfileViewUpdateManyWithWhereWithoutViewedProfileInput | ProfileViewUpdateManyWithWhereWithoutViewedProfileInput[]
+    deleteMany?: ProfileViewScalarWhereInput | ProfileViewScalarWhereInput[]
+  }
+
+  export type ProfileViewUpdateManyWithoutViewerNestedInput = {
+    create?: XOR<ProfileViewCreateWithoutViewerInput, ProfileViewUncheckedCreateWithoutViewerInput> | ProfileViewCreateWithoutViewerInput[] | ProfileViewUncheckedCreateWithoutViewerInput[]
+    connectOrCreate?: ProfileViewCreateOrConnectWithoutViewerInput | ProfileViewCreateOrConnectWithoutViewerInput[]
+    upsert?: ProfileViewUpsertWithWhereUniqueWithoutViewerInput | ProfileViewUpsertWithWhereUniqueWithoutViewerInput[]
+    createMany?: ProfileViewCreateManyViewerInputEnvelope
+    set?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    disconnect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    delete?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    connect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    update?: ProfileViewUpdateWithWhereUniqueWithoutViewerInput | ProfileViewUpdateWithWhereUniqueWithoutViewerInput[]
+    updateMany?: ProfileViewUpdateManyWithWhereWithoutViewerInput | ProfileViewUpdateManyWithWhereWithoutViewerInput[]
+    deleteMany?: ProfileViewScalarWhereInput | ProfileViewScalarWhereInput[]
+  }
+
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
   }
@@ -5555,6 +7008,34 @@ export namespace Prisma {
     update?: ServiceListingUpdateWithWhereUniqueWithoutCleanerInput | ServiceListingUpdateWithWhereUniqueWithoutCleanerInput[]
     updateMany?: ServiceListingUpdateManyWithWhereWithoutCleanerInput | ServiceListingUpdateManyWithWhereWithoutCleanerInput[]
     deleteMany?: ServiceListingScalarWhereInput | ServiceListingScalarWhereInput[]
+  }
+
+  export type ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput = {
+    create?: XOR<ProfileViewCreateWithoutViewedProfileInput, ProfileViewUncheckedCreateWithoutViewedProfileInput> | ProfileViewCreateWithoutViewedProfileInput[] | ProfileViewUncheckedCreateWithoutViewedProfileInput[]
+    connectOrCreate?: ProfileViewCreateOrConnectWithoutViewedProfileInput | ProfileViewCreateOrConnectWithoutViewedProfileInput[]
+    upsert?: ProfileViewUpsertWithWhereUniqueWithoutViewedProfileInput | ProfileViewUpsertWithWhereUniqueWithoutViewedProfileInput[]
+    createMany?: ProfileViewCreateManyViewedProfileInputEnvelope
+    set?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    disconnect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    delete?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    connect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    update?: ProfileViewUpdateWithWhereUniqueWithoutViewedProfileInput | ProfileViewUpdateWithWhereUniqueWithoutViewedProfileInput[]
+    updateMany?: ProfileViewUpdateManyWithWhereWithoutViewedProfileInput | ProfileViewUpdateManyWithWhereWithoutViewedProfileInput[]
+    deleteMany?: ProfileViewScalarWhereInput | ProfileViewScalarWhereInput[]
+  }
+
+  export type ProfileViewUncheckedUpdateManyWithoutViewerNestedInput = {
+    create?: XOR<ProfileViewCreateWithoutViewerInput, ProfileViewUncheckedCreateWithoutViewerInput> | ProfileViewCreateWithoutViewerInput[] | ProfileViewUncheckedCreateWithoutViewerInput[]
+    connectOrCreate?: ProfileViewCreateOrConnectWithoutViewerInput | ProfileViewCreateOrConnectWithoutViewerInput[]
+    upsert?: ProfileViewUpsertWithWhereUniqueWithoutViewerInput | ProfileViewUpsertWithWhereUniqueWithoutViewerInput[]
+    createMany?: ProfileViewCreateManyViewerInputEnvelope
+    set?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    disconnect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    delete?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    connect?: ProfileViewWhereUniqueInput | ProfileViewWhereUniqueInput[]
+    update?: ProfileViewUpdateWithWhereUniqueWithoutViewerInput | ProfileViewUpdateWithWhereUniqueWithoutViewerInput[]
+    updateMany?: ProfileViewUpdateManyWithWhereWithoutViewerInput | ProfileViewUpdateManyWithWhereWithoutViewerInput[]
+    deleteMany?: ProfileViewScalarWhereInput | ProfileViewScalarWhereInput[]
   }
 
   export type UserProfileCreatepermissionsInput = {
@@ -5632,6 +7113,36 @@ export namespace Prisma {
     upsert?: UserAccountUpsertWithoutServiceListingsInput
     connect?: UserAccountWhereUniqueInput
     update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutServiceListingsInput, UserAccountUpdateWithoutServiceListingsInput>, UserAccountUncheckedUpdateWithoutServiceListingsInput>
+  }
+
+  export type UserAccountCreateNestedOneWithoutProfileViewsInput = {
+    create?: XOR<UserAccountCreateWithoutProfileViewsInput, UserAccountUncheckedCreateWithoutProfileViewsInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutProfileViewsInput
+    connect?: UserAccountWhereUniqueInput
+  }
+
+  export type UserAccountCreateNestedOneWithoutViewedOthersInput = {
+    create?: XOR<UserAccountCreateWithoutViewedOthersInput, UserAccountUncheckedCreateWithoutViewedOthersInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutViewedOthersInput
+    connect?: UserAccountWhereUniqueInput
+  }
+
+  export type UserAccountUpdateOneRequiredWithoutProfileViewsNestedInput = {
+    create?: XOR<UserAccountCreateWithoutProfileViewsInput, UserAccountUncheckedCreateWithoutProfileViewsInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutProfileViewsInput
+    upsert?: UserAccountUpsertWithoutProfileViewsInput
+    connect?: UserAccountWhereUniqueInput
+    update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutProfileViewsInput, UserAccountUpdateWithoutProfileViewsInput>, UserAccountUncheckedUpdateWithoutProfileViewsInput>
+  }
+
+  export type UserAccountUpdateOneWithoutViewedOthersNestedInput = {
+    create?: XOR<UserAccountCreateWithoutViewedOthersInput, UserAccountUncheckedCreateWithoutViewedOthersInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutViewedOthersInput
+    upsert?: UserAccountUpsertWithoutViewedOthersInput
+    disconnect?: UserAccountWhereInput | boolean
+    delete?: UserAccountWhereInput | boolean
+    connect?: UserAccountWhereUniqueInput
+    update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutViewedOthersInput, UserAccountUpdateWithoutViewedOthersInput>, UserAccountUncheckedUpdateWithoutViewedOthersInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -5861,6 +7372,50 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ProfileViewCreateWithoutViewedProfileInput = {
+    id?: string
+    viewedAt?: Date | string
+    viewer?: UserAccountCreateNestedOneWithoutViewedOthersInput
+  }
+
+  export type ProfileViewUncheckedCreateWithoutViewedProfileInput = {
+    id?: string
+    viewerId?: string | null
+    viewedAt?: Date | string
+  }
+
+  export type ProfileViewCreateOrConnectWithoutViewedProfileInput = {
+    where: ProfileViewWhereUniqueInput
+    create: XOR<ProfileViewCreateWithoutViewedProfileInput, ProfileViewUncheckedCreateWithoutViewedProfileInput>
+  }
+
+  export type ProfileViewCreateManyViewedProfileInputEnvelope = {
+    data: ProfileViewCreateManyViewedProfileInput | ProfileViewCreateManyViewedProfileInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ProfileViewCreateWithoutViewerInput = {
+    id?: string
+    viewedAt?: Date | string
+    viewedProfile: UserAccountCreateNestedOneWithoutProfileViewsInput
+  }
+
+  export type ProfileViewUncheckedCreateWithoutViewerInput = {
+    id?: string
+    viewedProfileId: string
+    viewedAt?: Date | string
+  }
+
+  export type ProfileViewCreateOrConnectWithoutViewerInput = {
+    where: ProfileViewWhereUniqueInput
+    create: XOR<ProfileViewCreateWithoutViewerInput, ProfileViewUncheckedCreateWithoutViewerInput>
+  }
+
+  export type ProfileViewCreateManyViewerInputEnvelope = {
+    data: ProfileViewCreateManyViewerInput | ProfileViewCreateManyViewerInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserProfileUpsertWithoutUserAccountsInput = {
     update: XOR<UserProfileUpdateWithoutUserAccountsInput, UserProfileUncheckedUpdateWithoutUserAccountsInput>
     create: XOR<UserProfileCreateWithoutUserAccountsInput, UserProfileUncheckedCreateWithoutUserAccountsInput>
@@ -5922,6 +7477,48 @@ export namespace Prisma {
     cleanerId?: StringFilter<"ServiceListing"> | string
   }
 
+  export type ProfileViewUpsertWithWhereUniqueWithoutViewedProfileInput = {
+    where: ProfileViewWhereUniqueInput
+    update: XOR<ProfileViewUpdateWithoutViewedProfileInput, ProfileViewUncheckedUpdateWithoutViewedProfileInput>
+    create: XOR<ProfileViewCreateWithoutViewedProfileInput, ProfileViewUncheckedCreateWithoutViewedProfileInput>
+  }
+
+  export type ProfileViewUpdateWithWhereUniqueWithoutViewedProfileInput = {
+    where: ProfileViewWhereUniqueInput
+    data: XOR<ProfileViewUpdateWithoutViewedProfileInput, ProfileViewUncheckedUpdateWithoutViewedProfileInput>
+  }
+
+  export type ProfileViewUpdateManyWithWhereWithoutViewedProfileInput = {
+    where: ProfileViewScalarWhereInput
+    data: XOR<ProfileViewUpdateManyMutationInput, ProfileViewUncheckedUpdateManyWithoutViewedProfileInput>
+  }
+
+  export type ProfileViewScalarWhereInput = {
+    AND?: ProfileViewScalarWhereInput | ProfileViewScalarWhereInput[]
+    OR?: ProfileViewScalarWhereInput[]
+    NOT?: ProfileViewScalarWhereInput | ProfileViewScalarWhereInput[]
+    id?: StringFilter<"ProfileView"> | string
+    viewedProfileId?: StringFilter<"ProfileView"> | string
+    viewerId?: StringNullableFilter<"ProfileView"> | string | null
+    viewedAt?: DateTimeFilter<"ProfileView"> | Date | string
+  }
+
+  export type ProfileViewUpsertWithWhereUniqueWithoutViewerInput = {
+    where: ProfileViewWhereUniqueInput
+    update: XOR<ProfileViewUpdateWithoutViewerInput, ProfileViewUncheckedUpdateWithoutViewerInput>
+    create: XOR<ProfileViewCreateWithoutViewerInput, ProfileViewUncheckedCreateWithoutViewerInput>
+  }
+
+  export type ProfileViewUpdateWithWhereUniqueWithoutViewerInput = {
+    where: ProfileViewWhereUniqueInput
+    data: XOR<ProfileViewUpdateWithoutViewerInput, ProfileViewUncheckedUpdateWithoutViewerInput>
+  }
+
+  export type ProfileViewUpdateManyWithWhereWithoutViewerInput = {
+    where: ProfileViewScalarWhereInput
+    data: XOR<ProfileViewUpdateManyMutationInput, ProfileViewUncheckedUpdateManyWithoutViewerInput>
+  }
+
   export type UserAccountCreateWithoutUserProfileInput = {
     id?: string
     username: string
@@ -5931,6 +7528,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
   }
 
   export type UserAccountUncheckedCreateWithoutUserProfileInput = {
@@ -5942,6 +7541,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
   }
 
   export type UserAccountCreateOrConnectWithoutUserProfileInput = {
@@ -5993,6 +7594,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
+    profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
   }
 
   export type UserAccountUncheckedCreateWithoutServiceListingsInput = {
@@ -6004,6 +7607,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     userProfileId?: string | null
+    profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
   }
 
   export type UserAccountCreateOrConnectWithoutServiceListingsInput = {
@@ -6031,6 +7636,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
+    profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutServiceListingsInput = {
@@ -6042,6 +7649,144 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
+    profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
+  }
+
+  export type UserAccountCreateWithoutProfileViewsInput = {
+    id?: string
+    username: string
+    email: string
+    password: string
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
+    serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
+    viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
+  }
+
+  export type UserAccountUncheckedCreateWithoutProfileViewsInput = {
+    id?: string
+    username: string
+    email: string
+    password: string
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userProfileId?: string | null
+    serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
+    viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
+  }
+
+  export type UserAccountCreateOrConnectWithoutProfileViewsInput = {
+    where: UserAccountWhereUniqueInput
+    create: XOR<UserAccountCreateWithoutProfileViewsInput, UserAccountUncheckedCreateWithoutProfileViewsInput>
+  }
+
+  export type UserAccountCreateWithoutViewedOthersInput = {
+    id?: string
+    username: string
+    email: string
+    password: string
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
+    serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
+  }
+
+  export type UserAccountUncheckedCreateWithoutViewedOthersInput = {
+    id?: string
+    username: string
+    email: string
+    password: string
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userProfileId?: string | null
+    serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
+  }
+
+  export type UserAccountCreateOrConnectWithoutViewedOthersInput = {
+    where: UserAccountWhereUniqueInput
+    create: XOR<UserAccountCreateWithoutViewedOthersInput, UserAccountUncheckedCreateWithoutViewedOthersInput>
+  }
+
+  export type UserAccountUpsertWithoutProfileViewsInput = {
+    update: XOR<UserAccountUpdateWithoutProfileViewsInput, UserAccountUncheckedUpdateWithoutProfileViewsInput>
+    create: XOR<UserAccountCreateWithoutProfileViewsInput, UserAccountUncheckedCreateWithoutProfileViewsInput>
+    where?: UserAccountWhereInput
+  }
+
+  export type UserAccountUpdateToOneWithWhereWithoutProfileViewsInput = {
+    where?: UserAccountWhereInput
+    data: XOR<UserAccountUpdateWithoutProfileViewsInput, UserAccountUncheckedUpdateWithoutProfileViewsInput>
+  }
+
+  export type UserAccountUpdateWithoutProfileViewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
+    serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
+    viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
+  }
+
+  export type UserAccountUncheckedUpdateWithoutProfileViewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
+    viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
+  }
+
+  export type UserAccountUpsertWithoutViewedOthersInput = {
+    update: XOR<UserAccountUpdateWithoutViewedOthersInput, UserAccountUncheckedUpdateWithoutViewedOthersInput>
+    create: XOR<UserAccountCreateWithoutViewedOthersInput, UserAccountUncheckedCreateWithoutViewedOthersInput>
+    where?: UserAccountWhereInput
+  }
+
+  export type UserAccountUpdateToOneWithWhereWithoutViewedOthersInput = {
+    where?: UserAccountWhereInput
+    data: XOR<UserAccountUpdateWithoutViewedOthersInput, UserAccountUncheckedUpdateWithoutViewedOthersInput>
+  }
+
+  export type UserAccountUpdateWithoutViewedOthersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
+    serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
+  }
+
+  export type UserAccountUncheckedUpdateWithoutViewedOthersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
   }
 
   export type ServiceListingCreateManyCleanerInput = {
@@ -6054,6 +7799,18 @@ export namespace Prisma {
     availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type ProfileViewCreateManyViewedProfileInput = {
+    id?: string
+    viewerId?: string | null
+    viewedAt?: Date | string
+  }
+
+  export type ProfileViewCreateManyViewerInput = {
+    id?: string
+    viewedProfileId: string
+    viewedAt?: Date | string
   }
 
   export type ServiceListingUpdateWithoutCleanerInput = {
@@ -6092,6 +7849,42 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ProfileViewUpdateWithoutViewedProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    viewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    viewer?: UserAccountUpdateOneWithoutViewedOthersNestedInput
+  }
+
+  export type ProfileViewUncheckedUpdateWithoutViewedProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    viewerId?: NullableStringFieldUpdateOperationsInput | string | null
+    viewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfileViewUncheckedUpdateManyWithoutViewedProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    viewerId?: NullableStringFieldUpdateOperationsInput | string | null
+    viewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfileViewUpdateWithoutViewerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    viewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    viewedProfile?: UserAccountUpdateOneRequiredWithoutProfileViewsNestedInput
+  }
+
+  export type ProfileViewUncheckedUpdateWithoutViewerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    viewedProfileId?: StringFieldUpdateOperationsInput | string
+    viewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfileViewUncheckedUpdateManyWithoutViewerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    viewedProfileId?: StringFieldUpdateOperationsInput | string
+    viewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UserAccountCreateManyUserProfileInput = {
     id?: string
     username: string
@@ -6111,6 +7904,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutUserProfileInput = {
@@ -6122,6 +7917,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
   }
 
   export type UserAccountUncheckedUpdateManyWithoutUserProfileInput = {

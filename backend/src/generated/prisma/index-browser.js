@@ -153,6 +153,13 @@ exports.Prisma.ServiceListingScalarFieldEnum = {
   cleanerId: 'cleanerId'
 };
 
+exports.Prisma.ProfileViewScalarFieldEnum = {
+  id: 'id',
+  viewedProfileId: 'viewedProfileId',
+  viewerId: 'viewerId',
+  viewedAt: 'viewedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -189,7 +196,8 @@ exports.Permission = exports.$Enums.Permission = {
 exports.Prisma.ModelName = {
   UserAccount: 'UserAccount',
   UserProfile: 'UserProfile',
-  ServiceListing: 'ServiceListing'
+  ServiceListing: 'ServiceListing',
+  ProfileView: 'ProfileView'
 };
 
 /**

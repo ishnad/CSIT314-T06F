@@ -30,6 +30,10 @@ model UserAccount {
 
   // Relation to ServiceListings created by this user (if they are a Cleaner)
   serviceListings ServiceListing[]
+
+  // Relations for ProfileView
+  profileViews ProfileView[] @relation("ViewedProfile") // Profiles views this user received
+  viewedOthers ProfileView[] @relation("ProfileViewer") // Profiles this user viewed
 }
 
 // Define standard permissions
@@ -85,4 +89,17 @@ enum UserStatus {
   INACTIVE
   SUSPENDED
   BANNED
+}
+
+// Model to track profile views
+model ProfileView {
+  id              String       @id @default(cuid())
+  viewedProfileId String // ID of the UserAccount (Cleaner) whose profile was viewed
+  viewedProfile   UserAccount  @relation("ViewedProfile", fields: [viewedProfileId], references: [id], onDelete: Cascade) // If cleaner account is deleted, views are removed
+  viewerId        String? // ID of the UserAccount who viewed the profile (optional, if logged in)
+  viewer          UserAccount? @relation("ProfileViewer", fields: [viewerId], references: [id], onDelete: SetNull) // If viewer account is deleted, viewerId becomes null
+  viewedAt        DateTime     @default(now())
+
+  @@index([viewedProfileId, viewedAt])
+  @@index([viewerId])
 }
