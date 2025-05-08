@@ -12,14 +12,12 @@ class ServiceListingEntity {
      * @param {string} listingData.title - Title of the listing.
      * @param {string} listingData.description - Description of the service.
      * @param {number} listingData.ratePerHr - Rate per hour.
-     * @param {number} listingData.duration - Estimated duration in hours.
-     * @param {string} listingData.availability - ISO 8601 date string for availability.
      * @param {string} listingData.cleanerId - ID of the user creating the listing.
      * @returns {Promise<object>} The created listing object or an error object.
      */
     async createServiceListing(listingData) {
         // Destructure data first for validation
-        const { serviceType, title, description, ratePerHr, duration, availability, cleanerId } = listingData;
+        const { serviceType, title, description, ratePerHr, cleanerId } = listingData;
 
         // --- Inlined Validation Logic ---
         if (!serviceType || typeof serviceType !== 'string' || serviceType.trim().length === 0) {
@@ -34,23 +32,11 @@ class ServiceListingEntity {
         if (ratePerHr === undefined || ratePerHr === null) {
             return { error: { status: 400, error: 'Rate per hour is required.' }};
         }
-        if (duration === undefined || duration === null) {
-            return { error: { status: 400, error: 'Duration is required.' }};
-        }
-        if (!availability || typeof availability !== 'string') {
-             return { error: { status: 400, error: 'Availability is required and must be a string.' }};
-        }
         if (!cleanerId || typeof cleanerId !== 'string' || cleanerId.trim().length === 0) {
              return { error: { status: 400, error: 'Cleaner ID must be provided.' }};
         }
         if (typeof ratePerHr !== 'number' || ratePerHr <= 0) {
             return { error: { status: 400, error: 'Rate per hour must be a positive number.' }};
-        }
-        if (typeof duration !== 'number' || duration <= 0) {
-            return { error: { status: 400, error: 'Duration must be a positive number.' }};
-        }
-        if (isNaN(Date.parse(availability))) {
-             return { error: { status: 400, error: 'Availability must be a valid ISO 8601 date string.' }};
         }
         // --- End Inlined Validation Logic ---
 
@@ -75,8 +61,6 @@ class ServiceListingEntity {
                     title: title.trim(),
                     description: description.trim(),
                     ratePerHr: ratePerHr,
-                    duration: duration,
-                    availability: new Date(availability), // Convert ISO string to Date object
                     cleanerId: cleanerId,
                 },
                 // Select the fields to return
@@ -86,8 +70,6 @@ class ServiceListingEntity {
                     title: true,
                     description: true,
                     ratePerHr: true,
-                    duration: true,
-                    availability: true,
                     createdAt: true,
                     cleaner: { // Include cleaner's username for context
                         select: {
@@ -140,8 +122,6 @@ class ServiceListingEntity {
                     title: true,
                     description: true,
                     ratePerHr: true,
-                    duration: true,
-                    availability: true,
                     createdAt: true,
                     cleanerId: true, // Need cleanerId to verify ownership
                     cleaner: { // Include cleaner's username for context
@@ -186,11 +166,10 @@ class ServiceListingEntity {
      * @param {string} [updateData.serviceType] - Type of service.
      * @param {string} [updateData.description] - Description of the service.
      * @param {number} [updateData.ratePerHr] - Rate per hour.
-     * @param {string} [updateData.availability] - ISO 8601 date string for availability.
      * @returns {object|null} Error object { status: number, error: string } or null if valid.
      */
     validateEditInput(updateData) {
-        const { serviceType, description, ratePerHr, availability } = updateData;
+        const { serviceType, description, ratePerHr } = updateData;
 
         if (serviceType !== undefined) {
             if (typeof serviceType !== 'string' || serviceType.trim().length === 0) {
@@ -207,12 +186,6 @@ class ServiceListingEntity {
                 return { status: 400, error: 'Rate per hour must be a positive number.' };
             }
         }
-        if (availability !== undefined) {
-            if (typeof availability !== 'string' || isNaN(Date.parse(availability))) {
-                return { status: 400, error: 'Availability must be a valid ISO 8601 date string.' };
-            }
-        }
-        // Note: Title and Duration are not part of CL21 edit, so not validated here.
         return null; // Input is valid for the provided fields
     }
 
@@ -221,7 +194,7 @@ class ServiceListingEntity {
      * @param {string} listingId - The ID of the listing to edit.
      * @param {string} cleanerId - The ID of the cleaner attempting the edit (for ownership verification).
      * @param {object} updateData - Data to update the listing with.
-     * @returns {Promise<object>} The updated listing object or an error object.
+     * @returns {Promise<boolean|object>} True if successful, or an error object.
      */
     async editServiceListing(listingId, cleanerId, updateData) {
         if (!listingId || typeof listingId !== 'string') {
@@ -232,7 +205,7 @@ class ServiceListingEntity {
         }
 
         // Check if there's anything to update
-        const allowedUpdateFields = ['serviceType', 'description', 'ratePerHr', 'availability'];
+        const allowedUpdateFields = ['serviceType', 'description', 'ratePerHr'];
         const actualUpdateData = {};
         let hasUpdateFields = false;
         for (const field of allowedUpdateFields) {
@@ -276,38 +249,13 @@ class ServiceListingEntity {
             if (actualUpdateData.ratePerHr !== undefined) {
                 prismaUpdateData.ratePerHr = actualUpdateData.ratePerHr;
             }
-            if (actualUpdateData.availability !== undefined) {
-                prismaUpdateData.availability = new Date(actualUpdateData.availability);
-            }
 
             const updatedListing = await this.prisma.serviceListing.update({
                 where: { id: listingId },
                 data: prismaUpdateData,
-                select: {
-                    id: true,
-                    serviceType: true,
-                    title: true, // Return title even if not edited
-                    description: true,
-                    ratePerHr: true,
-                    duration: true, // Return duration even if not edited
-                    availability: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    cleaner: {
-                        select: {
-                            id: true,
-                            username: true
-                        }
-                    }
-                }
             });
 
-            return {
-                ...updatedListing,
-                cleanerId: updatedListing.cleaner.id,
-                cleanerUsername: updatedListing.cleaner.username,
-                cleaner: undefined
-            };
+            return true; // Successfully updated
 
         } catch (error) {
             console.error(`Error editing service listing ${listingId}:`, error);
@@ -326,7 +274,7 @@ class ServiceListingEntity {
      * Suspends a service listing.
      * @param {string} listingId - The ID of the listing to suspend.
      * @param {string} cleanerId - The ID of the cleaner attempting the suspension (for ownership verification).
-     * @returns {Promise<object>} The updated listing object or an error object.
+     * @returns {Promise<boolean|object>} True if successful, or an error object.
      */
     async suspendServiceListing(listingId, cleanerId) {
         if (!listingId || typeof listingId !== 'string') {
@@ -353,35 +301,12 @@ class ServiceListingEntity {
                 return { error: { status: 400, error: 'Service listing is already suspended.' } };
             }
 
-            const suspendedListing = await this.prisma.serviceListing.update({
+            await this.prisma.serviceListing.update({
                 where: { id: listingId },
                 data: { status: 'SUSPENDED' },
-                select: {
-                    id: true,
-                    serviceType: true,
-                    title: true,
-                    description: true,
-                    ratePerHr: true,
-                    duration: true,
-                    availability: true,
-                    status: true, // Return the new status
-                    createdAt: true,
-                    updatedAt: true,
-                    cleaner: {
-                        select: {
-                            id: true,
-                            username: true
-                        }
-                    }
-                }
             });
 
-            return {
-                ...suspendedListing,
-                cleanerId: suspendedListing.cleaner.id,
-                cleanerUsername: suspendedListing.cleaner.username,
-                cleaner: undefined
-            };
+            return true; // Successfully suspended
 
         } catch (error) {
             console.error(`Error suspending service listing ${listingId}:`, error);
@@ -403,8 +328,6 @@ class ServiceListingEntity {
      * @param {string} [filters.serviceType] - Filter by service type.
      * @param {number} [filters.minRate] - Minimum rate per hour.
      * @param {number} [filters.maxRate] - Maximum rate per hour.
-     * @param {string} [filters.availabilityStartDate] - ISO 8601 date string for start of availability range.
-     * @param {string} [filters.availabilityEndDate] - ISO 8601 date string for end of availability range.
      * @returns {Promise<Array<object>|object>} Array of listing objects or an error/message object.
      */
     async searchListings(searcherCleanerId, filters = {}) {
@@ -413,7 +336,7 @@ class ServiceListingEntity {
             return { error: { status: 401, error: 'Authentication required to perform search.' } };
         }
 
-        const { keyword, serviceType, minRate, maxRate, availabilityStartDate, availabilityEndDate } = filters;
+        const { keyword, serviceType, minRate, maxRate } = filters;
         const whereConditions = {
             status: 'ACTIVE', // Only search active listings
             cleanerId: {
@@ -450,31 +373,6 @@ class ServiceListingEntity {
             whereConditions.ratePerHr = rateFilter;
         }
 
-        const availabilityDateFilter = {};
-        if (availabilityStartDate) {
-            const parsedStartDate = new Date(availabilityStartDate);
-            if (!isNaN(parsedStartDate)) {
-                availabilityDateFilter.gte = parsedStartDate;
-            } else {
-                return { error: { status: 400, error: 'Invalid availability start date format. Use YYYY-MM-DD.' } };
-            }
-        }
-        if (availabilityEndDate) {
-            const parsedEndDate = new Date(availabilityEndDate);
-            if (!isNaN(parsedEndDate)) {
-                parsedEndDate.setUTCHours(23, 59, 59, 999); // Include the whole end day
-                availabilityDateFilter.lte = parsedEndDate;
-            } else {
-                return { error: { status: 400, error: 'Invalid availability end date format. Use YYYY-MM-DD.' } };
-            }
-        }
-        if (availabilityStartDate && availabilityEndDate && new Date(availabilityEndDate) < new Date(availabilityStartDate)) {
-            return { error: { status: 400, error: 'Availability end date cannot be before start date.' } };
-        }
-        if (Object.keys(availabilityDateFilter).length > 0) {
-            whereConditions.availability = availabilityDateFilter;
-        }
-
         try {
             const listings = await this.prisma.serviceListing.findMany({
                 where: whereConditions,
@@ -484,8 +382,6 @@ class ServiceListingEntity {
                     title: true,
                     description: true,
                     ratePerHr: true,
-                    duration: true,
-                    availability: true,
                     updatedAt: true, // To show how recent the listing is
                     cleaner: {
                         select: {

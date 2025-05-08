@@ -3897,12 +3897,10 @@ export namespace Prisma {
 
   export type ServiceListingAvgAggregateOutputType = {
     ratePerHr: number | null
-    duration: number | null
   }
 
   export type ServiceListingSumAggregateOutputType = {
     ratePerHr: number | null
-    duration: number | null
   }
 
   export type ServiceListingMinAggregateOutputType = {
@@ -3911,8 +3909,6 @@ export namespace Prisma {
     title: string | null
     description: string | null
     ratePerHr: number | null
-    duration: number | null
-    availability: Date | null
     createdAt: Date | null
     updatedAt: Date | null
     cleanerId: string | null
@@ -3925,8 +3921,6 @@ export namespace Prisma {
     title: string | null
     description: string | null
     ratePerHr: number | null
-    duration: number | null
-    availability: Date | null
     createdAt: Date | null
     updatedAt: Date | null
     cleanerId: string | null
@@ -3939,8 +3933,6 @@ export namespace Prisma {
     title: number
     description: number
     ratePerHr: number
-    duration: number
-    availability: number
     createdAt: number
     updatedAt: number
     cleanerId: number
@@ -3951,12 +3943,10 @@ export namespace Prisma {
 
   export type ServiceListingAvgAggregateInputType = {
     ratePerHr?: true
-    duration?: true
   }
 
   export type ServiceListingSumAggregateInputType = {
     ratePerHr?: true
-    duration?: true
   }
 
   export type ServiceListingMinAggregateInputType = {
@@ -3965,8 +3955,6 @@ export namespace Prisma {
     title?: true
     description?: true
     ratePerHr?: true
-    duration?: true
-    availability?: true
     createdAt?: true
     updatedAt?: true
     cleanerId?: true
@@ -3979,8 +3967,6 @@ export namespace Prisma {
     title?: true
     description?: true
     ratePerHr?: true
-    duration?: true
-    availability?: true
     createdAt?: true
     updatedAt?: true
     cleanerId?: true
@@ -3993,8 +3979,6 @@ export namespace Prisma {
     title?: true
     description?: true
     ratePerHr?: true
-    duration?: true
-    availability?: true
     createdAt?: true
     updatedAt?: true
     cleanerId?: true
@@ -4094,8 +4078,6 @@ export namespace Prisma {
     title: string
     description: string
     ratePerHr: number
-    duration: number
-    availability: Date
     createdAt: Date
     updatedAt: Date
     cleanerId: string
@@ -4127,8 +4109,6 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     ratePerHr?: boolean
-    duration?: boolean
-    availability?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     cleanerId?: boolean
@@ -4144,8 +4124,6 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     ratePerHr?: boolean
-    duration?: boolean
-    availability?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     cleanerId?: boolean
@@ -4159,8 +4137,6 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     ratePerHr?: boolean
-    duration?: boolean
-    availability?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     cleanerId?: boolean
@@ -4174,15 +4150,13 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     ratePerHr?: boolean
-    duration?: boolean
-    availability?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     cleanerId?: boolean
     status?: boolean
   }
 
-  export type ServiceListingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "serviceType" | "title" | "description" | "ratePerHr" | "duration" | "availability" | "createdAt" | "updatedAt" | "cleanerId" | "status", ExtArgs["result"]["serviceListing"]>
+  export type ServiceListingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "serviceType" | "title" | "description" | "ratePerHr" | "createdAt" | "updatedAt" | "cleanerId" | "status", ExtArgs["result"]["serviceListing"]>
   export type ServiceListingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
     confirmedMatches?: boolean | ServiceListing$confirmedMatchesArgs<ExtArgs>
@@ -4207,8 +4181,6 @@ export namespace Prisma {
       title: string
       description: string
       ratePerHr: number
-      duration: number
-      availability: Date
       createdAt: Date
       updatedAt: Date
       cleanerId: string
@@ -4643,8 +4615,6 @@ export namespace Prisma {
     readonly title: FieldRef<"ServiceListing", 'String'>
     readonly description: FieldRef<"ServiceListing", 'String'>
     readonly ratePerHr: FieldRef<"ServiceListing", 'Float'>
-    readonly duration: FieldRef<"ServiceListing", 'Float'>
-    readonly availability: FieldRef<"ServiceListing", 'DateTime'>
     readonly createdAt: FieldRef<"ServiceListing", 'DateTime'>
     readonly updatedAt: FieldRef<"ServiceListing", 'DateTime'>
     readonly cleanerId: FieldRef<"ServiceListing", 'String'>
@@ -8311,8 +8281,6 @@ export namespace Prisma {
     title: 'title',
     description: 'description',
     ratePerHr: 'ratePerHr',
-    duration: 'duration',
-    availability: 'availability',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     cleanerId: 'cleanerId',
@@ -8653,8 +8621,6 @@ export namespace Prisma {
     title?: StringFilter<"ServiceListing"> | string
     description?: StringFilter<"ServiceListing"> | string
     ratePerHr?: FloatFilter<"ServiceListing"> | number
-    duration?: FloatFilter<"ServiceListing"> | number
-    availability?: DateTimeFilter<"ServiceListing"> | Date | string
     createdAt?: DateTimeFilter<"ServiceListing"> | Date | string
     updatedAt?: DateTimeFilter<"ServiceListing"> | Date | string
     cleanerId?: StringFilter<"ServiceListing"> | string
@@ -8669,8 +8635,6 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     ratePerHr?: SortOrder
-    duration?: SortOrder
-    availability?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     cleanerId?: SortOrder
@@ -8688,8 +8652,6 @@ export namespace Prisma {
     title?: StringFilter<"ServiceListing"> | string
     description?: StringFilter<"ServiceListing"> | string
     ratePerHr?: FloatFilter<"ServiceListing"> | number
-    duration?: FloatFilter<"ServiceListing"> | number
-    availability?: DateTimeFilter<"ServiceListing"> | Date | string
     createdAt?: DateTimeFilter<"ServiceListing"> | Date | string
     updatedAt?: DateTimeFilter<"ServiceListing"> | Date | string
     cleanerId?: StringFilter<"ServiceListing"> | string
@@ -8704,8 +8666,6 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     ratePerHr?: SortOrder
-    duration?: SortOrder
-    availability?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     cleanerId?: SortOrder
@@ -8726,8 +8686,6 @@ export namespace Prisma {
     title?: StringWithAggregatesFilter<"ServiceListing"> | string
     description?: StringWithAggregatesFilter<"ServiceListing"> | string
     ratePerHr?: FloatWithAggregatesFilter<"ServiceListing"> | number
-    duration?: FloatWithAggregatesFilter<"ServiceListing"> | number
-    availability?: DateTimeWithAggregatesFilter<"ServiceListing"> | Date | string
     createdAt?: DateTimeWithAggregatesFilter<"ServiceListing"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ServiceListing"> | Date | string
     cleanerId?: StringWithAggregatesFilter<"ServiceListing"> | string
@@ -9067,8 +9025,6 @@ export namespace Prisma {
     title: string
     description: string
     ratePerHr: number
-    duration: number
-    availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
     status?: $Enums.ServiceListingStatus
@@ -9082,8 +9038,6 @@ export namespace Prisma {
     title: string
     description: string
     ratePerHr: number
-    duration: number
-    availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
     cleanerId: string
@@ -9097,8 +9051,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     ratePerHr?: FloatFieldUpdateOperationsInput | number
-    duration?: FloatFieldUpdateOperationsInput | number
-    availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
@@ -9112,8 +9064,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     ratePerHr?: FloatFieldUpdateOperationsInput | number
-    duration?: FloatFieldUpdateOperationsInput | number
-    availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cleanerId?: StringFieldUpdateOperationsInput | string
@@ -9127,8 +9077,6 @@ export namespace Prisma {
     title: string
     description: string
     ratePerHr: number
-    duration: number
-    availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
     cleanerId: string
@@ -9141,8 +9089,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     ratePerHr?: FloatFieldUpdateOperationsInput | number
-    duration?: FloatFieldUpdateOperationsInput | number
-    availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
@@ -9154,8 +9100,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     ratePerHr?: FloatFieldUpdateOperationsInput | number
-    duration?: FloatFieldUpdateOperationsInput | number
-    availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cleanerId?: StringFieldUpdateOperationsInput | string
@@ -9583,8 +9527,6 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     ratePerHr?: SortOrder
-    duration?: SortOrder
-    availability?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     cleanerId?: SortOrder
@@ -9593,7 +9535,6 @@ export namespace Prisma {
 
   export type ServiceListingAvgOrderByAggregateInput = {
     ratePerHr?: SortOrder
-    duration?: SortOrder
   }
 
   export type ServiceListingMaxOrderByAggregateInput = {
@@ -9602,8 +9543,6 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     ratePerHr?: SortOrder
-    duration?: SortOrder
-    availability?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     cleanerId?: SortOrder
@@ -9616,8 +9555,6 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     ratePerHr?: SortOrder
-    duration?: SortOrder
-    availability?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     cleanerId?: SortOrder
@@ -9626,7 +9563,6 @@ export namespace Prisma {
 
   export type ServiceListingSumOrderByAggregateInput = {
     ratePerHr?: SortOrder
-    duration?: SortOrder
   }
 
   export type FloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -10442,8 +10378,6 @@ export namespace Prisma {
     title: string
     description: string
     ratePerHr: number
-    duration: number
-    availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
     status?: $Enums.ServiceListingStatus
@@ -10456,8 +10390,6 @@ export namespace Prisma {
     title: string
     description: string
     ratePerHr: number
-    duration: number
-    availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
     status?: $Enums.ServiceListingStatus
@@ -10638,8 +10570,6 @@ export namespace Prisma {
     title?: StringFilter<"ServiceListing"> | string
     description?: StringFilter<"ServiceListing"> | string
     ratePerHr?: FloatFilter<"ServiceListing"> | number
-    duration?: FloatFilter<"ServiceListing"> | number
-    availability?: DateTimeFilter<"ServiceListing"> | Date | string
     createdAt?: DateTimeFilter<"ServiceListing"> | Date | string
     updatedAt?: DateTimeFilter<"ServiceListing"> | Date | string
     cleanerId?: StringFilter<"ServiceListing"> | string
@@ -11272,8 +11202,6 @@ export namespace Prisma {
     title: string
     description: string
     ratePerHr: number
-    duration: number
-    availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
     status?: $Enums.ServiceListingStatus
@@ -11286,8 +11214,6 @@ export namespace Prisma {
     title: string
     description: string
     ratePerHr: number
-    duration: number
-    availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
     cleanerId: string
@@ -11353,8 +11279,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     ratePerHr?: FloatFieldUpdateOperationsInput | number
-    duration?: FloatFieldUpdateOperationsInput | number
-    availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
@@ -11367,8 +11291,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     ratePerHr?: FloatFieldUpdateOperationsInput | number
-    duration?: FloatFieldUpdateOperationsInput | number
-    availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     cleanerId?: StringFieldUpdateOperationsInput | string
@@ -11424,8 +11346,6 @@ export namespace Prisma {
     title: string
     description: string
     ratePerHr: number
-    duration: number
-    availability: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
     status?: $Enums.ServiceListingStatus
@@ -11467,8 +11387,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     ratePerHr?: FloatFieldUpdateOperationsInput | number
-    duration?: FloatFieldUpdateOperationsInput | number
-    availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
@@ -11481,8 +11399,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     ratePerHr?: FloatFieldUpdateOperationsInput | number
-    duration?: FloatFieldUpdateOperationsInput | number
-    availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus
@@ -11495,8 +11411,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     ratePerHr?: FloatFieldUpdateOperationsInput | number
-    duration?: FloatFieldUpdateOperationsInput | number
-    availability?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumServiceListingStatusFieldUpdateOperationsInput | $Enums.ServiceListingStatus

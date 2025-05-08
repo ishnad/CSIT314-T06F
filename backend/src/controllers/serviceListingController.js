@@ -24,18 +24,17 @@ class CreateServiceListingController {
         }
         // --- End Authorization Check ---
 
-        const { serviceType, title, description, ratePerHr, duration, availability } = req.body;
+        const { serviceType, title, description, ratePerHr } = req.body;
 
         // Basic check for required fields in the body (entity does more detailed validation)
-        if (!serviceType || !title || !description || ratePerHr === undefined || duration === undefined || !availability) {
-            return res.status(400).json({ error: 'Missing required fields in request body: serviceType, title, description, ratePerHr, duration, availability.' });
+        if (!serviceType || !title || !description || ratePerHr === undefined ) {
+            return res.status(400).json({ error: 'Missing required fields in request body: serviceType, title, description, ratePerHr.' });
         }
 
         // Ensure numeric types are actually numbers before passing to entity
         const numericRate = parseFloat(ratePerHr);
-        const numericDuration = parseFloat(duration);
-        if (isNaN(numericRate) || isNaN(numericDuration)) {
-             return res.status(400).json({ error: 'ratePerHr and duration must be valid numbers.' });
+        if (isNaN(numericRate)) {
+             return res.status(400).json({ error: 'ratePerHr must be a valid number.' });
         }
 
         try {
@@ -44,8 +43,6 @@ class CreateServiceListingController {
                 title,
                 description,
                 ratePerHr: numericRate,
-                duration: numericDuration,
-                availability, // Pass as string, entity converts
                 cleanerId // Pass the authenticated cleaner's ID
             };
 
@@ -135,7 +132,7 @@ class EditServiceListingController {
         }
         // --- End Authorization Check ---
 
-        const { serviceType, description, ratePerHr, availability } = req.body;
+        const { serviceType, description, ratePerHr } = req.body;
         const updateData = {};
 
         // Only include fields in updateData if they are present in the request body
@@ -148,11 +145,10 @@ class EditServiceListingController {
             }
             updateData.ratePerHr = numericRate;
         }
-        if (availability !== undefined) updateData.availability = availability;
 
 
         if (Object.keys(updateData).length === 0) {
-            return res.status(400).json({ error: 'No fields provided for update. Please provide serviceType, description, ratePerHr, or availability.' });
+            return res.status(400).json({ error: 'No fields provided for update. Please provide serviceType, description, or ratePerHr.' });
         }
 
         try {
@@ -160,8 +156,13 @@ class EditServiceListingController {
 
             if (result.error) {
                 res.status(result.error.status).json({ error: result.error.error });
+            } else if (result === true) {
+                // Entity returned true, meaning success
+                res.status(200).json({ message: 'Service listing updated successfully.' });
             } else {
-                res.status(200).json({ message: 'Service listing updated successfully.', listing: result });
+                // Should not happen if entity behaves as expected (true or error object)
+                console.error("Controller error: editServiceListing entity returned unexpected value:", result);
+                res.status(500).json({ error: 'An unexpected error occurred while editing the service listing.' });
             }
         } catch (error) {
             console.error(`Controller error editing service listing ${listingId}:`, error);
@@ -202,8 +203,13 @@ class SuspendServiceListingController {
 
             if (result.error) {
                 res.status(result.error.status).json({ error: result.error.error });
+            } else if (result === true) {
+                // Entity returned true, meaning success
+                res.status(200).json({ message: 'Service listing suspended successfully.' });
             } else {
-                res.status(200).json({ message: 'Service listing suspended successfully.', listing: result });
+                // Should not happen if entity behaves as expected (true or error object)
+                console.error("Controller error: suspendServiceListing entity returned unexpected value:", result);
+                res.status(500).json({ error: 'An unexpected error occurred while suspending the service listing.' });
             }
         } catch (error) {
             console.error(`Controller error suspending service listing ${listingId}:`, error);
@@ -238,7 +244,7 @@ class SearchServiceListingsController {
 
 
         // Extract filters from query parameters
-        const { keyword, serviceType, minRate, maxRate, availabilityStartDate, availabilityEndDate } = req.query;
+        const { keyword, serviceType, minRate, maxRate } = req.query;
         const filters = {};
 
         if (keyword) filters.keyword = keyword;
@@ -253,8 +259,6 @@ class SearchServiceListingsController {
             if (!isNaN(numMaxRate)) filters.maxRate = numMaxRate;
             else return res.status(400).json({ error: 'maxRate must be a valid number.'});
         }
-        if (availabilityStartDate) filters.availabilityStartDate = availabilityStartDate;
-        if (availabilityEndDate) filters.availabilityEndDate = availabilityEndDate;
 
         try {
             const result = await this.serviceListingEntity.searchListings(searcherCleanerId, filters);

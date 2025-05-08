@@ -45,15 +45,11 @@ describe('ServiceListingEntity', () => {
 
     // --- Test createServiceListing ---
     describe('createServiceListing', () => {
-        const validDate = new Date();
-        const validDateISO = validDate.toISOString();
         const listingData = {
             serviceType: ' Window Cleaning ', // With whitespace
             title: ' Sparkling Windows ', // With whitespace
             description: ' Streak-free guarantee! ', // With whitespace
             ratePerHr: 30,
-            duration: 2.5,
-            availability: validDateISO,
             cleanerId: 'cleaner-id-abc',
         };
         const mockCleaner = {
@@ -72,8 +68,6 @@ describe('ServiceListingEntity', () => {
             title: 'Sparkling Windows',
             description: 'Streak-free guarantee!',
             ratePerHr: 30,
-            duration: 2.5,
-            availability: validDate,
             createdAt: new Date(),
             cleaner: {
                 id: listingData.cleanerId,
@@ -86,8 +80,6 @@ describe('ServiceListingEntity', () => {
             title: 'Sparkling Windows',
             description: 'Streak-free guarantee!',
             ratePerHr: 30,
-            duration: 2.5,
-            availability: validDate,
             createdAt: createdListingRaw.createdAt,
             cleanerId: listingData.cleanerId,
             cleanerUsername: mockCleaner.username,
@@ -112,8 +104,6 @@ describe('ServiceListingEntity', () => {
                     title: 'Sparkling Windows', // Trimmed
                     description: 'Streak-free guarantee!', // Trimmed
                     ratePerHr: listingData.ratePerHr,
-                    duration: listingData.duration,
-                    availability: validDate, // Converted to Date object
                     cleanerId: listingData.cleanerId,
                 },
                 select: expect.any(Object), // Check that select is used
@@ -156,20 +146,6 @@ describe('ServiceListingEntity', () => {
             expect(result).toEqual(expectedError);
         });
 
-        it('should return validation error if duration is missing', async () => {
-            const invalidData = { ...listingData, duration: undefined };
-            const expectedError = { error: { status: 400, error: 'Duration is required.' } };
-            const result = await serviceListingEntity.createServiceListing(invalidData);
-            expect(result).toEqual(expectedError);
-        });
-
-        it('should return validation error if availability is missing', async () => {
-            const invalidData = { ...listingData, availability: undefined };
-            const expectedError = { error: { status: 400, error: 'Availability is required and must be a string.' } };
-            const result = await serviceListingEntity.createServiceListing(invalidData);
-            expect(result).toEqual(expectedError);
-        });
-
         it('should return validation error if cleanerId is missing', async () => {
             const invalidData = { ...listingData, cleanerId: undefined };
             const expectedError = { error: { status: 400, error: 'Cleaner ID must be provided.' } };
@@ -187,27 +163,6 @@ describe('ServiceListingEntity', () => {
         it('should return validation error for non-numeric ratePerHr', async () => {
             const invalidData = { ...listingData, ratePerHr: "abc" };
             const expectedError = { error: { status: 400, error: 'Rate per hour must be a positive number.' } };
-            const result = await serviceListingEntity.createServiceListing(invalidData);
-            expect(result).toEqual(expectedError);
-        });
-
-        it('should return validation error for non-positive duration', async () => {
-            const invalidData = { ...listingData, duration: 0 };
-            const expectedError = { error: { status: 400, error: 'Duration must be a positive number.' } };
-            const result = await serviceListingEntity.createServiceListing(invalidData);
-            expect(result).toEqual(expectedError);
-        });
-
-        it('should return validation error for non-numeric duration', async () => {
-            const invalidData = { ...listingData, duration: "two" };
-            const expectedError = { error: { status: 400, error: 'Duration must be a positive number.' } };
-            const result = await serviceListingEntity.createServiceListing(invalidData);
-            expect(result).toEqual(expectedError);
-        });
-
-        it('should return validation error for invalid availability date string', async () => {
-            const invalidData = { ...listingData, availability: 'not-a-date' };
-            const expectedError = { error: { status: 400, error: 'Availability must be a valid ISO 8601 date string.' } };
             const result = await serviceListingEntity.createServiceListing(invalidData);
             expect(result).toEqual(expectedError);
         });
@@ -293,8 +248,6 @@ describe('ServiceListingEntity', () => {
             title: 'Lawn Mowing',
             description: 'Basic lawn mowing service.',
             ratePerHr: 40,
-            duration: 1.5,
-            availability: new Date(),
             createdAt: new Date(),
             cleanerId: ownerCleanerId, // Belongs to ownerCleanerId
             cleaner: {
@@ -400,15 +353,11 @@ describe('ServiceListingEntity', () => {
         it('should return null for valid partial input (only ratePerHr)', () => {
             expect(serviceListingEntity.validateEditInput({ ratePerHr: 30 })).toBeNull();
         });
-        it('should return null for valid partial input (only availability)', () => {
-            expect(serviceListingEntity.validateEditInput({ availability: new Date().toISOString() })).toBeNull();
-        });
-        it('should return null for valid full input', () => {
+        it('should return null for valid full input (serviceType, description, ratePerHr)', () => {
             expect(serviceListingEntity.validateEditInput({
                 serviceType: 'Cleaning',
                 description: 'Good clean',
-                ratePerHr: 20,
-                availability: new Date().toISOString()
+                ratePerHr: 20
             })).toBeNull();
         });
         it('should return null if no editable fields are provided (empty object)', () => {
@@ -433,15 +382,9 @@ describe('ServiceListingEntity', () => {
             expect(serviceListingEntity.validateEditInput({ ratePerHr: 'abc' }))
                 .toEqual({ status: 400, error: 'Rate per hour must be a positive number.' });
         });
-        it('should validate availability if provided', () => {
-            expect(serviceListingEntity.validateEditInput({ availability: 'not-a-date' }))
-                .toEqual({ status: 400, error: 'Availability must be a valid ISO 8601 date string.' });
-            expect(serviceListingEntity.validateEditInput({ availability: 12345 }))
-                .toEqual({ status: 400, error: 'Availability must be a valid ISO 8601 date string.' });
-        });
-        it('should ignore fields not meant for editing (e.g. title, duration)', () => {
+        it('should ignore fields not meant for editing (e.g. title, duration, availability)', () => {
             expect(serviceListingEntity.validateEditInput({ title: '' })).toBeNull();
-            expect(serviceListingEntity.validateEditInput({ duration: 0 })).toBeNull();
+            expect(serviceListingEntity.validateEditInput({ availability: 'some-date' })).toBeNull();
         });
     });
 
@@ -454,32 +397,13 @@ describe('ServiceListingEntity', () => {
             serviceType: ' Specialized Cleaning ',
             description: ' Detailed and specific. ',
             ratePerHr: 50.0,
-            availability: new Date().toISOString(),
         };
         const expectedPrismaUpdateData = {
             serviceType: 'Specialized Cleaning',
             description: 'Detailed and specific.',
             ratePerHr: 50.0,
-            availability: new Date(validUpdateData.availability),
         };
-        const mockUpdatedListingRaw = {
-            id: listingId,
-            serviceType: expectedPrismaUpdateData.serviceType,
-            title: 'Original Title', // Assuming title is not changed
-            description: expectedPrismaUpdateData.description,
-            ratePerHr: expectedPrismaUpdateData.ratePerHr,
-            duration: 2, // Assuming duration is not changed
-            availability: expectedPrismaUpdateData.availability,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            cleaner: { id: cleanerId, username: 'testCleanerOwner' }
-        };
-        const expectedResult = {
-            ...mockUpdatedListingRaw,
-            cleanerId: mockUpdatedListingRaw.cleaner.id,
-            cleanerUsername: mockUpdatedListingRaw.cleaner.username,
-            cleaner: undefined
-        };
+        // No longer need mockUpdatedListingRaw or expectedResult as entity returns boolean
 
         beforeEach(() => {
             // Ensure 'update' is mocked on serviceListing
@@ -488,9 +412,9 @@ describe('ServiceListingEntity', () => {
             }
         });
 
-        it('should edit a service listing successfully', async () => {
+        it('should edit a service listing successfully and return true', async () => {
             mockPrismaClient.serviceListing.findUnique.mockResolvedValue(mockExistingListing);
-            mockPrismaClient.serviceListing.update.mockResolvedValue(mockUpdatedListingRaw);
+            mockPrismaClient.serviceListing.update.mockResolvedValue({}); // Prisma update returns the object, but we return true
 
             const result = await serviceListingEntity.editServiceListing(listingId, cleanerId, validUpdateData);
             
@@ -498,9 +422,9 @@ describe('ServiceListingEntity', () => {
             expect(mockPrismaClient.serviceListing.update).toHaveBeenCalledWith({
                 where: { id: listingId },
                 data: expectedPrismaUpdateData,
-                select: expect.any(Object)
+                // No select needed as we are returning true/false or error
             });
-            expect(result).toEqual(expectedResult);
+            expect(result).toBe(true);
         });
 
         it('should return 400 if listingId is invalid', async () => {
@@ -519,7 +443,7 @@ describe('ServiceListingEntity', () => {
         });
 
         it('should return validation error if input data is invalid', async () => {
-            const invalidData = { ratePerHr: -10 };
+            const invalidData = { ratePerHr: -10 }; // serviceType and description are also required by validateEditInput if they are in updateData
             const expectedError = { error: { status: 400, error: 'Rate per hour must be a positive number.' } };
             const result = await serviceListingEntity.editServiceListing(listingId, cleanerId, invalidData);
             expect(result).toEqual(expectedError);
@@ -541,27 +465,27 @@ describe('ServiceListingEntity', () => {
             expect(mockPrismaClient.serviceListing.update).not.toHaveBeenCalled();
         });
         
-        it('should handle partial updates correctly (only description)', async () => {
+        it('should handle partial updates correctly (only description) and return true', async () => {
             const partialUpdate = { description: "New Description Only" };
             const expectedPrismaPartial = { description: "New Description Only" };
-            const mockUpdatedPartialRaw = { ...mockUpdatedListingRaw, description: "New Description Only" };
-             const expectedPartialResult = {
-                ...mockUpdatedPartialRaw,
-                cleanerId: mockUpdatedPartialRaw.cleaner.id,
-                cleanerUsername: mockUpdatedPartialRaw.cleaner.username,
-                cleaner: undefined
-            };
+            // const mockUpdatedPartialRaw = { ...mockUpdatedListingRaw, description: "New Description Only" };
+            //  const expectedPartialResult = {
+            //     ...mockUpdatedPartialRaw,
+            //     cleanerId: mockUpdatedPartialRaw.cleaner.id,
+            //     cleanerUsername: mockUpdatedPartialRaw.cleaner.username,
+            //     cleaner: undefined
+            // };
 
             mockPrismaClient.serviceListing.findUnique.mockResolvedValue(mockExistingListing);
-            mockPrismaClient.serviceListing.update.mockResolvedValue(mockUpdatedPartialRaw);
+            mockPrismaClient.serviceListing.update.mockResolvedValue({}); // Prisma update returns object, entity returns true
 
             const result = await serviceListingEntity.editServiceListing(listingId, cleanerId, partialUpdate);
             expect(mockPrismaClient.serviceListing.update).toHaveBeenCalledWith({
                 where: { id: listingId },
                 data: expectedPrismaPartial,
-                select: expect.any(Object)
+                // No select needed
             });
-            expect(result).toEqual(expectedPartialResult);
+            expect(result).toBe(true);
         });
 
         it('should return 500 if Prisma update fails', async () => {
@@ -604,30 +528,11 @@ describe('ServiceListingEntity', () => {
         const cleanerId = 'owner-cleaner-id-007';
         const mockActiveListing = { cleanerId: cleanerId, status: 'ACTIVE' };
         const mockSuspendedListing = { cleanerId: cleanerId, status: 'SUSPENDED' };
+        // mockSuspendedListingRaw and expectedSuspendedResult are no longer needed as entity returns boolean
 
-        const mockSuspendedListingRaw = {
-            id: listingId,
-            serviceType: 'Old Service',
-            title: 'To Be Suspended',
-            description: 'This service is no longer offered.',
-            ratePerHr: 10,
-            duration: 1,
-            availability: new Date(),
-            status: 'SUSPENDED',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            cleaner: { id: cleanerId, username: 'testCleanerOwner' }
-        };
-        const expectedSuspendedResult = {
-            ...mockSuspendedListingRaw,
-            cleanerId: mockSuspendedListingRaw.cleaner.id,
-            cleanerUsername: mockSuspendedListingRaw.cleaner.username,
-            cleaner: undefined
-        };
-
-        it('should suspend an active service listing successfully', async () => {
+        it('should suspend an active service listing successfully and return true', async () => {
             mockPrismaClient.serviceListing.findUnique.mockResolvedValue(mockActiveListing);
-            mockPrismaClient.serviceListing.update.mockResolvedValue(mockSuspendedListingRaw);
+            mockPrismaClient.serviceListing.update.mockResolvedValue({}); // Prisma update returns object, entity returns true
 
             const result = await serviceListingEntity.suspendServiceListing(listingId, cleanerId);
 
@@ -635,9 +540,9 @@ describe('ServiceListingEntity', () => {
             expect(mockPrismaClient.serviceListing.update).toHaveBeenCalledWith({
                 where: { id: listingId },
                 data: { status: 'SUSPENDED' },
-                select: expect.any(Object)
+                // No select needed
             });
-            expect(result).toEqual(expectedSuspendedResult);
+            expect(result).toBe(true);
         });
 
         it('should return 400 if listingId is invalid', async () => {
@@ -715,8 +620,6 @@ describe('ServiceListingEntity', () => {
             title: 'Basic Home Clean',
             description: 'A very clean home is a happy home.',
             ratePerHr: 20,
-            duration: 2,
-            availability: new Date('2025-06-10T10:00:00Z'),
             updatedAt: new Date(),
             cleaner: { id: otherCleanerId, username: 'otherCleanerUser' },
             status: 'ACTIVE' // Implicitly filtered by entity, but good for mock clarity
@@ -727,13 +630,11 @@ describe('ServiceListingEntity', () => {
             title: mockListingBase.title,
             description: mockListingBase.description,
             ratePerHr: mockListingBase.ratePerHr,
-            duration: mockListingBase.duration,
-            availability: mockListingBase.availability,
             updatedAt: mockListingBase.updatedAt,
             cleanerId: otherCleanerId,
             cleanerUsername: 'otherCleanerUser',
             status: mockListingBase.status, // Add status from mockListingBase
-            cleaner: undefined, // Add cleaner: undefined as per mapping
+            cleaner: undefined,
         };
 
         beforeEach(() => {
@@ -804,48 +705,13 @@ describe('ServiceListingEntity', () => {
             expect(result).toEqual({ error: { status: 400, error: 'Maximum rate cannot be less than minimum rate.' } });
         });
 
-        it('should filter by availabilityStartDate and availabilityEndDate', async () => {
-            mockPrismaClient.serviceListing.findMany.mockResolvedValue([mockListingBase]);
-            const startDate = '2025-06-01';
-            const endDate = '2025-06-15';
-            const expectedStartDate = new Date(startDate);
-            const expectedEndDate = new Date(endDate);
-            expectedEndDate.setUTCHours(23, 59, 59, 999);
-
-            await serviceListingEntity.searchListings(searcherCleanerId, { availabilityStartDate: startDate, availabilityEndDate: endDate });
-            expect(mockPrismaClient.serviceListing.findMany).toHaveBeenCalledWith(expect.objectContaining({
-                where: {
-                    status: 'ACTIVE',
-                    cleanerId: { not: searcherCleanerId },
-                    availability: { gte: expectedStartDate, lte: expectedEndDate }
-                }
-            }));
-        });
-        
-        it('should return error if availabilityEndDate is before availabilityStartDate', async () => {
-            const result = await serviceListingEntity.searchListings(searcherCleanerId, { availabilityStartDate: '2025-06-15', availabilityEndDate: '2025-06-01' });
-            expect(result).toEqual({ error: { status: 400, error: 'Availability end date cannot be before start date.' } });
-        });
-        
-        it('should return error for invalid availabilityStartDate format', async () => {
-            const result = await serviceListingEntity.searchListings(searcherCleanerId, { availabilityStartDate: 'invalid-date' });
-            expect(result).toEqual({ error: { status: 400, error: 'Invalid availability start date format. Use YYYY-MM-DD.' } });
-        });
-        
-        it('should return error for invalid availabilityEndDate format', async () => {
-            const result = await serviceListingEntity.searchListings(searcherCleanerId, { availabilityEndDate: 'invalid-date' });
-            expect(result).toEqual({ error: { status: 400, error: 'Invalid availability end date format. Use YYYY-MM-DD.' } });
-        });
-
-        it('should combine multiple filters correctly', async () => {
+        it('should combine multiple filters correctly (keyword, serviceType, minRate)', async () => {
             mockPrismaClient.serviceListing.findMany.mockResolvedValue([mockListingBase]);
             const filters = {
                 keyword: 'home',
                 serviceType: 'General Cleaning',
                 minRate: 10,
-                availabilityStartDate: '2025-06-01'
             };
-            const expectedStartDate = new Date(filters.availabilityStartDate);
 
             await serviceListingEntity.searchListings(searcherCleanerId, filters);
             expect(mockPrismaClient.serviceListing.findMany).toHaveBeenCalledWith(expect.objectContaining({
@@ -858,7 +724,6 @@ describe('ServiceListingEntity', () => {
                     ],
                     serviceType: { equals: 'General Cleaning', mode: 'insensitive' },
                     ratePerHr: { gte: 10 },
-                    availability: { gte: expectedStartDate }
                 }
             }));
         });

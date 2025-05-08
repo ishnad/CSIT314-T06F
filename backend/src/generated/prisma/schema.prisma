@@ -75,15 +75,13 @@ enum UserProfileStatus {
 
 // Relation from UserAccount to ServiceListing
 model ServiceListing {
-  id           String   @id @default(cuid())
-  serviceType  String // e.g., "Deep Cleaning", "Basic Cleaning", "Window Cleaning"
-  title        String
-  description  String
-  ratePerHr    Float // Rate per hour
-  duration     Float // Estimated duration in hours
-  availability DateTime // Specific date/time available - might need refinement later
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String   @id @default(cuid())
+  serviceType String // e.g., "Deep Cleaning", "Basic Cleaning", "Window Cleaning"
+  title       String
+  description String
+  ratePerHr   Float // Rate per hour
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relation to the Cleaner (UserAccount) who created the listing
   cleanerId String

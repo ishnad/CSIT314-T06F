@@ -80,8 +80,6 @@ model ServiceListing {
   title         String
   description   String
   ratePerHr     Float    // Rate per hour
-  duration      Float    // Estimated duration in hours
-  availability  DateTime // Specific date/time available - might need refinement later
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

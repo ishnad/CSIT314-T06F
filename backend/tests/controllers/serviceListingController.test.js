@@ -45,16 +45,12 @@ describe('CreateServiceListingController', () => {
         title: 'Standard House Clean',
         description: 'Floors, surfaces, bathrooms.',
         ratePerHr: '20.0', // String input from body
-        duration: '3.5', // String input from body
-        availability: new Date().toISOString(),
     };
     const listingDataEntityArg = { // Data expected by entity
         serviceType: listingDataBody.serviceType,
         title: listingDataBody.title,
         description: listingDataBody.description,
         ratePerHr: 20.0, // Parsed number
-        duration: 3.5, // Parsed number
-        availability: listingDataBody.availability,
         cleanerId: mockCleanerUser.id, // ID from authenticated user
     };
     const createdListing = { // Mock successful result from entity
@@ -63,8 +59,6 @@ describe('CreateServiceListingController', () => {
         title: listingDataEntityArg.title,
         description: listingDataEntityArg.description,
         ratePerHr: listingDataEntityArg.ratePerHr,
-        duration: listingDataEntityArg.duration,
-        availability: new Date(listingDataEntityArg.availability),
         createdAt: new Date(),
         cleanerId: mockCleanerUser.id,
         cleanerUsername: mockCleanerUser.username,
@@ -122,7 +116,7 @@ describe('CreateServiceListingController', () => {
 
         expect(ServiceListingEntity.prototype.createServiceListing).not.toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ error: 'Missing required fields in request body: serviceType, title, description, ratePerHr, duration, availability.' });
+        expect(res.json).toHaveBeenCalledWith({ error: 'Missing required fields in request body: serviceType, title, description, ratePerHr.' });
     });
 
      it('should return 400 if ratePerHr is not a valid number string', async () => {
@@ -133,31 +127,20 @@ describe('CreateServiceListingController', () => {
 
         expect(ServiceListingEntity.prototype.createServiceListing).not.toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ error: 'ratePerHr and duration must be valid numbers.' });
-    });
-
-     it('should return 400 if duration is not a valid number string', async () => {
-        const invalidDurationBody = { ...listingDataBody, duration: 'three hours' };
-        req = mockRequest(invalidDurationBody, mockCleanerUser);
-
-        await controller.createServiceListing(req, res);
-
-        expect(ServiceListingEntity.prototype.createServiceListing).not.toHaveBeenCalled();
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ error: 'ratePerHr and duration must be valid numbers.' });
+        expect(res.json).toHaveBeenCalledWith({ error: 'ratePerHr must be a valid number.' });
     });
 
 
     it('should return error from entity if creation fails (e.g., validation error)', async () => {
         req = mockRequest(listingDataBody, mockCleanerUser);
-        const errorResponse = { error: { status: 400, error: 'Availability must be a valid ISO 8601 date string.' } };
+        const errorResponse = { error: { status: 400, error: 'Service Type must be a non-empty string.' } }; // Example error
         ServiceListingEntity.prototype.createServiceListing.mockResolvedValue(errorResponse);
 
         await controller.createServiceListing(req, res);
 
         expect(ServiceListingEntity.prototype.createServiceListing).toHaveBeenCalledWith(listingDataEntityArg);
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ error: 'Availability must be a valid ISO 8601 date string.' });
+        expect(res.json).toHaveBeenCalledWith({ error: 'Service Type must be a non-empty string.' });
     });
 
      it('should return error from entity if creation fails (e.g., cleaner not found)', async () => {
@@ -210,8 +193,6 @@ describe('GetServiceListingController', () => {
         title: 'Spring Cleaning Special',
         description: 'Full house deep clean.',
         ratePerHr: 35.0,
-        duration: 4.0,
-        availability: new Date(),
         createdAt: new Date(),
         cleanerId: mockCleanerOwner.id, // Belongs to the owner
         cleanerUsername: mockCleanerOwner.username,
@@ -346,24 +327,14 @@ describe('EditServiceListingController', () => {
         serviceType: 'Gardening',
         description: 'Lawn mowing and hedge trimming.',
         ratePerHr: '40.50', // String from body
-        availability: new Date().toISOString(),
     };
     const expectedEntityUpdateData = {
         serviceType: validUpdateBody.serviceType,
         description: validUpdateBody.description,
         ratePerHr: 40.50, // Parsed number
-        availability: validUpdateBody.availability,
     };
-    const mockUpdatedListing = { // Mock successful result from entity
-        id: listingId,
-        ...expectedEntityUpdateData,
-        title: 'Original Title',
-        duration: 3,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        cleanerId: mockCleanerUser.id,
-        cleanerUsername: mockCleanerUser.username,
-    };
+    // Entity now returns true, not the listing object
+    // const mockUpdatedListing = { ... }; 
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -374,30 +345,30 @@ describe('EditServiceListingController', () => {
         res = mockResponse();
     });
 
-    it('should edit listing successfully for an authenticated Cleaner', async () => {
+    it('should edit listing successfully for an authenticated Cleaner and return success message', async () => {
         req = mockRequest(validUpdateBody, mockCleanerUser, { id: listingId });
-        ServiceListingEntity.prototype.editServiceListing.mockResolvedValue(mockUpdatedListing);
+        ServiceListingEntity.prototype.editServiceListing.mockResolvedValue(true); // Entity returns true
 
         await controller.editServiceListing(req, res);
 
         expect(ServiceListingEntity.prototype.editServiceListing).toHaveBeenCalledWith(listingId, mockCleanerUser.id, expectedEntityUpdateData);
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith({
-            message: 'Service listing updated successfully.',
-            listing: mockUpdatedListing
+            message: 'Service listing updated successfully.' // No listing object in response
         });
     });
     
-    it('should handle partial updates (only description and ratePerHr)', async () => {
+    it('should handle partial updates (only description and ratePerHr) and return success message', async () => {
         const partialBody = { description: "New Desc", ratePerHr: "55" };
         const expectedPartialEntityData = { description: "New Desc", ratePerHr: 55 };
-        const mockPartialUpdatedListing = { ...mockUpdatedListing, ...expectedPartialEntityData };
+        // const mockPartialUpdatedListing = { ...mockUpdatedListing, ...expectedPartialEntityData }; // Not needed
         req = mockRequest(partialBody, mockCleanerUser, { id: listingId });
-        ServiceListingEntity.prototype.editServiceListing.mockResolvedValue(mockPartialUpdatedListing);
+        ServiceListingEntity.prototype.editServiceListing.mockResolvedValue(true); // Entity returns true
 
         await controller.editServiceListing(req, res);
         expect(ServiceListingEntity.prototype.editServiceListing).toHaveBeenCalledWith(listingId, mockCleanerUser.id, expectedPartialEntityData);
         expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({ message: 'Service listing updated successfully.' }); // No listing object
     });
 
 
@@ -430,7 +401,7 @@ describe('EditServiceListingController', () => {
         await controller.editServiceListing(req, res);
         expect(ServiceListingEntity.prototype.editServiceListing).not.toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ error: 'No fields provided for update. Please provide serviceType, description, ratePerHr, or availability.' });
+        expect(res.json).toHaveBeenCalledWith({ error: 'No fields provided for update. Please provide serviceType, description, or ratePerHr.' });
     });
     
     it('should return 400 if ratePerHr is not a valid number string', async () => {
@@ -444,13 +415,13 @@ describe('EditServiceListingController', () => {
 
     it('should return error from entity if editing fails (e.g., validation error in entity)', async () => {
         req = mockRequest(validUpdateBody, mockCleanerUser, { id: listingId });
-        const errorResponse = { error: { status: 400, error: 'Availability must be a valid ISO 8601 date string.' } };
+        const errorResponse = { error: { status: 400, error: 'Rate per hour must be a positive number.' } }; // Example error
         ServiceListingEntity.prototype.editServiceListing.mockResolvedValue(errorResponse);
 
         await controller.editServiceListing(req, res);
         expect(ServiceListingEntity.prototype.editServiceListing).toHaveBeenCalledWith(listingId, mockCleanerUser.id, expectedEntityUpdateData);
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ error: 'Availability must be a valid ISO 8601 date string.' });
+        expect(res.json).toHaveBeenCalledWith({ error: 'Rate per hour must be a positive number.' });
     });
 
     it('should return 404 if entity reports listing not found', async () => {
@@ -481,6 +452,19 @@ describe('EditServiceListingController', () => {
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.json).toHaveBeenCalledWith({ error: 'An unexpected error occurred while editing the service listing.' });
     });
+
+    it('should return 500 if entity returns an unexpected non-error, non-true value', async () => {
+        req = mockRequest(validUpdateBody, mockCleanerUser, { id: listingId });
+        ServiceListingEntity.prototype.editServiceListing.mockResolvedValue("unexpected string"); // Simulate unexpected return
+
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        await controller.editServiceListing(req, res);
+        consoleErrorSpy.mockRestore();
+
+        expect(ServiceListingEntity.prototype.editServiceListing).toHaveBeenCalledWith(listingId, mockCleanerUser.id, expectedEntityUpdateData);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ error: 'An unexpected error occurred while editing the service listing.' });
+    });
 });
 
 // --- Test Suite for SuspendServiceListingController ---
@@ -499,12 +483,8 @@ describe('SuspendServiceListingController', () => {
         username: 'suspenderHomeowner',
         profile: { name: 'Homeowner' }
     };
-    const mockSuspendedListingData = { // Mock successful result from entity
-        id: listingId,
-        title: 'Suspended Service',
-        status: 'SUSPENDED',
-        // ... other fields
-    };
+    // Entity now returns true, not the listing object
+    // const mockSuspendedListingData = { ... };
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -515,17 +495,16 @@ describe('SuspendServiceListingController', () => {
         res = mockResponse();
     });
 
-    it('should suspend listing successfully for an authenticated Cleaner', async () => {
+    it('should suspend listing successfully for an authenticated Cleaner and return success message', async () => {
         req = mockRequest({}, mockCleanerUser, { id: listingId });
-        ServiceListingEntity.prototype.suspendServiceListing.mockResolvedValue(mockSuspendedListingData);
+        ServiceListingEntity.prototype.suspendServiceListing.mockResolvedValue(true); // Entity returns true
 
         await controller.suspendServiceListing(req, res);
 
         expect(ServiceListingEntity.prototype.suspendServiceListing).toHaveBeenCalledWith(listingId, mockCleanerUser.id);
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith({
-            message: 'Service listing suspended successfully.',
-            listing: mockSuspendedListingData
+            message: 'Service listing suspended successfully.' // No listing object in response
         });
     });
 
@@ -583,6 +562,19 @@ describe('SuspendServiceListingController', () => {
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.json).toHaveBeenCalledWith({ error: 'An unexpected error occurred while suspending the service listing.' });
     });
+
+    it('should return 500 if entity returns an unexpected non-error, non-true value', async () => {
+        req = mockRequest({}, mockCleanerUser, { id: listingId });
+        ServiceListingEntity.prototype.suspendServiceListing.mockResolvedValue("unexpected string"); // Simulate unexpected return
+
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        await controller.suspendServiceListing(req, res);
+        consoleErrorSpy.mockRestore();
+
+        expect(ServiceListingEntity.prototype.suspendServiceListing).toHaveBeenCalledWith(listingId, mockCleanerUser.id);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ error: 'An unexpected error occurred while suspending the service listing.' });
+    });
 });
 
 // --- Test Suite for SearchServiceListingsController ---
@@ -635,6 +627,15 @@ describe('SearchServiceListingsController', () => {
         expect(ServiceListingEntity.prototype.searchListings).toHaveBeenCalledWith(mockSearcherUser.id, expectedFilters);
     });
 
+    it('should pass through string filters like keyword and serviceType directly', async () => {
+        const queryParams = { keyword: 'garden', serviceType: 'Gardening' };
+        req = mockRequest({}, mockSearcherUser, {}, queryParams);
+        ServiceListingEntity.prototype.searchListings.mockResolvedValue(mockSearchResults);
+
+        await controller.searchListings(req, res);
+        expect(ServiceListingEntity.prototype.searchListings).toHaveBeenCalledWith(mockSearcherUser.id, queryParams);
+    });
+
     it('should return 400 if minRate is not a number', async () => {
         req = mockRequest({}, mockSearcherUser, {}, { minRate: 'abc' });
         await controller.searchListings(req, res);
@@ -675,16 +676,17 @@ describe('SearchServiceListingsController', () => {
         expect(res.json).toHaveBeenCalledWith({ error: 'Forbidden: Only Cleaners can perform this search.' });
     });
 
-    it('should return error from entity if searching fails (e.g., invalid date format in entity)', async () => {
-        const queryParams = { availabilityStartDate: 'invalid-date' };
-        req = mockRequest({}, mockSearcherUser, {}, queryParams);
-        const entityErrorResponse = { error: { status: 400, error: 'Invalid availability start date format. Use YYYY-MM-DD.' } };
+    it('should return error from entity if searching fails (e.g., maxRate < minRate in entity)', async () => {
+        const queryParams = { minRate: '20', maxRate: '10' }; // Invalid range
+        req = mockRequest({}, mockSearcherUser, {}, { minRate: 20, maxRate: 10 }); // Parsed numbers
+        const entityErrorResponse = { error: { status: 400, error: 'Maximum rate cannot be less than minimum rate.' } };
         ServiceListingEntity.prototype.searchListings.mockResolvedValue(entityErrorResponse);
 
         await controller.searchListings(req, res);
-        expect(ServiceListingEntity.prototype.searchListings).toHaveBeenCalledWith(mockSearcherUser.id, queryParams);
+        // Controller passes parsed numbers to entity
+        expect(ServiceListingEntity.prototype.searchListings).toHaveBeenCalledWith(mockSearcherUser.id, { minRate: 20, maxRate: 10 });
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ error: 'Invalid availability start date format. Use YYYY-MM-DD.' });
+        expect(res.json).toHaveBeenCalledWith({ error: 'Maximum rate cannot be less than minimum rate.' });
     });
 
     it('should return 500 on unexpected controller error', async () => {
