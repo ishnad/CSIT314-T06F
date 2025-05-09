@@ -9,9 +9,11 @@ const viewUserProfileController = new userProfileController.ViewUserProfileContr
 const editUserProfileController = new userProfileController.EditUserProfileController();
 const simulateUserProfileController = new userProfileController.SimulateUserProfileController();
 const updateUserProfileStatusController = new userProfileController.UpdateUserProfileStatusController();
+const searchUserProfileController = new userProfileController.SearchUserProfileController();
 
 router.post('/', (req, res) => createUserProfileController.createUserProfile(req, res));
 router.get('/', (req, res) => viewUserProfileController.listUserProfiles(req, res));
+router.get('/search-detailed', (req, res) => searchUserProfileController.searchUserProfiles(req, res));
 router.put('/:id', (req, res) => editUserProfileController.updateUserProfile(req, res));
 router.put('/:id/status', (req, res) => updateUserProfileStatusController.updateProfileStatus(req, res));
 router.get('/simulate/:profileName', (req, res) => simulateUserProfileController.simulateProfile(req, res));

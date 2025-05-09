@@ -113,7 +113,7 @@ describe('UserProfileEntity', () => {
             });
             // expectedProfile now includes status, so direct comparison is fine.
             // Using expect.objectContaining to be robust against minor differences in Date objects if not mocked perfectly.
-            expect(result).toEqual(expect.objectContaining(expectedProfile));
+            expect(result).toBe(true);
         });
 
          it('should create a new user profile successfully without permissions (defaults to empty array)', async () => {
@@ -134,7 +134,7 @@ describe('UserProfileEntity', () => {
                 select: { id: true, name: true, permissions: true, status: true, createdAt: true },
             });
             // expectedProfileNoPerms now includes status.
-            expect(result).toEqual(expect.objectContaining(expectedProfileNoPerms));
+            expect(result).toBe(true);
         });
 
          it('should return validation error if permissions is not an array', async () => {
@@ -353,7 +353,7 @@ describe('UserProfileEntity', () => {
                 data: expectedData,
                 select: { id: true, name: true, permissions: true, status: true, createdAt: true, updatedAt: true }, // Add status
             });
-            expect(result).toEqual(mockReturn);
+            expect(result).toBe(true);
         });
 
         // --- Split description tests ---
@@ -373,7 +373,7 @@ describe('UserProfileEntity', () => {
                 data: expectedDataPerms,
                 select: { id: true, name: true, permissions: true, status: true, createdAt: true, updatedAt: true }, // Add status
             });
-            expect(resultPerms).toEqual(mockReturnPerms);
+            expect(resultPerms).toBe(true);
         });
 
         it('should update profile permissions to an empty array successfully', async () => {
@@ -390,7 +390,7 @@ describe('UserProfileEntity', () => {
                 data: expectedDataEmpty,
                 select: { id: true, name: true, permissions: true, status: true, createdAt: true, updatedAt: true }, // Add status
             });
-            expect(resultEmpty).toEqual(mockReturnEmpty);
+            expect(resultEmpty).toBe(true);
         });
         // --- End split description tests ---
 
@@ -411,7 +411,7 @@ describe('UserProfileEntity', () => {
                 data: expectedData, // Expect both fields
                 select: { id: true, name: true, permissions: true, status: true, createdAt: true, updatedAt: true }, // Add status
             });
-            expect(result).toEqual(mockReturn);
+            expect(result).toBe(true);
         });
 
 
@@ -482,7 +482,7 @@ describe('UserProfileEntity', () => {
                 data: expectedData, // Data to update (includes permissions)
                 select: { id: true, name: true, permissions: true, status: true, createdAt: true, updatedAt: true }, // Add status
             });
-            expect(result).toEqual(mockReturn);
+            expect(result).toBe(true);
         });
 
         it('should return server error if prisma update fails', async () => {
@@ -506,6 +506,56 @@ describe('UserProfileEntity', () => {
             expect(mockPrismaClient.userProfile.update).toHaveBeenCalled();
         });
     });
+
+    // --- Test updateProfileStatus (after renaming from updateUserProfileStatus) ---
+    describe('updateProfileStatus', () => {
+        const profileId = 'profile-status-id';
+        const newStatus = 'SUSPENDED'; // Using UserProfileStatus.SUSPENDED
+        const existingProfile = { id: profileId, name: 'TestProfile', status: 'ACTIVE' }; // UserProfileStatus.ACTIVE
+        // const updatedProfileMock = { ...existingProfile, status: newStatus, userAccountCount: 0, _count: undefined }; // No longer returns profile
+
+        it('should update profile status successfully and return true', async () => {
+            mockPrismaClient.userProfile.findUnique.mockResolvedValue(existingProfile);
+            mockPrismaClient.userProfile.update.mockResolvedValue({ ...existingProfile, status: newStatus }); // Prisma returns object
+
+            const result = await userProfileEntity.updateProfileStatus(profileId, newStatus);
+
+            expect(mockPrismaClient.userProfile.findUnique).toHaveBeenCalledWith({ where: { id: profileId } });
+            expect(mockPrismaClient.userProfile.update).toHaveBeenCalledWith({
+                where: { id: profileId },
+                data: { status: newStatus },
+                select: expect.any(Object), // Select is still used by Prisma, but entity returns boolean
+            });
+            expect(result).toBe(true);
+        });
+
+        it('should return 400 if profileId is missing', async () => {
+            const result = await userProfileEntity.updateProfileStatus(null, newStatus);
+            expect(result).toEqual({ error: { status: 400, error: 'Profile ID is required.' } });
+        });
+
+        it('should return 400 if newStatus is invalid', async () => {
+            const result = await userProfileEntity.updateProfileStatus(profileId, 'INVALID_STATUS');
+            expect(result.error.status).toBe(400);
+            expect(result.error.error).toContain('Invalid status provided.');
+        });
+
+        it('should return 404 if profile not found', async () => {
+            mockPrismaClient.userProfile.findUnique.mockResolvedValue(null);
+            const result = await userProfileEntity.updateProfileStatus(profileId, newStatus);
+            expect(result).toEqual({ error: { status: 404, error: 'User profile not found.' } });
+        });
+
+        it('should return 500 if prisma update fails', async () => {
+            mockPrismaClient.userProfile.findUnique.mockResolvedValue(existingProfile);
+            mockPrismaClient.userProfile.update.mockRejectedValue(new Error('DB Error'));
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await userProfileEntity.updateProfileStatus(profileId, newStatus);
+            consoleErrorSpy.mockRestore();
+            expect(result).toEqual({ error: { status: 500, error: 'Failed to update user profile status due to a server error.' } });
+        });
+    });
+
 
     // --- Test simulateProfile ---
     describe('simulateProfile', () => {
@@ -574,6 +624,82 @@ describe('UserProfileEntity', () => {
                 select: { id: true, name: true, permissions: true, status: true } // Add status
             });
             expect(result).toEqual(expectedError);
+        });
+    });
+
+    // --- Test searchUserProfiles ---
+    describe('searchUserProfiles', () => {
+        const profileNameKeyword = 'TestProfileForSearch';
+        const mockProfileData = {
+            id: 'profile-search-id',
+            name: profileNameKeyword,
+            permissions: ['SEARCH_PERM'],
+            status: 'ACTIVE',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+        const mockUserAccountsData = [
+            { id: 'user-acc-1', username: 'userOne', email: 'one@test.com', status: 'ACTIVE', createdAt: new Date() },
+            { id: 'user-acc-2', username: 'userTwo', email: 'two@test.com', status: 'ACTIVE', createdAt: new Date() },
+        ];
+        const mockProfileWithAccounts = { ...mockProfileData, userAccounts: mockUserAccountsData };
+        const mockProfileWithoutAccounts = { ...mockProfileData, userAccounts: [] };
+
+        it('should return profile with accounts if filter is "name" and profile exists', async () => {
+            mockPrismaClient.userProfile.findUnique.mockResolvedValue(mockProfileWithAccounts);
+            const result = await userProfileEntity.searchUserProfiles({ filter: 'name', keyword: profileNameKeyword });
+
+            expect(mockPrismaClient.userProfile.findUnique).toHaveBeenCalledWith({
+                where: { name: profileNameKeyword },
+                include: {
+                    userAccounts: {
+                        select: { id: true, username: true, email: true, status: true, createdAt: true },
+                        orderBy: { username: 'asc' }
+                    }
+                }
+            });
+            expect(result).toEqual(mockProfileWithAccounts);
+        });
+
+        it('should return profile with empty accounts array if profile exists but has no accounts', async () => {
+            mockPrismaClient.userProfile.findUnique.mockResolvedValue(mockProfileWithoutAccounts);
+            const result = await userProfileEntity.searchUserProfiles({ filter: 'name', keyword: profileNameKeyword });
+            expect(result).toEqual(mockProfileWithoutAccounts);
+        });
+
+        it('should return 404 error if profile name not found', async () => {
+            mockPrismaClient.userProfile.findUnique.mockResolvedValue(null);
+            const result = await userProfileEntity.searchUserProfiles({ filter: 'name', keyword: 'NonExistentProfile' });
+            expect(result).toEqual({ error: { status: 404, error: "User profile with name 'NonExistentProfile' not found." } });
+        });
+
+        it('should return 400 error for invalid filter type', async () => {
+            const result = await userProfileEntity.searchUserProfiles({ filter: 'id', keyword: 'some-id' });
+            expect(result).toEqual({ error: { status: 400, error: "Invalid filter provided. Only searching by 'name' is supported." } });
+            expect(mockPrismaClient.userProfile.findUnique).not.toHaveBeenCalled();
+        });
+
+        it('should return 400 error if filter is missing', async () => {
+            const result = await userProfileEntity.searchUserProfiles({ keyword: profileNameKeyword });
+            expect(result).toEqual({ error: { status: 400, error: "Invalid filter provided. Only searching by 'name' is supported." } });
+        });
+
+        it('should return 400 error if keyword is missing', async () => {
+            const result = await userProfileEntity.searchUserProfiles({ filter: 'name', keyword: '' });
+            expect(result).toEqual({ error: { status: 400, error: 'Keyword (profile name) is required for search.' } });
+        });
+         it('should return 400 error if keyword is whitespace only', async () => {
+            const result = await userProfileEntity.searchUserProfiles({ filter: 'name', keyword: '   ' });
+            expect(result).toEqual({ error: { status: 400, error: 'Keyword (profile name) is required for search.' } });
+        });
+
+        it('should return 500 error if Prisma findUnique fails', async () => {
+            const dbError = new Error('DB query failed');
+            mockPrismaClient.userProfile.findUnique.mockRejectedValue(dbError);
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await userProfileEntity.searchUserProfiles({ filter: 'name', keyword: profileNameKeyword });
+            consoleErrorSpy.mockRestore();
+            expect(result).toEqual({ error: { status: 500, error: 'Failed to search user profile due to a server error.' } });
         });
     });
 });

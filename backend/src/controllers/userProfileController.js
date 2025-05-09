@@ -29,9 +29,13 @@ class CreateUserProfileController {
             if (result.error) {
                 // If the entity returned an error object, use its status and message
                 res.status(result.error.status).json({ error: result.error.error });
+            } else if (result === true) {
+                // Success: return a success message
+                res.status(201).json({ message: 'User profile created successfully.' });
             } else {
-                // Success: return the created profile data
-                res.status(201).json({ message: 'User profile created successfully.', profile: result });
+                // Should not happen if entity behaves as expected (true or error object)
+                console.error("Controller error: createUserProfile entity returned unexpected value:", result);
+                res.status(500).json({ error: 'Failed to create user profile due to an unexpected internal state.' });
             }
         } catch (error) {
             // Catch unexpected errors during the process
@@ -106,9 +110,13 @@ class EditUserProfileController {
             if (result.error) {
                 // If the entity returned an error object, use its status and message
                 res.status(result.error.status).json({ error: result.error.error });
+            } else if (result === true) {
+                // Success: return a success message
+                res.status(200).json({ message: 'User profile updated successfully.' });
             } else {
-                // Success: return the updated profile data
-                res.status(200).json({ message: 'User profile updated successfully.', profile: result });
+                // Should not happen if entity behaves as expected (true or error object)
+                console.error("Controller error: updateUserProfile entity returned unexpected value:", result);
+                res.status(500).json({ error: 'Failed to update user profile due to an unexpected internal state.' });
             }
         } catch (error) {
             // Catch unexpected errors during the process
@@ -180,12 +188,16 @@ class UpdateUserProfileStatusController {
         }
 
         try {
-            const result = await this.userProfileEntity.updateUserProfileStatus(id, status.toUpperCase());
+            const result = await this.userProfileEntity.updateProfileStatus(id, status.toUpperCase());
 
             if (result.error) {
                 res.status(result.error.status).json({ error: result.error.error });
+            } else if (result === true) {
+                res.status(200).json({ message: `User profile status updated to ${status.toUpperCase()} successfully.` });
             } else {
-                res.status(200).json({ message: `User profile status updated to ${result.status}.`, profile: result });
+                // Should not happen if entity behaves as expected (true or error object)
+                console.error("Controller error: updateProfileStatus entity returned unexpected value:", result);
+                res.status(500).json({ error: 'Failed to update user profile status due to an unexpected internal state.' });
             }
         } catch (error) {
             console.error("Controller error updating user profile status:", error);
@@ -200,4 +212,55 @@ module.exports = {
     EditUserProfileController,
     SimulateUserProfileController,
     UpdateUserProfileStatusController
+};
+
+class SearchUserProfileController {
+    constructor() {
+        this.userProfileEntity = new UserProfileEntity();
+    }
+
+    /**
+     * Handles the HTTP request to search for a user profile by name and retrieve its associated user accounts.
+     * @param {object} req - Express request object, expects req.query.filter and req.query.keyword.
+     * @param {object} res - Express response object.
+     */
+    async searchUserProfiles(req, res) {
+        const { filter, keyword } = req.query;
+
+        if (!filter) {
+            return res.status(400).json({ error: 'Filter query parameter is required.' });
+        }
+        if (filter.toLowerCase() !== 'name') {
+            return res.status(400).json({ error: "Invalid filter. Only 'name' is supported for this search." });
+        }
+        if (!keyword) {
+            return res.status(400).json({ error: 'Keyword (profile name) query parameter is required.' });
+        }
+
+        try {
+            const result = await this.userProfileEntity.searchUserProfiles({ filter, keyword });
+
+            if (result.error) {
+                return res.status(result.error.status).json({ error: result.error.error });
+            }
+
+            // Success: result is the profile object with userAccounts
+            // The alternate flow "No user accounts found for this user profile type"
+            // can be handled by the frontend if result.userAccounts is an empty array.
+            res.status(200).json(result);
+
+        } catch (error) {
+            console.error(`Controller error in searchUserProfiles for keyword '${keyword}':`, error);
+            res.status(500).json({ error: 'An unexpected error occurred while searching for the user profile.' });
+        }
+    }
+}
+
+module.exports = {
+    CreateUserProfileController,
+    ViewUserProfileController,
+    EditUserProfileController,
+    SimulateUserProfileController,
+    UpdateUserProfileStatusController,
+    SearchUserProfileController
 };

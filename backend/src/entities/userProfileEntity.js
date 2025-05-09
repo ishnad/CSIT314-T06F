@@ -32,7 +32,7 @@ class UserProfileEntity {
      * @param {object} profileData - Data for the new profile.
      * @param {string} profileData.name - The name of the profile.
      * @param {string[]} [profileData.permissions] - Optional list of permissions.
-     * @returns {Promise<object>} The created profile object or an error object.
+     * @returns {Promise<boolean|{error: {status: number, error: string}}>} True on successful creation, or an error object on failure.
      */
     async createUserProfile({ name, permissions = [] }) { // Default to empty array if not provided
         const validationError = this.validateUserProfileInput(name, permissions);
@@ -66,7 +66,7 @@ class UserProfileEntity {
                 }
             });
 
-            return newProfile; // Return the created profile data
+            return true; // Return true on successful creation
 
         } catch (error) {
             console.error("Error creating user profile:", error);
@@ -129,7 +129,7 @@ class UserProfileEntity {
      * @param {object} updateData - Data to update.
      * @param {string} [updateData.name] - The new name for the profile.
      * @param {string[]} [updateData.permissions] - The new list of permissions.
-     * @returns {Promise<object>} The updated profile object or an error object.
+     * @returns {Promise<boolean|{error: {status: number, error: string}}>} True on successful update, or an error object on failure.
      */
     async updateUserProfile(profileId, { name, permissions }) {
         const nameProvided = name !== undefined;
@@ -201,7 +201,7 @@ class UserProfileEntity {
                 }
             });
 
-            return updatedProfile;
+            return true; // Return true on successful update
 
         } catch (error) {
             console.error("Error updating user profile:", error);
@@ -213,9 +213,9 @@ class UserProfileEntity {
      * Updates the status of an existing user profile.
      * @param {string} profileId - The ID of the profile to update.
      * @param {UserProfileStatus} newStatus - The new status for the profile.
-     * @returns {Promise<object>} The updated profile object or an error object.
+     * @returns {Promise<boolean|{error: {status: number, error: string}}>} True on successful status update, or an error object on failure.
      */
-    async updateUserProfileStatus(profileId, newStatus) {
+    async updateProfileStatus(profileId, newStatus) {
         if (!profileId) {
             return { error: { status: 400, error: 'Profile ID is required.' } };
         }
@@ -248,12 +248,7 @@ class UserProfileEntity {
                 }
             });
             
-            // Remap to include userAccountCount directly
-            return {
-                ...updatedProfile,
-                userAccountCount: updatedProfile._count.userAccounts,
-                _count: undefined
-            };
+            return true; // Return true on successful update
 
         } catch (error) {
             console.error(`Error updating status for profile ${profileId}:`, error);
@@ -294,6 +289,55 @@ class UserProfileEntity {
         } catch (error) {
             console.error(`Error finding profile '${trimmedName}' for simulation:`, error);
             return { error: { status: 500, error: 'Failed to retrieve user profile for simulation due to a server error.' } };
+        }
+    }
+
+    /**
+     * Searches for a specific user profile by name and returns it along with associated user accounts.
+     * @param {object} params - The search parameters.
+     * @param {string} params.filter - The filter type, expected to be 'name'.
+     * @param {string} params.keyword - The keyword for the filter (e.g., the profile name).
+     * @returns {Promise<object>} The UserProfile object with associated userAccounts, or an error object.
+     */
+    async searchUserProfiles({ filter, keyword }) {
+        if (!filter || filter.toLowerCase() !== 'name') {
+            return { error: { status: 400, error: "Invalid filter provided. Only searching by 'name' is supported." } };
+        }
+        if (!keyword || typeof keyword !== 'string' || keyword.trim() === '') {
+            return { error: { status: 400, error: 'Keyword (profile name) is required for search.' } };
+        }
+
+        const trimmedKeyword = keyword.trim();
+
+        try {
+            const profile = await this.prisma.userProfile.findUnique({
+                where: { name: trimmedKeyword },
+                include: {
+                    userAccounts: {
+                        select: {
+                            id: true,
+                            username: true,
+                            email: true,
+                            status: true,
+                            createdAt: true,
+                        },
+                        orderBy: { // Optional: order accounts by username or createdAt
+                            username: 'asc'
+                        }
+                    }
+                }
+            });
+
+            if (!profile) {
+                return { error: { status: 404, error: `User profile with name '${trimmedKeyword}' not found.` } };
+            }
+
+            // If profile is found, it will include userAccounts (empty array if none)
+            return profile;
+
+        } catch (error) {
+            console.error(`Error searching user profile by name '${trimmedKeyword}':`, error);
+            return { error: { status: 500, error: 'Failed to search user profile due to a server error.' } };
         }
     }
 }
