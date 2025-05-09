@@ -69,7 +69,7 @@ class MatchServiceEntity {
                             title: true,
                             serviceType: true,
                             ratePerHr: true,
-                            duration: true,
+                            // duration: true,
                         }
                     },
                     homeowner: {
@@ -95,7 +95,7 @@ class MatchServiceEntity {
                 serviceTitle: match.serviceListing.title,
                 serviceType: match.serviceListing.serviceType,
                 serviceRatePerHr: match.serviceListing.ratePerHr,
-                serviceDuration: match.serviceListing.duration,
+                // serviceDuration: match.serviceListing.duration,
                 homeownerUsername: match.homeowner.username,
                 homeownerId: match.homeowner.id,
                 serviceListingId: match.serviceListing.id,
@@ -107,6 +107,121 @@ class MatchServiceEntity {
                  return { error: { status: 400, error: 'Invalid filter parameters provided.' } };
             }
             return { error: { status: 500, error: 'Failed to retrieve confirmed matches due to a server error.' } };
+        }
+    }
+
+    /**
+     * Searches for confirmed matches for a specific cleaner, with optional filters including status.
+     * @param {string} cleanerId - The ID of the cleaner.
+     * @param {object} filters - Optional filters.
+     * @param {string} [filters.serviceType] - Filter by service type.
+     * @param {string} [filters.startDate] - ISO 8601 date string for start of date range.
+     * @param {string} [filters.endDate] - ISO 8601 date string for end of date range.
+     * @param {string} [filters.status] - Filter by match status.
+     * @returns {Promise<Array<object>|object>} Array of match objects or an error/message object.
+     */
+    async searchCleanerConfirmedMatches(cleanerId, filters = {}) {
+        if (!cleanerId) {
+            return { error: { status: 400, error: 'Cleaner ID is required for search.' } };
+        }
+
+        const { serviceType, startDate, endDate, status } = filters;
+        const whereConditions = {
+            serviceListing: {
+                cleanerId: cleanerId,
+            },
+        };
+
+        if (serviceType && typeof serviceType === 'string' && serviceType.trim() !== '') {
+            whereConditions.serviceListing.serviceType = {
+                equals: serviceType.trim(),
+                mode: 'insensitive',
+            };
+        }
+
+        if (status && typeof status === 'string' && status.trim() !== '') {
+            const upperStatus = status.trim().toUpperCase();
+            if (upperStatus !== 'CONFIRMED') {
+                // Since ConfirmedMatch model has no active status field,
+                // only 'CONFIRMED' is implicitly valid by querying the table.
+                // Filtering by other statuses would require schema changes.
+                return { message: `Filtering by status '${status.trim()}' is not currently supported or no matches found for this status.` };
+            }
+            // If status is 'CONFIRMED', it doesn't add an explicit DB filter condition for ConfirmedMatch.status,
+            // as all records in this table are considered confirmed.
+        }
+
+        const dateFilter = {};
+        if (startDate) {
+            const parsedStartDate = new Date(startDate);
+            if (!isNaN(parsedStartDate)) {
+                dateFilter.gte = parsedStartDate;
+            } else {
+                return { error: { status: 400, error: 'Invalid start date format. Use YYYY-MM-DD.' } };
+            }
+        }
+        if (endDate) {
+            const parsedEndDate = new Date(endDate);
+            if (!isNaN(parsedEndDate)) {
+                parsedEndDate.setUTCHours(23, 59, 59, 999);
+                dateFilter.lte = parsedEndDate;
+            } else {
+                return { error: { status: 400, error: 'Invalid end date format. Use YYYY-MM-DD.' } };
+            }
+        }
+
+        if (Object.keys(dateFilter).length > 0) {
+            whereConditions.confirmationDate = dateFilter;
+        }
+
+        try {
+            const matches = await this.prisma.confirmedMatch.findMany({
+                where: whereConditions,
+                select: {
+                    id: true,
+                    confirmationDate: true,
+                    serviceListing: {
+                        select: {
+                            id: true,
+                            title: true,
+                            serviceType: true,
+                            ratePerHr: true,
+                            // duration
+                        }
+                    },
+                    homeowner: {
+                        select: {
+                            id: true,
+                            username: true,
+                        }
+                    }
+                },
+                orderBy: {
+                    confirmationDate: 'desc',
+                }
+            });
+
+            if (matches.length === 0) {
+                return { message: "No confirmed matches found for selected search criteria." };
+            }
+
+            return matches.map(match => ({
+                matchId: match.id,
+                confirmationDate: match.confirmationDate,
+                serviceTitle: match.serviceListing.title,
+                serviceType: match.serviceListing.serviceType,
+                serviceRatePerHr: match.serviceListing.ratePerHr,
+                homeownerUsername: match.homeowner.username,
+                homeownerId: match.homeowner.id,
+                serviceListingId: match.serviceListing.id,
+            }));
+
+        } catch (error) {
+            console.error(`Error searching confirmed matches for cleaner ${cleanerId}:`, error);
+            if (error instanceof Prisma.PrismaClientValidationError) {
+                 return { error: { status: 400, error: 'Invalid filter parameters provided for search.' } };
+            }
+            return { error: { status: 500, error: 'Failed to search confirmed matches due to a server error.' } };
         }
     }
 }

@@ -53,4 +53,59 @@ class ConfirmedMatchesController {
     }
 }
 
-module.exports = { ConfirmedMatchesController };
+class SearchConfirmedMatchesController {
+    constructor() {
+        this.matchServiceEntity = new MatchServiceEntity();
+    }
+
+    /**
+     * Handles the HTTP request to search confirmed matches for the authenticated cleaner,
+     * supporting filters like serviceType, date range, and status.
+     * @param {object} req - Express request object.
+     * @param {object} res - Express response object.
+     */
+    async searchConfirmedMatches(req, res) {
+        const cleanerId = req.user?.id;
+        const userProfileName = req.user?.profile?.name;
+
+        // Authorization: Ensure user is authenticated
+        if (!cleanerId) {
+            return res.status(401).json({ error: 'Authentication required.' });
+        }
+
+        // Authorization: Ensure user is a 'Cleaner'
+        if (userProfileName !== 'Cleaner') {
+            return res.status(403).json({ error: 'Forbidden: Only Cleaners can search their confirmed matches.' });
+        }
+
+        // Extract filters from query parameters
+        const { serviceType, startDate, endDate, status } = req.query;
+        const filters = {};
+        if (serviceType) filters.serviceType = serviceType;
+        if (startDate) filters.startDate = startDate;
+        if (endDate) filters.endDate = endDate;
+        if (status) filters.status = status;
+
+        try {
+            const result = await this.matchServiceEntity.searchCleanerConfirmedMatches(cleanerId, filters);
+
+            if (result.error) {
+                return res.status(result.error.status).json({ error: result.error.error });
+            }
+            
+            if (result.message) { // e.g., "No confirmed matches found..." or "Filtering by status 'X' not supported..."
+                return res.status(200).json(result);
+            }
+
+            // Success: return the list of matches
+            res.status(200).json(result);
+
+        } catch (error) {
+            // Catch unexpected errors during the process
+            console.error(`Controller error searching confirmed matches for cleaner ${cleanerId}:`, error);
+            res.status(500).json({ error: 'An unexpected error occurred while searching confirmed matches.' });
+        }
+    }
+}
+
+module.exports = { ConfirmedMatchesController, SearchConfirmedMatchesController };

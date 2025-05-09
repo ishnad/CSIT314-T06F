@@ -13,7 +13,7 @@ class ServiceListingEntity {
      * @param {string} listingData.description - Description of the service.
      * @param {number} listingData.ratePerHr - Rate per hour.
      * @param {string} listingData.cleanerId - ID of the user creating the listing.
-     * @returns {Promise<object>} The created listing object or an error object.
+     * @returns {Promise<boolean|{error: {status: number, error: string}}>} True on successful creation, or an error object on failure.
      */
     async createServiceListing(listingData) {
         // Destructure data first for validation
@@ -80,13 +80,7 @@ class ServiceListingEntity {
                 }
             });
 
-            // Remap cleaner info for a cleaner response structure
-            return {
-                ...newListing,
-                cleanerId: newListing.cleaner.id,
-                cleanerUsername: newListing.cleaner.username,
-                cleaner: undefined // Remove nested cleaner object
-            };
+            return true; // Return true on successful creation
 
         } catch (error) {
             console.error("Error creating service listing:", error);

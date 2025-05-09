@@ -42,19 +42,19 @@ describe('MatchServiceEntity', () => {
             {
                 id: 'match-1',
                 confirmationDate: new Date('2025-05-01T10:00:00Z'),
-                serviceListing: { id: 'sl-1', title: 'Deep Clean Deluxe', serviceType: 'Deep Clean', ratePerHr: 30, duration: 3 },
+                serviceListing: { id: 'sl-1', title: 'Deep Clean Deluxe', serviceType: 'Deep Clean', ratePerHr: 30 /* duration removed */ },
                 homeowner: { id: 'ho-1', username: 'homeownerA' }
             },
             {
                 id: 'match-2',
                 confirmationDate: new Date('2025-05-05T14:00:00Z'),
-                serviceListing: { id: 'sl-2', title: 'Window Sparkle', serviceType: 'Window Cleaning', ratePerHr: 25, duration: 2 },
+                serviceListing: { id: 'sl-2', title: 'Window Sparkle', serviceType: 'Window Cleaning', ratePerHr: 25 /* duration removed */ },
                 homeowner: { id: 'ho-2', username: 'homeownerB' }
             },
             {
                 id: 'match-3',
                 confirmationDate: new Date('2025-04-20T09:00:00Z'),
-                serviceListing: { id: 'sl-3', title: 'Basic Tidy Up', serviceType: 'Basic Clean', ratePerHr: 20, duration: 1.5 },
+                serviceListing: { id: 'sl-3', title: 'Basic Tidy Up', serviceType: 'Basic Clean', ratePerHr: 20 /* duration removed */ },
                 homeowner: { id: 'ho-3', username: 'homeownerC' }
             }
         ];
@@ -64,7 +64,7 @@ describe('MatchServiceEntity', () => {
             serviceTitle: match.serviceListing.title,
             serviceType: match.serviceListing.serviceType,
             serviceRatePerHr: match.serviceListing.ratePerHr,
-            serviceDuration: match.serviceListing.duration,
+            // serviceDuration: match.serviceListing.duration, // Removed serviceDuration
             homeownerUsername: match.homeowner.username,
             homeownerId: match.homeowner.id,
             serviceListingId: match.serviceListing.id,
@@ -199,6 +199,114 @@ describe('MatchServiceEntity', () => {
             consoleErrorSpy.mockRestore();
             
             expect(result).toEqual({ error: { status: 400, error: 'Invalid filter parameters provided.' } });
+        });
+    });
+
+    // --- Test searchCleanerConfirmedMatches ---
+    describe('searchCleanerConfirmedMatches', () => {
+        const cleanerId = 'cleaner-search-id-789';
+        const mockRawMatchDataForSearch = [
+            {
+                id: 'match-s1',
+                confirmationDate: new Date('2025-06-01T10:00:00Z'),
+                serviceListing: { id: 'sl-s1', title: 'Searchable Clean', serviceType: 'Search Clean', ratePerHr: 35 },
+                homeowner: { id: 'ho-s1', username: 'homeownerSearchA' }
+            },
+            {
+                id: 'match-s2',
+                confirmationDate: new Date('2025-06-05T14:00:00Z'),
+                serviceListing: { id: 'sl-s2', title: 'Another Searchable', serviceType: 'General', ratePerHr: 22 },
+                homeowner: { id: 'ho-s2', username: 'homeownerSearchB' }
+            }
+        ];
+        const expectedFormattedMatchesForSearch = mockRawMatchDataForSearch.map(match => ({
+            matchId: match.id,
+            confirmationDate: match.confirmationDate,
+            serviceTitle: match.serviceListing.title,
+            serviceType: match.serviceListing.serviceType,
+            serviceRatePerHr: match.serviceListing.ratePerHr,
+            homeownerUsername: match.homeowner.username,
+            homeownerId: match.homeowner.id,
+            serviceListingId: match.serviceListing.id,
+        }));
+
+        it('should return error if cleanerId is not provided', async () => {
+            const result = await entity.searchCleanerConfirmedMatches(null, {});
+            expect(result).toEqual({ error: { status: 400, error: 'Cleaner ID is required for search.' } });
+        });
+
+        it('should fetch matches with "CONFIRMED" status filter (effectively no status DB filter)', async () => {
+            mockPrismaClient.confirmedMatch.findMany.mockResolvedValue(mockRawMatchDataForSearch);
+            const result = await entity.searchCleanerConfirmedMatches(cleanerId, { status: 'CONFIRMED' });
+            expect(mockPrismaClient.confirmedMatch.findMany).toHaveBeenCalledWith(expect.objectContaining({
+                where: { serviceListing: { cleanerId: cleanerId } } // No specific ConfirmedMatch.status clause
+            }));
+            expect(result).toEqual(expectedFormattedMatchesForSearch);
+        });
+
+        it('should return message for unsupported status filter like "PENDING"', async () => {
+            const result = await entity.searchCleanerConfirmedMatches(cleanerId, { status: 'PENDING' });
+            expect(result).toEqual({ message: "Filtering by status 'PENDING' is not currently supported or no matches found for this status." });
+            expect(mockPrismaClient.confirmedMatch.findMany).not.toHaveBeenCalled();
+        });
+
+        it('should filter by serviceType and status "CONFIRMED"', async () => {
+            mockPrismaClient.confirmedMatch.findMany.mockResolvedValue([mockRawMatchDataForSearch[0]]);
+            const filters = { serviceType: 'Search Clean', status: 'CONFIRMED' };
+            await entity.searchCleanerConfirmedMatches(cleanerId, filters);
+            expect(mockPrismaClient.confirmedMatch.findMany).toHaveBeenCalledWith(expect.objectContaining({
+                where: {
+                    serviceListing: {
+                        cleanerId: cleanerId,
+                        serviceType: { equals: 'Search Clean', mode: 'insensitive' }
+                    }
+                    // No ConfirmedMatch.status clause
+                }
+            }));
+        });
+        
+        it('should filter by date range and status "CONFIRMED"', async () => {
+            const filters = { startDate: '2025-06-01', endDate: '2025-06-01', status: 'CONFIRMED' };
+            const expectedStartDate = new Date('2025-06-01T00:00:00.000Z');
+            const expectedEndDate = new Date('2025-06-01T23:59:59.999Z');
+            mockPrismaClient.confirmedMatch.findMany.mockResolvedValue([mockRawMatchDataForSearch[0]]);
+            await entity.searchCleanerConfirmedMatches(cleanerId, filters);
+            expect(mockPrismaClient.confirmedMatch.findMany).toHaveBeenCalledWith(expect.objectContaining({
+                where: {
+                    serviceListing: { cleanerId: cleanerId },
+                    confirmationDate: { gte: expectedStartDate, lte: expectedEndDate }
+                    // No ConfirmedMatch.status clause
+                }
+            }));
+        });
+
+        it('should return "No confirmed matches found" message if no matches meet search criteria', async () => {
+            mockPrismaClient.confirmedMatch.findMany.mockResolvedValue([]);
+            const result = await entity.searchCleanerConfirmedMatches(cleanerId, { serviceType: 'NonExistentServiceType', status: 'CONFIRMED' });
+            expect(result).toEqual({ message: "No confirmed matches found for selected search criteria." });
+        });
+        
+        it('should return 400 error for invalid startDate format during search', async () => {
+            const result = await entity.searchCleanerConfirmedMatches(cleanerId, { startDate: 'invalid-date-search', status: 'CONFIRMED' });
+            expect(result).toEqual({ error: { status: 400, error: 'Invalid start date format. Use YYYY-MM-DD.' } });
+        });
+
+        it('should return 500 error if Prisma query fails during search', async () => {
+            const dbError = new Error('DB search query failed');
+            mockPrismaClient.confirmedMatch.findMany.mockRejectedValue(dbError);
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await entity.searchCleanerConfirmedMatches(cleanerId, { status: 'CONFIRMED' });
+            consoleErrorSpy.mockRestore();
+            expect(result).toEqual({ error: { status: 500, error: 'Failed to search confirmed matches due to a server error.' } });
+        });
+
+        it('should return 400 error for PrismaClientValidationError during search', async () => {
+            const validationError = new Prisma.PrismaClientValidationError('Simulated validation error for search');
+            mockPrismaClient.confirmedMatch.findMany.mockRejectedValue(validationError);
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const result = await entity.searchCleanerConfirmedMatches(cleanerId, { serviceType: {}, status: 'CONFIRMED' });
+            consoleErrorSpy.mockRestore();
+            expect(result).toEqual({ error: { status: 400, error: 'Invalid filter parameters provided for search.' } });
         });
     });
 });

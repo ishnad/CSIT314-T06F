@@ -63,7 +63,7 @@ describe('CreateServiceListingController', () => {
         cleanerId: mockCleanerUser.id,
         cleanerUsername: mockCleanerUser.username,
     };
-
+    // const createdListing is no longer returned by controller, entity returns true
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -74,17 +74,16 @@ describe('CreateServiceListingController', () => {
         res = mockResponse();
     });
 
-    it('should create listing successfully for an authenticated Cleaner', async () => {
+    it('should create listing successfully for an authenticated Cleaner and return success message', async () => {
         req = mockRequest(listingDataBody, mockCleanerUser); // Pass cleaner user
-        ServiceListingEntity.prototype.createServiceListing.mockResolvedValue(createdListing);
+        ServiceListingEntity.prototype.createServiceListing.mockResolvedValue(true); // Entity returns true
 
         await controller.createServiceListing(req, res);
 
         expect(ServiceListingEntity.prototype.createServiceListing).toHaveBeenCalledWith(listingDataEntityArg);
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith({
-            message: 'Service listing created successfully.',
-            listing: createdListing
+            message: 'Service listing created successfully.' // No listing object in response
         });
     });
 
@@ -167,6 +166,19 @@ describe('CreateServiceListingController', () => {
         expect(ServiceListingEntity.prototype.createServiceListing).toHaveBeenCalledWith(listingDataEntityArg);
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.json).toHaveBeenCalledWith({ error: 'An unexpected error occurred while creating the service listing.' });
+    });
+
+    it('should return 500 if entity returns an unexpected non-error, non-true value', async () => {
+        req = mockRequest(listingDataBody, mockCleanerUser);
+        ServiceListingEntity.prototype.createServiceListing.mockResolvedValue("unexpected string"); // Simulate unexpected return
+
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        await controller.createServiceListing(req, res);
+        consoleErrorSpy.mockRestore();
+
+        expect(ServiceListingEntity.prototype.createServiceListing).toHaveBeenCalledWith(listingDataEntityArg);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Failed to create service listing due to an unexpected internal state.' });
     });
 });
 

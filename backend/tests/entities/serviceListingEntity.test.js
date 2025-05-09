@@ -86,7 +86,7 @@ describe('ServiceListingEntity', () => {
         };
 
 
-        it('should create a service listing successfully', async () => {
+        it('should create a service listing successfully and return true', async () => {
             // Mock cleaner check -> found, is Cleaner
             mockPrismaClient.userAccount.findUnique.mockResolvedValue(mockCleaner);
             // Mock listing creation
@@ -108,7 +108,7 @@ describe('ServiceListingEntity', () => {
                 },
                 select: expect.any(Object), // Check that select is used
             });
-            expect(result).toEqual(expectedListingResult);
+            expect(result).toBe(true);
         });
 
         // --- Inlined Validation Tests ---

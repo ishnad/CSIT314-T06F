@@ -51,9 +51,13 @@ class CreateServiceListingController {
             if (result.error) {
                 // If the entity returned an error object, use its status and message
                 res.status(result.error.status).json({ error: result.error.error });
+            } else if (result === true) {
+                // Success: return a success message
+                res.status(201).json({ message: 'Service listing created successfully.' });
             } else {
-                // Success: return the created listing data
-                res.status(201).json({ message: 'Service listing created successfully.', listing: result });
+                // Should not happen if entity behaves as expected (true or error object)
+                console.error("Controller error: createServiceListing entity returned unexpected value:", result);
+                res.status(500).json({ error: 'Failed to create service listing due to an unexpected internal state.' });
             }
         } catch (error) {
             // Catch unexpected errors during the process
