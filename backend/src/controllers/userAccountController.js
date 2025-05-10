@@ -11,36 +11,20 @@ class CreateUserAccountController {
      * @param {import('express').Response} res - Express response object.
      */
     async createUserAccount(req, res) {
-        // Expect userProfileName and email
         const { username, password, email, userProfileName } = req.body;
-
-        if (!userProfileName) {
-             return res.status(400).json({ error: 'userProfileName is required.' });
-        }
-        if (!email) { // check for email
-             return res.status(400).json({ error: 'Email is required.' });
-        }
-
         try {
-            // Pass email to the entity method
             const result = await this.userEntity.createUserAccount({ username, password, email, userProfileName });
 
-            // Check if entity returned an error
-            if (result.error) {
-                 res.status(result.error.status).json({ error: result.error.error });
-            } else if (result === true) {
-                 res.status(201).json({ message: 'User account created successfully.' });
+            if (result === true) {
+                res.status(201).json(true); // Successfully created
             } else {
-                // Should not happen if entity behaves as expected (true or error object)
-                console.error("Controller error: createUserAccount entity returned unexpected value:", result);
-                res.status(500).json({ error: 'Failed to create user due to an unexpected internal state.' });
+                console.error("User account creation failed (handled by entity).");
+                res.status(400).json(false); // Creation failed
             }
-
         } catch (error) {
-            // Catch unexpected errors
-            console.error("Error creating user:", error);
-            // Avoid using 'result' in catch block as it might be undefined
-            res.status(500).json({ error: 'Failed to create user due to a server error.' });
+            // An unexpected error occurred during the entity call (e.g., database issue or other unhandled exception in entity)
+            console.error("createUserAccount ERROR:", error);
+            res.status(500).json(false); // Creation failed
         }
     }
 }
@@ -87,18 +71,6 @@ class EditUserAccountController {
     async editUserAccount(req, res) {
         // Expect id, username, userProfileName, email, status
         const { id, username, userProfileName, email, status } = req.body;
-
-        if (!id) {
-            return res.status(400).json({ error: 'User ID is required for update.' });
-        }
-        if (!userProfileName) {
-             return res.status(400).json({ error: 'userProfileName is required.' });
-        }
-        // Add basic checks for other required fields if necessary
-        if (!username || !email || !status) {
-             return res.status(400).json({ error: 'Username, email, and status are required.' });
-        }
-
 
         try {
             // Pass id along with other data to the entity

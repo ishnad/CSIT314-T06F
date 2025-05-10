@@ -56,7 +56,7 @@ describe('UserAccount Controllers (excluding Login)', () => {
             controller = new CreateUserAccountController();
         });
 
-        it('should create user successfully', async () => {
+        it('should respond with 201 and true if user creation is successful', async () => {
             req = mockRequest({}, userData);
             UserAccountEntity.prototype.createUserAccount.mockResolvedValue(true);
 
@@ -64,48 +64,36 @@ describe('UserAccount Controllers (excluding Login)', () => {
 
             expect(UserAccountEntity.prototype.createUserAccount).toHaveBeenCalledWith(userData);
             expect(res.status).toHaveBeenCalledWith(201);
-            expect(res.json).toHaveBeenCalledWith({ message: 'User account created successfully.' });
+            expect(res.json).toHaveBeenCalledWith(true);
         });
 
-        it('should return 400 if userProfileName is missing', async () => {
-            req = mockRequest({}, { username: 'test', password: 'pw', email: 'test@e.com' }); // Missing profile name
-            await controller.createUserAccount(req, res);
-            expect(UserAccountEntity.prototype.createUserAccount).not.toHaveBeenCalled();
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({ error: 'userProfileName is required.' });
-        });
-
-        it('should return 400 if email is missing', async () => {
-            req = mockRequest({}, { username: 'test', password: 'pw', userProfileName: 'HomeOwner' }); // Missing email
-            await controller.createUserAccount(req, res);
-            expect(UserAccountEntity.prototype.createUserAccount).not.toHaveBeenCalled();
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({ error: 'Email is required.' });
-        });
-
-        it('should return error from entity if creation fails (e.g., conflict)', async () => {
+        it('should respond with 400 and false if entity returns false (e.g., conflict, profile not found)', async () => {
             req = mockRequest({}, userData);
-            const errorResponse = { error: { status: 409, error: 'Username already exists.' } };
-            UserAccountEntity.prototype.createUserAccount.mockResolvedValue(errorResponse);
+            UserAccountEntity.prototype.createUserAccount.mockResolvedValue(false); // Entity now returns false directly
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
             await controller.createUserAccount(req, res);
 
             expect(UserAccountEntity.prototype.createUserAccount).toHaveBeenCalledWith(userData);
-            expect(res.status).toHaveBeenCalledWith(409);
-            expect(res.json).toHaveBeenCalledWith({ error: 'Username already exists.' });
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith(false);
+            expect(consoleErrorSpy).toHaveBeenCalledWith("User account creation failed (handled by entity).");
+            consoleErrorSpy.mockRestore();
         });
 
-        it('should return 500 on unexpected controller error', async () => {
+        it('should respond with 500 and false on unexpected error during entity call (controller catch block)', async () => {
             req = mockRequest({}, userData);
-            const error = new Error("Something broke");
+            const error = new Error("Something broke badly");
             UserAccountEntity.prototype.createUserAccount.mockRejectedValue(error);
 
             const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
             await controller.createUserAccount(req, res);
-            consoleErrorSpy.mockRestore();
 
+            expect(UserAccountEntity.prototype.createUserAccount).toHaveBeenCalledWith(userData);
             expect(res.status).toHaveBeenCalledWith(500);
-            expect(res.json).toHaveBeenCalledWith({ error: 'Failed to create user due to a server error.' });
+            expect(res.json).toHaveBeenCalledWith(false);
+            expect(consoleErrorSpy).toHaveBeenCalledWith("createUserAccount ERROR:", error);
+            consoleErrorSpy.mockRestore(); // Moved after the assertion
         });
     });
 
@@ -195,23 +183,6 @@ describe('UserAccount Controllers (excluding Login)', () => {
             expect(UserAccountEntity.prototype.editUserAccount).toHaveBeenCalledWith(editData.id, editData.username, editData.userProfileName, editData.email, editData.status);
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith(updatedUser);
-        });
-
-        it('should return 400 if ID is missing', async () => {
-            req = mockRequest({}, { username: 'u', userProfileName: 'p', email: 'e', status: 's' }); // Missing ID
-            await controller.editUserAccount(req, res);
-            expect(UserAccountEntity.prototype.editUserAccount).not.toHaveBeenCalled();
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({ error: 'User ID is required for update.' });
-        });
-
-         it('should return 400 if other required fields are missing', async () => {
-            req = mockRequest({}, { id: 'edit-id', username: 'u' }); // Missing profile, email, status
-            await controller.editUserAccount(req, res);
-            expect(UserAccountEntity.prototype.editUserAccount).not.toHaveBeenCalled();
-            expect(res.status).toHaveBeenCalledWith(400);
-            // Controller checks for userProfileName first after id
-            expect(res.json).toHaveBeenCalledWith({ error: 'userProfileName is required.' });
         });
 
         it('should return error from entity if edit fails', async () => {

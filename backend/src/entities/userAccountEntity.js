@@ -17,22 +17,8 @@ class UserAccountEntity {
      * @returns {Promise<object|{error: {status: number, error: string}}>} The updated user object or an error object.
      */
     async editUserAccount(id, username, userProfileName, email, status) {
-        // Basic validation first (presence of fields)
-        if (!id || !username || !userProfileName || !email || !status) {
-             return { error: { status: 400, error: 'ID, username, userProfileName, email, and status are required' } };
-        }
-         // Validate email format
-        if (!email.includes('@')) {
-            return { error: { status: 400, error: 'Invalid email format' } };
-        }
-
-        // Validate and convert status to uppercase enum value
-        const validStatuses = Object.values(UserStatus); // Get ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'BANNED']
+        // Convert status to uppercase enum value
         const upperCaseStatus = status.toUpperCase();
-        if (!validStatuses.includes(upperCaseStatus)) {
-             return { error: { status: 400, error: `Invalid status value. Must be one of: ${validStatuses.join(', ')}` } };
-        }
-
 
         try {
             // Find the profile ID based on the provided name
@@ -40,24 +26,28 @@ class UserAccountEntity {
                 where: { name: userProfileName },
                 select: { id: true }
             });
-
             if (!profile) {
                 return { error: { status: 404, error: `User profile '${userProfileName}' not found.` } };
             }
 
-            // Check if the new username conflicts with another existing user (if username is being changed)
             const currentUser = await this.prisma.userAccount.findUnique({ where: { id } });
             if (!currentUser) {
-                 // This case should ideally not happen if ID is valid, but good to check
                  return { error: { status: 404, error: 'User to update not found.' } };
             }
+            // Check if the new username conflicts with another existing user if username is being changed
             if (username !== currentUser.username) {
                 const existingUserWithNewUsername = await this.prisma.userAccount.findUnique({ where: { username } });
                 if (existingUserWithNewUsername) {
                     return { error: { status: 409, error: 'New username already exists.' } };
                 }
             }
-
+            // Check if the new email conflicts with another existing user if email is being changed
+            if (email !== currentUser.email) {
+                const existingUserWithNewEmail = await this.prisma.userAccount.findUnique({where: { email } });
+                if (existingUserWithNewEmail) {
+                    return { error: { status: 409, error: 'New email already exists.' } };
+                }
+            }
 
             const updatedUser = await this.prisma.userAccount.update({
                 where: { id },
@@ -67,14 +57,13 @@ class UserAccountEntity {
                     email,
                     status: upperCaseStatus
                 },
-                // Include profile with permissions
                 include: { userProfile: { select: { name: true, permissions: true } } }
             });
 
             return {
                 username: updatedUser.username,
-                userProfile: updatedUser.userProfile.name, // Keep name for simplicity here
-                permissions: updatedUser.userProfile.permissions, // Add permissions
+                userProfile: updatedUser.userProfile.name,
+                permissions: updatedUser.userProfile.permissions,
                 email: updatedUser.email,
                 status: updatedUser.status
             };
@@ -96,51 +85,47 @@ class UserAccountEntity {
      * @param {string} userData.password - The password for the new account.
      * @param {string} userData.email - The email address for the new account.
      * @param {string} userData.userProfileName - The name of the user profile to associate with the account.
-     * @returns {Promise<boolean|{error: {status: number, error: string}}>} True if successful, or an error object.
+     * @returns {Promise<boolean>} True if successful, false otherwise.
      */
-    async createUserAccount({ username, password, email, userProfileName }) {
-        if (!userProfileName) {
-             return { error: { status: 400, error: 'User profile name is required.' } };
-        }
-        if (!email) { // validation for email
-             return { error: { status: 400, error: 'Email is required.' } };
-        }
-        // Basic email format check
-        if (!email.includes('@')) {
-            return { error: { status: 400, error: 'Invalid email format.' } };
-        }
-        const usernameError = await this.checkUsernameExists(username);
-        if (usernameError) {
-            return { error: usernameError };
-        }
+async createUserAccount({ username, password, email, userProfileName }) {
+        try {
+            // Check if username exists
+            const existingUser = await this.prisma.userAccount.findUnique({
+                where: { username },
+            });
+            if (existingUser) {
+                console.error(`User account creation failed: Username '${username}' already exists.`);
+                return false; // Username exists
+            }
+            // Check if email exists
+            const existingEmail = await this.prisma.userAccount.findUnique({
+                where: { email },
+            });
+            if (existingEmail) {
+                console.error(`User account creation failed: Email '${email}' already exists.`);
+                return false; // Email exists
+            }
 
-        // Find the profile ID based on the provided name
-        const profile = await this.prisma.userProfile.findUnique({
-            where: { name: userProfileName },
-            select: { id: true }
-        });
-
-        if (!profile) {
-            return { error: { status: 404, error: `User profile '${userProfileName}' not found.` } };
-        }
-
-        const hashedPassword = await this.hashPassword(password);
-
-        const newUser = await this.prisma.userAccount.create({
-            data: {
+            const profile = await this.prisma.userProfile.findUnique({
+                where: { name: userProfileName },
+                select: { id: true }
+            });
+            const hashedPassword = await this.hashPassword(password);
+            await this.prisma.userAccount.create({
+                data: {
                 username,
                 email,
                 password: hashedPassword,
                 userProfileId: profile.id,
             },
-            // Include profile with permissions
             include: { userProfile: { select: { name: true, permissions: true } } }
         });
 
-        // If newUser is created successfully, Prisma returns the object.
-        // If it failed, an error would have been thrown and caught by the controller's try/catch,
-        // or by specific error handling within this method if we added more.
-        return true;
+            return true; // Account successfully created
+        } catch (error) {
+            console.error("Error during user account creation in entity:", error);
+            return false; // Catch any other unexpected errors
+        }
     }
 
     /**
@@ -334,15 +319,6 @@ class UserAccountEntity {
      * @returns {Promise<object>} User object with profile if valid, otherwise an error object.
      */
     async validateLogin(username, password) {
-        // Basic validation
-        if (!username || typeof username !== 'string' || username.trim() === '') {
-            return { error: { status: 400, message: 'Username is required.' } };
-        }
-        if (!password || typeof password !== 'string' || password === '') {
-            // Note: Password validation (length, complexity) should happen on signup/update, not necessarily login attempt.
-            return { error: { status: 400, message: 'Password is required.' } };
-        }
-
         const trimmedUsername = username.trim();
 
         try {
