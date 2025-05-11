@@ -51,7 +51,7 @@ class UserProfileEntity {
             }
 
             // Create the new profile
-            const newProfile = await this.prisma.userProfile.create({
+            await this.prisma.userProfile.create({
                 data: {
                     name: name.trim(),
                     permissions: permissions,
@@ -69,7 +69,6 @@ class UserProfileEntity {
             return true; // Return true on successful creation
 
         } catch (error) {
-            console.error("Error creating user profile:", error);
             // Handle potential Prisma errors (e.g., database connection issues)
             return { error: { status: 500, error: 'Failed to create user profile due to a server error.' } };
         }
@@ -132,28 +131,7 @@ class UserProfileEntity {
      * @returns {Promise<boolean|{error: {status: number, error: string}}>} True on successful update, or an error object on failure.
      */
     async updateUserProfile(profileId, { name, permissions }) {
-        const nameProvided = name !== undefined;
-        const permissionsProvided = permissions !== undefined;
-        const trimmedName = nameProvided ? name.trim() : undefined;
-
-        // Validate input
-        const validationError = this.validateUserProfileInput(
-            nameProvided ? trimmedName : 'placeholder', // Provide placeholder if name not changing
-            permissions
-        );
-        // If name wasn't provided, ignore the name part of validation
-        if (validationError && (!nameProvided || validationError.error !== 'Profile name is required and cannot be empty.')) {
-             return { error: validationError };
-        }
-        // Check 1: If name was provided but is empty after trimming
-        if (nameProvided && !trimmedName) {
-            return { error: { status: 400, error: 'Profile name cannot be empty.' } };
-        }
-
-        // Check 2: At least one field must be provided for update
-        if (!nameProvided && !permissionsProvided) {
-            return { error: { status: 400, error: 'At least name or permissions must be provided for update.' } };
-        }
+        const trimmedName = name.trim();
 
         try {
             // Check if the target profile exists
@@ -161,7 +139,6 @@ class UserProfileEntity {
                 where: { id: profileId },
                 select: { id: true, name: true } // Select current name for conflict check
             });
-
             if (!existingProfile) {
                 return { error: { status: 404, error: 'User profile not found.' } };
             }
@@ -178,17 +155,13 @@ class UserProfileEntity {
                 }
             }
 
-            // Prepare data for update, only include fields that were provided and valid
+            // Prepare data for update
             const dataToUpdate = {};
-            if (nameProvided && trimmedName) { // Ensure name is valid if provided
-                dataToUpdate.name = trimmedName;
-            }
-            if (permissionsProvided) {
-                dataToUpdate.permissions = permissions;
-            }
+            dataToUpdate.name = trimmedName;
+            dataToUpdate.permissions = permissions;
 
             // Update the profile
-            const updatedProfile = await this.prisma.userProfile.update({
+            await this.prisma.userProfile.update({
                 where: { id: profileId },
                 data: dataToUpdate,
                 select: { // Select the fields to return
@@ -216,23 +189,15 @@ class UserProfileEntity {
      * @returns {Promise<boolean|{error: {status: number, error: string}}>} True on successful status update, or an error object on failure.
      */
     async updateProfileStatus(profileId, newStatus) {
-        if (!profileId) {
-            return { error: { status: 400, error: 'Profile ID is required.' } };
-        }
-        if (!newStatus || !Object.values(UserProfileStatus).includes(newStatus)) {
-            return { error: { status: 400, error: `Invalid status provided. Must be one of: ${Object.values(UserProfileStatus).join(', ')}.` } };
-        }
-
         try {
             const existingProfile = await this.prisma.userProfile.findUnique({
                 where: { id: profileId },
             });
-
             if (!existingProfile) {
                 return { error: { status: 404, error: 'User profile not found.' } };
             }
 
-            const updatedProfile = await this.prisma.userProfile.update({
+            await this.prisma.userProfile.update({
                 where: { id: profileId },
                 data: { status: newStatus },
                 select: {
@@ -300,13 +265,6 @@ class UserProfileEntity {
      * @returns {Promise<object>} The UserProfile object with associated userAccounts, or an error object.
      */
     async searchUserProfiles({ filter, keyword }) {
-        if (!filter || filter.toLowerCase() !== 'name') {
-            return { error: { status: 400, error: "Invalid filter provided. Only searching by 'name' is supported." } };
-        }
-        if (!keyword || typeof keyword !== 'string' || keyword.trim() === '') {
-            return { error: { status: 400, error: 'Keyword (profile name) is required for search.' } };
-        }
-
         const trimmedKeyword = keyword.trim();
 
         try {
@@ -327,7 +285,6 @@ class UserProfileEntity {
                     }
                 }
             });
-
             if (!profile) {
                 return { error: { status: 404, error: `User profile with name '${trimmedKeyword}' not found.` } };
             }
