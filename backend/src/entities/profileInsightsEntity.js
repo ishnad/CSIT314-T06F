@@ -8,8 +8,8 @@ class ProfileInsightsEntity {
     /**
      * Fetches view statistics for a cleaner's profile.
      * @param {string} cleanerUserId - The ID of the cleaner.
-     * @returns {Promise<object>} An object containing total views and daily views for the last week,
-     *                            or a message if no views, or an error object.
+     * @returns {Promise<{totalViews: number, dailyViewsLastWeek: Array<{date: string, views: number}>}|{error: {status: number, error: string}}>} 
+     *          An object with total views and daily views for the last week, or an error object.
      */
     async fetchViewStats(cleanerUserId) {
         const sevenDaysAgo = new Date();
@@ -28,7 +28,7 @@ class ProfileInsightsEntity {
             });
 
             if (totalViews === 0) {
-                return { message: "No profile views yet" };
+                return { error: { status: 404, error: "No profile views yet" } };
             }
 
             // Get views within the last 7 days for daily breakdown
@@ -83,7 +83,8 @@ class ProfileInsightsEntity {
     /**
      * Fetches the number of times a cleaner has been shortlisted by homeowners.
      * @param {string} cleanerUserId - The ID of the cleaner.
-     * @returns {Promise<object>} An object containing the shortlist count or a message if not shortlisted, or an error object.
+     * @returns {Promise<{shortlistCount: number}|{error: {status: number, error: string}}>} 
+     *          An object with the shortlist count, or an error object (e.g., if not shortlisted or due to a server error).
      */
     async fetchShortlistCount(cleanerUserId) {
         try {
@@ -94,7 +95,7 @@ class ProfileInsightsEntity {
             });
 
             if (count === 0) {
-                return { message: "You have not been shortlisted yet" };
+                return { error: { status: 404, error: "You have not been shortlisted yet" } };
             }
 
             return { shortlistCount: count };

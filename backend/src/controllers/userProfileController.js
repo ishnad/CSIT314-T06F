@@ -20,8 +20,7 @@ class CreateUserProfileController {
             // If the entity returned an error object, use its status and message
             res.status(result.error.status).json({ error: result.error.error });
         } else if (result === true) {
-            // Success: return a success message
-            res.status(201).json({ message: 'User profile created successfully.' });
+            res.status(201).json(result);
         }
     }
 }
@@ -72,8 +71,7 @@ class EditUserProfileController {
             // If the entity returned an error object, use its status and message
             res.status(result.error.status).json({ error: result.error.error });
         } else if (result === true) {
-            // Success: return a success message
-            res.status(200).json({ message: 'User profile updated successfully.' });
+            res.status(200).json(result);
         }
     }
 }
@@ -134,18 +132,10 @@ class UpdateUserProfileStatusController {
         if (result.error) {
             res.status(result.error.status).json({ error: result.error.error });
         } else if (result === true) {
-            res.status(200).json({ message: `User profile status updated to ${status.toUpperCase()} successfully.` });
+            res.status(200).json(result);
         }
     }
 }
-
-module.exports = {
-    CreateUserProfileController,
-    ViewUserProfileController,
-    EditUserProfileController,
-    SimulateUserProfileController,
-    UpdateUserProfileStatusController
-};
 
 class SearchUserProfileController {
     constructor() {

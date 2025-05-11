@@ -12,17 +12,6 @@ class ConfirmedMatchesController {
      */
     async fetchConfirmedMatches(req, res) {
         const cleanerId = req.user?.id;
-        const userProfileName = req.user?.profile?.name;
-
-        // Authorization: Ensure user is authenticated
-        if (!cleanerId) {
-            return res.status(401).json({ error: 'Authentication required.' });
-        }
-
-        // Authorization: Ensure user is a 'Cleaner'
-        if (userProfileName !== 'Cleaner') {
-            return res.status(403).json({ error: 'Forbidden: Only Cleaners can view their confirmed matches.' });
-        }
 
         // Extract filters from query parameters
         const { serviceType, startDate, endDate } = req.query;
@@ -31,24 +20,14 @@ class ConfirmedMatchesController {
         if (startDate) filters.startDate = startDate;
         if (endDate) filters.endDate = endDate;
 
-        try {
-            const result = await this.matchServiceEntity.fetchConfirmedMatches(cleanerId, filters);
+        const result = await this.matchServiceEntity.fetchConfirmedMatches(cleanerId, filters);
 
-            if (result.error) {
-                return res.status(result.error.status).json({ error: result.error.error });
-            }
-            
-            if (result.message) { // e.g., "No confirmed matches found..."
-                return res.status(200).json(result);
-            }
-
+        if (result.error) {
+            return res.status(result.error.status).json({ error: result.error.error });
+        }
+        else {
             // Success: return the list of matches
             res.status(200).json(result);
-
-        } catch (error) {
-            // Catch unexpected errors during the process
-            console.error(`Controller error fetching confirmed matches for cleaner ${cleanerId}:`, error);
-            res.status(500).json({ error: 'An unexpected error occurred while fetching confirmed matches.' });
         }
     }
 }
@@ -66,17 +45,6 @@ class SearchConfirmedMatchesController {
      */
     async searchConfirmedMatches(req, res) {
         const cleanerId = req.user?.id;
-        const userProfileName = req.user?.profile?.name;
-
-        // Authorization: Ensure user is authenticated
-        if (!cleanerId) {
-            return res.status(401).json({ error: 'Authentication required.' });
-        }
-
-        // Authorization: Ensure user is a 'Cleaner'
-        if (userProfileName !== 'Cleaner') {
-            return res.status(403).json({ error: 'Forbidden: Only Cleaners can search their confirmed matches.' });
-        }
 
         // Extract filters from query parameters
         const { serviceType, startDate, endDate, status } = req.query;
@@ -86,24 +54,14 @@ class SearchConfirmedMatchesController {
         if (endDate) filters.endDate = endDate;
         if (status) filters.status = status;
 
-        try {
-            const result = await this.matchServiceEntity.searchCleanerConfirmedMatches(cleanerId, filters);
+        const result = await this.matchServiceEntity.searchCleanerConfirmedMatches(cleanerId, filters);
 
-            if (result.error) {
-                return res.status(result.error.status).json({ error: result.error.error });
-            }
-            
-            if (result.message) { // e.g., "No confirmed matches found..." or "Filtering by status 'X' not supported..."
-                return res.status(200).json(result);
-            }
-
+        if (result.error) {
+            return res.status(result.error.status).json({ error: result.error.error });
+        }
+        else {
             // Success: return the list of matches
             res.status(200).json(result);
-
-        } catch (error) {
-            // Catch unexpected errors during the process
-            console.error(`Controller error searching confirmed matches for cleaner ${cleanerId}:`, error);
-            res.status(500).json({ error: 'An unexpected error occurred while searching confirmed matches.' });
         }
     }
 }

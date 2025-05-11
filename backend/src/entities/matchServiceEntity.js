@@ -12,13 +12,10 @@ class MatchServiceEntity {
      * @param {string} [filters.serviceType] - Filter by service type.
      * @param {string} [filters.startDate] - ISO 8601 date string for start of date range.
      * @param {string} [filters.endDate] - ISO 8601 date string for end of date range.
-     * @returns {Promise<Array<object>|object>} Array of match objects or an error/message object.
+     * @returns {Promise<Array<{matchId: string, confirmationDate: Date, serviceTitle: string, serviceType: string, serviceRatePerHr: number, homeownerUsername: string, homeownerId: string, serviceListingId: string}>|{error: {status: number, error: string}}>} 
+     *          Array of confirmed match objects, or an error object.
      */
     async fetchConfirmedMatches(cleanerId, filters = {}) {
-        if (!cleanerId) {
-            return { error: { status: 400, error: 'Cleaner ID is required.' } };
-        }
-
         const { serviceType, startDate, endDate } = filters;
         const whereConditions = {
             serviceListing: {
@@ -36,21 +33,13 @@ class MatchServiceEntity {
         const dateFilter = {};
         if (startDate) {
             const parsedStartDate = new Date(startDate);
-            if (!isNaN(parsedStartDate)) {
-                dateFilter.gte = parsedStartDate;
-            } else {
-                return { error: { status: 400, error: 'Invalid start date format. Use YYYY-MM-DD.' } };
-            }
+            dateFilter.gte = parsedStartDate;
         }
         if (endDate) {
             const parsedEndDate = new Date(endDate);
-            if (!isNaN(parsedEndDate)) {
-                // To include the whole end day, set time to end of day using UTC hours
-                parsedEndDate.setUTCHours(23, 59, 59, 999);
-                dateFilter.lte = parsedEndDate;
-            } else {
-                return { error: { status: 400, error: 'Invalid end date format. Use YYYY-MM-DD.' } };
-            }
+            // To include the whole end day, set time to end of day using UTC hours
+            parsedEndDate.setUTCHours(23, 59, 59, 999);
+            dateFilter.lte = parsedEndDate;
         }
 
         if (Object.keys(dateFilter).length > 0) {
@@ -86,7 +75,7 @@ class MatchServiceEntity {
             });
 
             if (matches.length === 0) {
-                return { message: "No confirmed matches found for selected filters" };
+                return { error: { status: 404, error: "No confirmed matches found for selected filters" } };
             }
 
             return matches.map(match => ({
@@ -118,13 +107,10 @@ class MatchServiceEntity {
      * @param {string} [filters.startDate] - ISO 8601 date string for start of date range.
      * @param {string} [filters.endDate] - ISO 8601 date string for end of date range.
      * @param {string} [filters.status] - Filter by match status.
-     * @returns {Promise<Array<object>|object>} Array of match objects or an error/message object.
+     * @returns {Promise<Array<{matchId: string, confirmationDate: Date, serviceTitle: string, serviceType: string, serviceRatePerHr: number, homeownerUsername: string, homeownerId: string, serviceListingId: string}>|{message: string}|{error: {status: number, error: string}}>} 
+     *          Array of confirmed match objects, a message object, or an error object.
      */
     async searchCleanerConfirmedMatches(cleanerId, filters = {}) {
-        if (!cleanerId) {
-            return { error: { status: 400, error: 'Cleaner ID is required for search.' } };
-        }
-
         const { serviceType, startDate, endDate, status } = filters;
         const whereConditions = {
             serviceListing: {
@@ -154,20 +140,12 @@ class MatchServiceEntity {
         const dateFilter = {};
         if (startDate) {
             const parsedStartDate = new Date(startDate);
-            if (!isNaN(parsedStartDate)) {
-                dateFilter.gte = parsedStartDate;
-            } else {
-                return { error: { status: 400, error: 'Invalid start date format. Use YYYY-MM-DD.' } };
-            }
+            dateFilter.gte = parsedStartDate;
         }
         if (endDate) {
             const parsedEndDate = new Date(endDate);
-            if (!isNaN(parsedEndDate)) {
-                parsedEndDate.setUTCHours(23, 59, 59, 999);
-                dateFilter.lte = parsedEndDate;
-            } else {
-                return { error: { status: 400, error: 'Invalid end date format. Use YYYY-MM-DD.' } };
-            }
+            parsedEndDate.setUTCHours(23, 59, 59, 999);
+            dateFilter.lte = parsedEndDate;
         }
 
         if (Object.keys(dateFilter).length > 0) {
@@ -202,7 +180,7 @@ class MatchServiceEntity {
             });
 
             if (matches.length === 0) {
-                return { message: "No confirmed matches found for selected search criteria." };
+                return { error: { status: 404, error: "No confirmed matches found for selected search criteria." } };
             }
 
             return matches.map(match => ({
