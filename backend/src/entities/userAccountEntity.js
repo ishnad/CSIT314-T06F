@@ -85,7 +85,7 @@ class UserAccountEntity {
      * @param {string} userData.password - The password for the new account.
      * @param {string} userData.email - The email address for the new account.
      * @param {string} userData.userProfileName - The name of the user profile to associate with the account.
-     * @returns {Promise<boolean>} True if successful, false otherwise.
+     * @returns {Promise<true|{error: {status: number, message: string}}>} True if successful, or an error object.
      */
 async createUserAccount({ username, password, email, userProfileName }) {
         try {
@@ -94,16 +94,14 @@ async createUserAccount({ username, password, email, userProfileName }) {
                 where: { username },
             });
             if (existingUser) {
-                console.error(`User account creation failed: Username '${username}' already exists.`);
-                return false; // Username exists
+                return { error: { status: 409, message: `Username '${username}' already exists.` } };
             }
             // Check if email exists
             const existingEmail = await this.prisma.userAccount.findUnique({
                 where: { email },
             });
             if (existingEmail) {
-                console.error(`User account creation failed: Email '${email}' already exists.`);
-                return false; // Email exists
+                return { error: { status: 409, message: `Email '${email}' already exists.` } };
             }
 
             const profile = await this.prisma.userProfile.findUnique({
@@ -123,8 +121,7 @@ async createUserAccount({ username, password, email, userProfileName }) {
 
             return true; // Account successfully created
         } catch (error) {
-            console.error("Error during user account creation in entity:", error);
-            return false; // Catch any other unexpected errors
+            return { error: { status: 500, message: 'An unexpected error occurred during user account creation.' } };
         }
     }
 
@@ -206,15 +203,14 @@ async createUserAccount({ username, password, email, userProfileName }) {
     /**
      * Suspends a user account by setting its status to SUSPENDED.
      * @param {string} username - The username of the account to suspend.
-     * @returns {Promise<boolean>} True if successful, false otherwise.
+     * @returns {Promise<true|{error: {status: number, message: string}}>} True if successful, or an error object.
      */
     async suspendUserAccount(username) {
         try {
             // Find user by username first to ensure it exists
             const userExists = await this.prisma.userAccount.findUnique({ where: { username } });
             if (!userExists) {
-                 console.error(`Suspend failed: User '${username}' not found.`);
-                 return false;
+                 return { error: { status: 404, message: `User '${username}' not found.` } };
             }
 
             await this.prisma.userAccount.update({
@@ -223,8 +219,8 @@ async createUserAccount({ username, password, email, userProfileName }) {
             });
             return true;
         } catch (error) {
-            console.error("Error suspending user:", error);
-            return false;
+            console.error("Error suspending user account in entity:", error);
+            return { error: { status: 500, message: 'An unexpected error occurred while suspending the user account.' } };
         }
     }
 
