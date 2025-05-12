@@ -112,10 +112,34 @@ class SearchUserAccountController {
     }
 }
 
+class ViewCleanerProfileController {
+    constructor() {
+        this.userEntity = new UserAccountEntity();
+    }
+
+    /**
+     * Handles the HTTP request to view a specific cleaner's profile.
+     * @param {import('express').Request} req - Express request object.
+     * @param {import('express').Response} res - Express response object.
+     */
+    async viewCleanerProfile(req, res) {
+        const { cleanerId } = req.params;
+
+        const result = await this.userEntity.getCleanerProfile(cleanerId);
+
+        if (result.error) {
+            res.status(result.error.status).json({ error: result.error.error });
+        } else {
+            res.status(200).json(result);
+        }
+    }
+}
+
 module.exports = {
     CreateUserAccountController,
     ViewUserAccountController,
     EditUserAccountController,
     SuspendUserAccountController,
-    SearchUserAccountController
+    SearchUserAccountController,
+    ViewCleanerProfileController
 };

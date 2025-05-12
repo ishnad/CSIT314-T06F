@@ -9,11 +9,13 @@ const viewUserAccountController = new userAccountController.ViewUserAccountContr
 const editUserAccountController = new userAccountController.EditUserAccountController();
 const suspendUserAccountController = new userAccountController.SuspendUserAccountController();
 const searchUserAccountController = new userAccountController.SearchUserAccountController();
+const viewCleanerProfileController = new userAccountController.ViewCleanerProfileController();
 
 router.post('/', (req, res) => createUserAccountController.createUserAccount(req, res));
 router.get('/', (req, res) => viewUserAccountController.viewUserAccount(req, res));
 router.put('/', (req, res) => editUserAccountController.editUserAccount(req, res));
 router.post('/suspend', (req, res) => suspendUserAccountController.suspendUserAccount(req, res));
 router.get('/search', (req, res) => searchUserAccountController.searchUserAccount(req, res));
+router.get('/:cleanerId/profile', (req, res) => viewCleanerProfileController.viewCleanerProfile(req, res));
 
-module.exports = router; // Export the router
+module.exports = router;

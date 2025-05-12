@@ -355,6 +355,60 @@ async createUserAccount({ username, password, email, userProfileName }) {
             return { error: { status: 500, message: 'Login failed due to a server error.' } };
         }
     }
+
+    /**
+     * Retrieves a cleaner's profile, including their active service listings.
+     * @param {string} cleanerId - The ID of the cleaner (UserAccount ID).
+     * @returns {Promise<object|{error: {status: number, error: string}}>} The cleaner's profile data or an error object.
+     */
+    async getCleanerProfile(cleanerId) {
+        try {
+            const cleanerAccount = await this.prisma.userAccount.findUnique({
+                where: { id: cleanerId },
+                select: {
+                    id: true,
+                    username: true,
+                    email: true,
+                    status: true,
+                    userProfile: {
+                        select: {
+                            name: true
+                        }
+                    },
+                    serviceListings: {
+                        where: {
+                            status: 'ACTIVE' // Only fetch active service listings
+                        },
+                        select: {
+                            id: true,
+                            serviceType: true,
+                            title: true,
+                            description: true,
+                            ratePerHr: true,
+                            status: true
+                        }
+                    }
+                }
+            });
+
+            return {
+                id: cleanerAccount.id,
+                username: cleanerAccount.username,
+                email: cleanerAccount.email,
+                status: cleanerAccount.status,
+                profileName: cleanerAccount.userProfile.name,
+                serviceListings: cleanerAccount.serviceListings
+            };
+
+        } catch (error) {
+            console.error(`Error fetching cleaner profile for ID ${cleanerId}:`, error);
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2023') {
+                // Invalid CUID format for cleanerId
+                return { error: { status: 400, error: 'Invalid cleaner ID format.' } };
+            }
+            return { error: { status: 500, error: 'Failed to retrieve cleaner profile due to a server error.' } };
+        }
+    }
 }
 
 module.exports = UserAccountEntity;
