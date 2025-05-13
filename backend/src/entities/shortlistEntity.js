@@ -138,30 +138,30 @@ class ShortlistEntity {
      * @returns {Promise<Array<object>|{error: {status: number, message: string}}>}
      * An array of cleaner objects (summaries) or an error object.
      */
-    async viewCleanerProfile(homeownerId) {
+    async fetchAllCleanersForHomeowner(homeownerId) {
         try {
-            const cleanerProfile = await this.prisma.userProfile.findUnique({
-                where: { name: 'CLEANER' }, // Ensure 'CLEANER' is the exact name
+            const cleanerUserProfile = await this.prisma.userProfile.findUnique({
+                where: { name: 'CLEANER' },
                 select: { id: true }
             });
 
             const shortlistEntries = await this.prisma.shortlist.findMany({
                 where: {
                     homeownerId: homeownerId,
-                    cleaner: { // Ensure the shortlisted user is an ACTIVE CLEANER
-                        userProfileId: cleanerProfile.id,
+                    cleaner: {
+                        userProfileId: cleanerUserProfile.id,
                         status: UserStatus.ACTIVE,
                     },
                 },
                 select: {
                     addedAt: true,
-                    cleaner: {  // Select details of the cleaner
+                    cleaner: {
                         select: {
-                            id: true,   // cleanerID
+                            id: true,
                             username: true,
                             email: true,
                             serviceListings: {
-                                where: { status: 'ACTIVE' }, // Only active service listings
+                                where: { status: 'ACTIVE' },
                                 select: {
                                     id: true,
                                     serviceType: true,
@@ -169,18 +169,17 @@ class ShortlistEntity {
                                     description: true,
                                     ratePerHr: true,
                                 },
-                                take: 3 // Example: Show a few top/recent service listings in the summary
+                                take: 3
                             }
                         }
                     }
                 }
             });
 
-            // Map the result to a list of cleaner objects with shortlist metadata if needed
             const detailedShortlist = shortlistEntries.map(entry => ({
                 shortlistedAt: entry.addedAt,
-                ...entry.cleaner // Spread the cleaner details
-            })).filter(item => item.id); // Ensure cleaner object exists
+                ...entry.cleaner
+            })).filter(item => item && item.id);
 
             return detailedShortlist;
 

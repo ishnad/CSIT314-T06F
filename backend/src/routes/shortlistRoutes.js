@@ -8,6 +8,6 @@ const viewShortlistController = new shortlistController.ViewShortlistController(
 
 router.post('/add', (req, res) => saveShortlistController.shortlistCleaner(req, res));
 router.get('/search', (req, res) => searchShortlistCleaner.searchShortlistCleaner(req, res));
-router.get('/view', (req, res) => viewShortlistController.viewCleanerProfile(req, res));
+router.get('/', (req, res) => viewShortlistController.getMyShortlistedCleaners(req, res));
 
 module.exports = router;

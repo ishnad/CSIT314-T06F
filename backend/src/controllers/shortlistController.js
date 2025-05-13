@@ -44,12 +44,12 @@ class SearchShortlistCleanerController {
             return res.status(result.error.status).json({ error: result.error.message });
         }
 
-        // if (result.length === 0 && keyword) {
-        //     return res.status(200).json({ message: "No cleaners found in your shortlist matching your search.", data: [] });
-        // }
-        // if (result.length === 0 && !keyword) {
-        //     return res.status(200).json({ message: "Your shortlist is currently empty or no active cleaners are shortlisted.", data: [] });
-        // }
+        if (result.length === 0 && keyword) {
+            return res.status(200).json({ data: [] });
+        }
+        if (result.length === 0 && !keyword) {
+            return res.status(200).json({ data: [] });
+        }
 
         res.status(200).json(result);
     }
@@ -65,9 +65,9 @@ class ViewShortlistController {
      * @param {import('express').Request} req - Express request object.
      * @param {import('express').Response} res - Express response object.
      */
-    async viewCleanerProfile(req, res) {
+    async getMyShortlistedCleaners(req, res) {
         const homeownerId = req.user?.id;
-        
+
         const result = await this.shortlistEntity.fetchAllCleanersForHomeowner(homeownerId);
 
         if (result.error) {
@@ -75,10 +75,10 @@ class ViewShortlistController {
         }
 
         if (result.length === 0) {
-            return res.status(200).json({ message: "You have no shortlisted cleaners yet.", data: [] });
+            return res.status(200).json({ data: [] });
         }
 
-        res.status(200).json(result);
+        res.status(200).json(result); // Returns the list of shortlisted cleaners
     }
 }
 
