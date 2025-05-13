@@ -1,6 +1,6 @@
 const ShortlistEntity = require('../entities/shortlistEntity');
 
-class ShortlistController {
+class SaveShortlistController {
     constructor() {
         this.shortlistEntity = new ShortlistEntity();
     }
@@ -24,4 +24,38 @@ class ShortlistController {
     }
 }
 
-module.exports = ShortlistController;
+class SearchShortlistCleanerController {
+    constructor() {
+        this.shortlistEntity = new ShortlistEntity();
+    }
+
+    /**
+     * Handles the HTTP request to search for a cleaner within the authenticated homeowner's shortlist.
+     * @param {import('express').Request} req - Express request object.
+     * @param {import('express').Response} res - Express response object.
+     */
+    async searchShortlistCleaner(req, res) {
+        const homeownerId = req.user?.id;
+        const { keyword } = req.query; // Get keyword from query params: /api/shortlist/search?keyword=reliable
+
+        const result = await this.shortlistEntity.searchShortlistCleaner(homeownerId, keyword || ""); // Pass empty string if keyword is undefined
+
+        if (result.error) {
+            return res.status(result.error.status).json({ error: result.error.message });
+        }
+
+        // if (result.length === 0 && keyword) {
+        //     return res.status(200).json({ message: "No cleaners found in your shortlist matching your search.", data: [] });
+        // }
+        // if (result.length === 0 && !keyword) {
+        //     return res.status(200).json({ message: "Your shortlist is currently empty or no active cleaners are shortlisted.", data: [] });
+        // }
+
+        res.status(200).json(result);
+    }
+}
+
+module.exports = {
+    SaveShortlistController,
+    SearchShortlistCleanerController
+};

@@ -21,7 +21,7 @@ class ShortlistEntity {
                 include: { name: true }
             });
             
-            const existingEntry = await this.prisma.shortlistEntry.findUnique({
+            const existingEntry = await this.prisma.shortlist.findUnique({
                 where: {
                     homeownerCleanerUnique: { // Using the @@unique constraint name
                         homeownerId: homeownerId,
@@ -34,7 +34,7 @@ class ShortlistEntity {
                 return { error: { status: 409, error: `Shortlist of Cleaner '${cleanerAccount.name}' already exists.` } };
             }
 
-            const newShortlistEntry = await this.prisma.shortlistEntry.create({
+            await this.prisma.shortlist.create({
                 data: {
                     homeownerId: homeownerId,
                     cleanerId: cleanerId
@@ -45,6 +45,88 @@ class ShortlistEntity {
         } catch (error) {
             console.error(`Error shortlisting cleaner ${cleanerId} for homeowner ${homeownerId}:`, error);
             return { error: { status: 500, error: 'An unexpected error occurred during shortlist.' } };
+        }
+    }
+
+    /**
+     * Finds cleaners in a specific homeowner's shortlist that match a keyword.
+     * The keyword searches against the cleaner's username, email, and
+     * details within their active service listings (title, serviceType, description).
+     *
+     * @param {string} homeownerId - The ID of the homeowner.
+     * @param {string} keyword - The search keyword.
+     * @returns {Promise<Array<object>|{error: {status: number, message: string}}>}
+     * An array of cleaner objects or an error object.
+     */
+    async searchShortlistCleaner(homeownerId, keyword) {
+        try {
+            const cleanerProfile = await this.prisma.userProfile.findUnique({
+                where: { name: 'CLEANER' },
+                select: { id: true }
+            });
+
+            // Define search conditions if a keyword is provided
+            const keywordSearchConditions = keyword ? {
+                OR: [
+                    { username: { contains: keyword, mode: 'insensitive' } },
+                    { email: { contains: keyword, mode: 'insensitive' } },
+                    {
+                        serviceListings: {
+                            some: {
+                                status: 'ACTIVE',
+                                OR: [
+                                    { serviceType: { contains: keyword, mode: 'insensitive' } },
+                                    { title: { contains: keyword, mode: 'insensitive' } },
+                                    { description: { contains: keyword, mode: 'insensitive' } },
+                                ],
+                            },
+                        },
+                    },
+                ],
+            } : {}; // If no keyword, no specific text search on cleaner details is applied beyond being in shortlist
+
+            const shortlistEntries = await this.prisma.shortlist.findMany({
+                where: {
+                    homeownerId: homeownerId,
+                    cleaner: { // Conditions on the related cleaner
+                        userProfileId: cleanerProfile.id,
+                        status: UserStatus.ACTIVE, // Only include active cleaners
+                        ...keywordSearchConditions, // Apply keyword search if provided
+                    },
+                },
+                select: {
+                    cleaner: { // Select the cleaner's details
+                        select: {
+                            id: true,
+                            username: true,
+                            email: true,
+                            serviceListings: {
+                                where: { status: 'ACTIVE' }, // Only active service listings
+                                select: {
+                                    id: true,
+                                    serviceType: true,
+                                    title: true,
+                                    description: true,
+                                    ratePerHr: true,
+                                }
+                            },
+                        }
+                    }
+                }
+            });
+
+            // Extract just the cleaner objects from the shortlist entries
+            const cleaners = shortlistEntries.map(entry => entry.cleaner).filter(Boolean);
+            return cleaners;
+
+        } catch (error) {
+            console.error("Error finding cleaners in shortlist by keyword:", error);
+            return {
+                error: {
+                    status: 500,
+                    message: "An unexpected error occurred while searching your shortlist."
+                }
+            };
         }
     }
 }
