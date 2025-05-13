@@ -173,6 +173,20 @@ exports.Prisma.ConfirmedMatchScalarFieldEnum = {
   confirmationDate: 'confirmationDate'
 };
 
+exports.Prisma.ServiceBookingScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  cleanerId: 'cleanerId',
+  homeownerId: 'homeownerId',
+  serviceDate: 'serviceDate',
+  status: 'status',
+  serviceType: 'serviceType',
+  ratePerHr: 'ratePerHr',
+  hours: 'hours',
+  totalAmount: 'totalAmount',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -211,13 +225,20 @@ exports.ServiceListingStatus = exports.$Enums.ServiceListingStatus = {
   SUSPENDED: 'SUSPENDED'
 };
 
+exports.BookingStatus = exports.$Enums.BookingStatus = {
+  CONFIRMED: 'CONFIRMED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+};
+
 exports.Prisma.ModelName = {
   UserAccount: 'UserAccount',
   UserProfile: 'UserProfile',
   ServiceListing: 'ServiceListing',
   ProfileView: 'ProfileView',
   Shortlist: 'Shortlist',
-  ConfirmedMatch: 'ConfirmedMatch'
+  ConfirmedMatch: 'ConfirmedMatch',
+  ServiceBooking: 'ServiceBooking'
 };
 
 /**

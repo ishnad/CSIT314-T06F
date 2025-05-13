@@ -409,6 +409,77 @@ async createUserAccount({ username, password, email, userProfileName }) {
             return { error: { status: 500, error: 'Failed to retrieve cleaner profile due to a server error.' } };
         }
     }
+
+    /**
+     * Searches for cleaner profiles based on a keyword.
+     * The keyword is matched against username, and details within their active service listings
+     * like service type, title, and description.
+     * @param {string} keyword - The keyword to search for.
+     * @returns {Promise<Array<object>|{error: {status: number, message: string}}>} A list of matching cleaner profiles or an error object.
+     */
+    async searchCleaners(keyword) {
+        try {
+            const cleanerProfile = await this.prisma.userProfile.findUnique({
+                where: { name: 'CLEANER' },
+                select: { id: true }
+            });
+
+            const cleaners = await this.prisma.userAccount.findMany({
+                where: {
+                    userProfileId: cleanerProfile.id, // Filter by cleaner profile
+                    status: UserStatus.ACTIVE,        // Only search for active cleaners
+                    OR: keyword ? [ // Only apply OR filters if keyword is provided
+                        { username: { contains: keyword, mode: 'insensitive' } },
+                        { email: { contains: keyword, mode: 'insensitive' } },
+                        {
+                            serviceListings: {
+                                some: { // Check if any service listing matches
+                                    status: 'ACTIVE', // Only consider active service listings
+                                    OR: [
+                                        { serviceType: { contains: keyword, mode: 'insensitive' } },
+                                        { title: { contains: keyword, mode: 'insensitive' } },
+                                        { description: { contains: keyword, mode: 'insensitive' } },
+                                    ],
+                                },
+                            },
+                        },
+                    ] : undefined, // If no keyword, this will fetch all active cleaners
+                },
+                select: {
+                    id: true, // cleanerID
+                    username: true,
+                    email: true, // For contact or display
+                    serviceListings: {
+                        where: {
+                            status: 'ACTIVE', // Ensure we only fetch active listings
+                        },
+                        select: {
+                            id: true,
+                            serviceType: true,
+                            title: true,
+                            description: true,
+                            ratePerHr: true,
+                        }
+                    },
+                }
+            });
+            return cleaners.map(cleaner => ({
+                id: cleaner.id,
+                username: cleaner.username,
+                email: cleaner.email,
+                serviceListings: cleaner.serviceListings, 
+            }));
+
+        } catch (error) {
+            console.error("Error searching for cleaners in entity:", error);
+            return {
+                error: {
+                    status: 500,
+                    message: 'An unexpected error occurred while searching for cleaners.'
+                }
+            };
+        }
+    }
 }
 
 module.exports = UserAccountEntity;

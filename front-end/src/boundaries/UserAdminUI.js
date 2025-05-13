@@ -288,9 +288,7 @@ class UserAdminUI extends Component {
         throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
       }
 
-      const data = await res.json();
-
-      // Update state with success message and reset form
+      // On success, the API returns true - use the profileName from state since we know it succeeded
       this.setState({
         profileName: '',
         permissions: { // Reset permissions object
@@ -300,7 +298,7 @@ class UserAdminUI extends Component {
           VIEW_REPORTS: false
         },
         profileMessage: {
-          text: `Profile "${data.profile.name}" created successfully!`, // Use name from response
+          text: `Profile "${profileName}" created successfully!`,
           type: "success"
         }
       });
@@ -313,7 +311,7 @@ class UserAdminUI extends Component {
       // Refresh the profiles list
       this.getAllProfiles();
 
-      return data;
+      return true;
 
     } catch (err) {
       this.setState({
@@ -353,9 +351,7 @@ class UserAdminUI extends Component {
         throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
       }
 
-      const data = await res.json();
-
-      // Refresh the profiles list and update the selected profile
+      // On success, the API returns true - use the name from edit form since we know it succeeded
       await this.getAllProfiles();
 
       // Find the updated profile in the refreshed list
@@ -363,24 +359,22 @@ class UserAdminUI extends Component {
 
       // Update the selected profile if found
       if (updatedProfile) {
-        this.setState({ selectedProfile: updatedProfile });
+        this.setState({ 
+          selectedProfile: updatedProfile,
+          message: {
+            text: `Profile ${updatedProfile.name} updated successfully!`,
+            type: 'success'
+          },
+          showProfileEditModal: false
+        });
       }
-
-      // Show success message
-      this.setState({
-        message: {
-          text: `Profile ${data.profile.name} updated successfully!`, // Use name from response
-          type: 'success'
-        },
-        showProfileEditModal: false
-      });
 
       // Clear message after 3 seconds
       setTimeout(() => {
         this.setState({ message: null });
       }, 3000);
 
-      return data;
+      return true;
 
     } catch (err) {
       this.setState({
@@ -426,11 +420,11 @@ class UserAdminUI extends Component {
 
         const responseData = await res.json(); // Backend returns { message, profile }
 
-        // Update selected profile from responseData.profile
+        // Update selected profile from response data
         this.setState({
-          selectedProfile: responseData.profile,
+          selectedProfile: responseData,
           message: {
-            text: responseData.message,
+            text: `Profile status updated to ${responseData.status}`,
             type: 'success'
           }
         });
