@@ -129,6 +129,71 @@ class ShortlistEntity {
             };
         }
     }
+
+    /**
+     * Fetches all active cleaners shortlisted by a specific homeowner.
+     * Includes basic cleaner details and a summary of their active service listings.
+     *
+     * @param {string} homeownerId - The ID of the homeowner.
+     * @returns {Promise<Array<object>|{error: {status: number, message: string}}>}
+     * An array of cleaner objects (summaries) or an error object.
+     */
+    async viewCleanerProfile(homeownerId) {
+        try {
+            const cleanerProfile = await this.prisma.userProfile.findUnique({
+                where: { name: 'CLEANER' }, // Ensure 'CLEANER' is the exact name
+                select: { id: true }
+            });
+
+            const shortlistEntries = await this.prisma.shortlist.findMany({
+                where: {
+                    homeownerId: homeownerId,
+                    cleaner: { // Ensure the shortlisted user is an ACTIVE CLEANER
+                        userProfileId: cleanerProfile.id,
+                        status: UserStatus.ACTIVE,
+                    },
+                },
+                select: {
+                    addedAt: true,
+                    cleaner: {  // Select details of the cleaner
+                        select: {
+                            id: true,   // cleanerID
+                            username: true,
+                            email: true,
+                            serviceListings: {
+                                where: { status: 'ACTIVE' }, // Only active service listings
+                                select: {
+                                    id: true,
+                                    serviceType: true,
+                                    title: true,
+                                    description: true,
+                                    ratePerHr: true,
+                                },
+                                take: 3 // Example: Show a few top/recent service listings in the summary
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Map the result to a list of cleaner objects with shortlist metadata if needed
+            const detailedShortlist = shortlistEntries.map(entry => ({
+                shortlistedAt: entry.addedAt,
+                ...entry.cleaner // Spread the cleaner details
+            })).filter(item => item.id); // Ensure cleaner object exists
+
+            return detailedShortlist;
+
+        } catch (error) {
+            console.error("Error fetching all cleaners for homeowner's shortlist:", error);
+            return {
+                error: {
+                    status: 500,
+                    message: "An unexpected error occurred while retrieving your shortlist."
+                }
+            };
+        }
+    }
 }
 
 module.exports = ShortlistEntity;

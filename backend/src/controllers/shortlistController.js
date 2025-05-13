@@ -55,7 +55,35 @@ class SearchShortlistCleanerController {
     }
 }
 
+class ViewShortlistController {
+    constructor() {
+        this.shortlistEntity = new ShortlistEntity();
+    }
+
+    /**
+     * Handles the HTTP request to retrieve all cleaners in the authenticated homeowner's shortlist.
+     * @param {import('express').Request} req - Express request object.
+     * @param {import('express').Response} res - Express response object.
+     */
+    async viewCleanerProfile(req, res) {
+        const homeownerId = req.user?.id;
+        
+        const result = await this.shortlistEntity.fetchAllCleanersForHomeowner(homeownerId);
+
+        if (result.error) {
+            return res.status(result.error.status).json({ error: result.error.message });
+        }
+
+        if (result.length === 0) {
+            return res.status(200).json({ message: "You have no shortlisted cleaners yet.", data: [] });
+        }
+
+        res.status(200).json(result);
+    }
+}
+
 module.exports = {
     SaveShortlistController,
-    SearchShortlistCleanerController
+    SearchShortlistCleanerController,
+    ViewShortlistController
 };
