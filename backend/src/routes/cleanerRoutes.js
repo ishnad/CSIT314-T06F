@@ -5,7 +5,7 @@ const router = express.Router();
 
 const searchCleanerController = new SearchCleanerController();
 
-router.get('/search', isAuthenticated, (req, res) => searchCleanerController.searchCleaner(req, res));
+router.get('/search', (req, res) => searchCleanerController.searchCleaner(req, res));
 
 
 module.exports = router;
