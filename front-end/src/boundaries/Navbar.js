@@ -28,14 +28,6 @@ function Navbar({ currentPage, navigateTo, user, onLogout }) {
                 Search Listings
               </button>
             </li>
-            <li className={`nav-item ${currentPage === 'createListing' ? 'active' : ''}`}>
-              <button 
-                className="nav-link" 
-                onClick={() => handleTabClick('createListing')}
-              >
-                Create Listing
-              </button>
-            </li>
             <li className={`nav-item ${currentPage === 'myListings' ? 'active' : ''}`}>
               <button 
                 className="nav-link" 

@@ -123,3 +123,33 @@ body {
     color: #d1ecf1;
   }
 }
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.modal-left-actions {
+  display: flex;
+  align-items: center;
+}
+
+.modal-right-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.suspend-button {
+  background-color: #ff9800;
+  color: white;
+}
+
+.activate-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.suspend-button:hover, .activate-button:hover {
+  opacity: 0.9;
+}

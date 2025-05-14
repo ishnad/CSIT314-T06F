@@ -17,11 +17,20 @@ class CreateServiceListingController {
             return res.status(400).json({ error: "Cleaner ID is required" });
         }
 
-        const { serviceType, title, description, ratePerHr: ratePerHrString } = req.body;
+        const { serviceType, title, description, ratePerHr: ratePerHrString, duration: durationString, availability } = req.body;
         
         const numericRate = parseFloat(ratePerHrString);
         if (isNaN(numericRate)) {
             return res.status(400).json({ error: "Invalid rate format" });
+        }
+
+        const numericDuration = parseFloat(durationString);
+        if (isNaN(numericDuration) || numericDuration <= 0) {
+            return res.status(400).json({ error: "Invalid duration format" });
+        }
+
+        if (!availability) {
+            return res.status(400).json({ error: "Availability is required" });
         }
 
         const result = await this.serviceListingEntity.createServiceListing(
@@ -29,6 +38,8 @@ class CreateServiceListingController {
             title,
             description,
             numericRate,
+            numericDuration,
+            availability,
             cleanerId
         );
 

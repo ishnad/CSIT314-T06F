@@ -14,7 +14,7 @@ class ServiceListingEntity {
      * @param {string} cleanerId - ID of the user creating the listing.
      * @returns {Promise<boolean|{error: {status: number, error: string}}>} True on successful creation, or an error object on failure.
      */
-    async createServiceListing(serviceType, title, description, ratePerHr, cleanerId) {
+    async createServiceListing(serviceType, title, description, ratePerHr, duration, availability, cleanerId) {
         try {
             if (!cleanerId) {
                 return { error: { status: 400, error: 'Cleaner ID is required' } };
@@ -26,6 +26,8 @@ class ServiceListingEntity {
                     title: title.trim(),
                     description: description.trim(),
                     ratePerHr: ratePerHr,
+                    duration: duration,
+                    availability: availability.trim(),
                     cleanerId: cleanerId,
                 },
                 // Select the fields to return

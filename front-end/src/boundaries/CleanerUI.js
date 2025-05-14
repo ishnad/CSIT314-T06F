@@ -12,11 +12,14 @@ class CleanerUI extends Component {
       insightsLoading: false,
 
       // Create Listing State
+      showCreateForm: false,
       newListing: {
         serviceType: 'Basic Cleaning',
         title: '',
         description: 'Describe your service',
         ratePerHr: 30.00,
+        duration: 2,
+        availability: 'Mon-Fri 9am-5pm, Sat 10am-2pm'
       },
       createListingError: null,
       createListingSuccess: null,
@@ -81,7 +84,7 @@ class CleanerUI extends Component {
   componentDidMount() {
     // Ensure user and user.id are available before fetching
     if (this.props.user && this.props.user.id) {
-        this.fetchInitialData(this.props.user.id); // Pass ID to fetchInitialData
+        this.fetchInitialData(this.props.user.id);
         this.handleSearchSubmit(); // Load initial search results
     } else {
         console.warn("CleanerUI: User ID not available on mount. Cannot fetch initial data.");
@@ -96,7 +99,7 @@ class CleanerUI extends Component {
   componentDidUpdate(prevProps) {
     // Check if user.id has changed and is available
     if (this.props.user && this.props.user.id && (prevProps.user?.id !== this.props.user.id)) {
-        this.fetchInitialData(this.props.user.id); // Pass new ID to fetchInitialData
+        this.fetchInitialData(this.props.user.id);
     }
   }
 
@@ -221,10 +224,18 @@ class CleanerUI extends Component {
       }
 
       this.setState({
-        newListing: { serviceType: 'Basic Cleaning', title: '', description: 'Describe your service', ratePerHr: 30.00 },
+        showCreateForm: false,
+        newListing: { 
+          serviceType: 'Basic Cleaning', 
+          title: '', 
+          description: 'Describe your service', 
+          ratePerHr: 30.00,
+          duration: 2,
+          availability: 'Mon-Fri 9am-5pm, Sat 10am-2pm'
+        },
         createListingSuccess: 'Listing created successfully!'
       });
-      this.fetchServiceListings(this.props.currentCleanerId);
+      this.fetchServiceListings();
     } catch (error) {
       console.error('Error creating listing:', error);
       this.setState({
@@ -240,20 +251,21 @@ class CleanerUI extends Component {
   };
 
   // Service Listings Actions
-  fetchServiceListings = async (currentCleanerId) => {
+  fetchServiceListings = async () => {
     this.setState({
       loadingListings: true,
       listingsError: null
     });
     try {
-      if (!currentCleanerId) {
+      const cleanerId = this.props.user?.id;
+      if (!cleanerId) {
         this.setState({
           listingsError: "Cleaner ID not available to fetch listings.",
           serviceListings: []
         });
         return;
       }
-      const response = await fetch(`/api/listings/by-cleaner/${currentCleanerId}`);
+      const response = await fetch(`/api/listings/by-cleaner/${cleanerId}`);
       
       // First check if response is JSON
       const contentType = response.headers.get('content-type');
@@ -317,10 +329,12 @@ class CleanerUI extends Component {
     this.setState({
       editingListingId: listing.id,
       editFormData: {
+        id: listing.id,
         serviceType: listing.serviceType || 'Basic Cleaning',
         title: listing.title || '',
         description: listing.description || '',
         ratePerHr: listing.ratePerHr ? listing.ratePerHr.toString() : '0',
+        status: listing.status || 'ACTIVE'
       },
       showEditModal: true
     });
@@ -330,7 +344,9 @@ class CleanerUI extends Component {
     this.setState({
       showEditModal: false,
       editingListingId: null,
-      editError: null
+      editError: null,
+      isSuspending: false,
+      suspendingListingId: null
     });
   };
 
@@ -383,7 +399,7 @@ class CleanerUI extends Component {
         message: { text: 'Changes saved successfully!', type: 'success' }
       });
       this.closeEditModal();
-      this.fetchServiceListings(this.props.currentCleanerId);
+      this.fetchServiceListings();
     } catch (error) {
       console.error('Error updating listing:', error);
       this.setState({
@@ -401,7 +417,8 @@ class CleanerUI extends Component {
     this.setState({
       suspendingListingId: listingId,
       isSuspending: true,
-      suspensionError: null
+      suspensionError: null,
+      editError: null
     });
 
     try {
@@ -410,7 +427,7 @@ class CleanerUI extends Component {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ cleanerId: this.props.currentCleanerId }),
+        body: JSON.stringify({ cleanerId: this.props.user?.id }),
       });
 
       if (!response.ok) {
@@ -419,13 +436,29 @@ class CleanerUI extends Component {
       }
 
       const data = await response.json();
-      this.setState({
-        message: { 
-          text: `Listing status changed to ${data.newStatus.toLowerCase()} successfully.`, 
-          type: 'success' 
+      
+      // Update the edit form's status if open
+      if (this.state.editingListingId === listingId) {
+        this.setState(prevState => ({
+          editFormData: {
+            ...prevState.editFormData,
+            status: data.newStatus
+          }
+        }));
+      }
+
+      // Update local listings status
+      this.setState(prevState => ({
+        serviceListings: prevState.serviceListings.map(listing => 
+          listing.id === listingId 
+            ? { ...listing, status: data.newStatus } 
+            : listing
+        ),
+        message: {
+          text: `Listing status changed to ${data.newStatus.toLowerCase()} successfully.`,
+          type: 'success'
         }
-      });
-      this.fetchServiceListings(this.props.currentCleanerId);
+      }));
     } catch (error) {
       console.error('Error suspending listing:', error);
       this.setState({
@@ -543,7 +576,6 @@ class CleanerUI extends Component {
     return (
       <div className="cleaner-ui-container">
         {currentPage === 'search' && this.renderSearchListings()}
-        {currentPage === 'createListing' && this.renderCreateListing()}
         {currentPage === 'myListings' && this.renderUserListings()}
         {currentPage === 'matches' && (
           <div className="matches-container">
