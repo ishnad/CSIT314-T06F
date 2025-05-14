@@ -186,23 +186,26 @@ class ServiceListingEntity {
      * @param {string} cleanerId - The ID of the cleaner attempting the suspension (for ownership verification).
      * @returns {Promise<boolean|object>} True if successful, or an error object.
      */
-    async suspendServiceListing(listingId) {
+    async toggleListingStatus(listingId) {
         try {
-            // Verify listing exists and cleanerId is the owner
+            // Get current status
             const existingListing = await this.prisma.serviceListing.findUnique({
                 where: { id: listingId },
                 select: { cleanerId: true, status: true }
             });
-            if (existingListing.status === 'SUSPENDED') {
-                return { error: { status: 400, error: 'Service listing is already suspended.' } };
+
+            if (!existingListing) {
+                return { error: { status: 404, error: 'Listing not found' } };
             }
 
+            const newStatus = existingListing.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+            
             await this.prisma.serviceListing.update({
                 where: { id: listingId },
-                data: { status: 'SUSPENDED' },
+                data: { status: newStatus },
             });
 
-            return true; // Successfully suspended
+            return { newStatus }; // Return the new status
 
         } catch (error) {
             console.error(`Error suspending service listing ${listingId}:`, error);
@@ -285,7 +288,11 @@ class ServiceListingEntity {
             });
 
             if (listings.length === 0) {
-                return { error: { status: 404, error: "No matching listings found." } };
+                // Only return error if there was an active search
+                if (keyword || serviceType || minRate !== undefined || maxRate !== undefined) {
+                    return { error: { status: 404, error: "No matching listings found." } };
+                }
+                return []; // Return empty array when no filters and no listings
             }
 
             return listings.map(listing => ({

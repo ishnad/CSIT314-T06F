@@ -78,7 +78,7 @@ const renderingMethods = {
 
     return (
       <div className="search-listings-container">
-        <h2>Search Service Listings</h2>
+        <h2>{this.state.searchKeyword ? 'Search Results' : 'All Listings'}</h2>
         <form onSubmit={this.handleSearchSubmit}>
           <div className="search-group">
             <label htmlFor="keyword">Search Keyword:</label>
@@ -99,9 +99,9 @@ const renderingMethods = {
         {searchError && <div className="error-message">Error: {searchError}</div>}
         {searchMessage && <div className="info-message">{searchMessage}</div>}
 
-        {searchResults.length > 0 && (
+        {searchResults.length > 0 ? (
           <div className="search-results">
-            <h3>Search Results</h3>
+            <h3>{searchKeyword ? 'Search Results' : 'Available Listings'}</h3>
             <ul className="results-list">
               {searchResults.map(listing => (
                 <li key={listing.id} className="listing-item">
@@ -111,6 +111,10 @@ const renderingMethods = {
                 </li>
               ))}
             </ul>
+          </div>
+        ) : (
+          !searchLoading && <div className="no-listings">
+            {searchKeyword ? 'No matching listings found' : 'No listings available at this time'}
           </div>
         )}
       </div>
@@ -150,11 +154,10 @@ const renderingMethods = {
                     Edit
                   </button>
                   <button 
-                    onClick={() => this.handleSuspendListing(listing.id)} 
-                    disabled={listing.status === 'SUSPENDED'}
-                    className={listing.status === 'SUSPENDED' ? 'disabled-button' : 'suspend-button'}
+                    onClick={() => this.handleToggleListingStatus(listing.id)}
+                    className={listing.status === 'SUSPENDED' ? 'activate-button' : 'suspend-button'}
                   >
-                    {listing.status === 'SUSPENDED' ? 'Suspended' : 'Suspend'}
+                    {listing.status === 'SUSPENDED' ? 'Activate' : 'Suspend'}
                   </button>
                 </div>
               </div>

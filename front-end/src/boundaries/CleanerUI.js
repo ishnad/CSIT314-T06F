@@ -82,6 +82,7 @@ class CleanerUI extends Component {
     // Ensure user and user.id are available before fetching
     if (this.props.user && this.props.user.id) {
         this.fetchInitialData(this.props.user.id); // Pass ID to fetchInitialData
+        this.handleSearchSubmit(); // Load initial search results
     } else {
         console.warn("CleanerUI: User ID not available on mount. Cannot fetch initial data.");
         this.setState({
@@ -396,7 +397,7 @@ class CleanerUI extends Component {
   };
 
   // Suspend Listing Actions
-  handleSuspendListing = async (listingId) => {
+  handleToggleListingStatus = async (listingId) => {
     this.setState({
       suspendingListingId: listingId,
       isSuspending: true,
@@ -404,7 +405,7 @@ class CleanerUI extends Component {
     });
 
     try {
-      const response = await fetch(`/api/listings/${listingId}/suspend`, {
+      const response = await fetch(`/api/listings/${listingId}/toggle-status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -419,7 +420,10 @@ class CleanerUI extends Component {
 
       const data = await response.json();
       this.setState({
-        message: { text: `Listing "${data.title || listingId}" suspended successfully.`, type: 'success' }
+        message: { 
+          text: `Listing status changed to ${data.newStatus.toLowerCase()} successfully.`, 
+          type: 'success' 
+        }
       });
       this.fetchServiceListings(this.props.currentCleanerId);
     } catch (error) {
@@ -443,31 +447,38 @@ class CleanerUI extends Component {
   };
 
   handleSearchSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     this.setState({
       searchLoading: true,
       searchError: null,
-      searchResults: [],
       searchMessage: null
     });
 
     try {
-      const queryParams = new URLSearchParams();
+      let url = '/api/listings/search';
       if (this.state.searchKeyword) {
-        queryParams.append('keyword', this.state.searchKeyword);
+        url += `?keyword=${encodeURIComponent(this.state.searchKeyword)}`;
       }
 
-      const url = `/api/listings/search?${queryParams.toString()}`;
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
-      const response = await fetch(url);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
+
       const data = await response.json();
       this.setState({
-        searchResults: data,
-        searchMessage: data && data.length === 0 ? 'No matching listings found.' : null
+        searchResults: Array.isArray(data) ? data : [],
+        searchMessage: this.state.searchKeyword && data.length === 0 
+          ? 'No matching listings found.' 
+          : data.length === 0
+          ? 'No listings available at this time.'
+          : null
       });
     } catch (error) {
       console.error('Error searching listings:', error);

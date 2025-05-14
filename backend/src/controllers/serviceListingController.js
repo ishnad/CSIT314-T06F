@@ -147,16 +147,15 @@ class SuspendServiceListingController {
      * @param {object} req - Express request object.
      * @param {object} res - Express response object.
      */
-    async suspendServiceListing(req, res) {
+    async toggleListingStatus(req, res) {
         const listingId = req.params.id;
         const cleanerId = req.user?.id;
 
-        const result = await this.serviceListingEntity.suspendServiceListing(listingId, cleanerId);
+        const result = await this.serviceListingEntity.toggleListingStatus(listingId, cleanerId);
 
         if (result.error) {
             res.status(result.error.status).json({ error: result.error.error });
-        } else if (result === true) {
-            // Entity returned true, meaning success
+        } else {
             res.status(200).json(result);
         }
     }
@@ -192,11 +191,13 @@ class SearchServiceListingsController {
         );
 
         if (result.error) {
-            return res.status(result.error.status).json({ error: result.error.error });
+            // Only return error if there was an active search
+            if (req.query.keyword || req.query.serviceType || req.query.minRate || req.query.maxRate) {
+                return res.status(result.error.status).json({ error: result.error.error });
+            }
+            return res.status(200).json([]); // Return empty array when no filters
         }
-        else {
-            res.status(200).json({listing: result});
-        }
+        res.status(200).json(result);
     }
 }
 

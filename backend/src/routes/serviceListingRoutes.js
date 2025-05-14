@@ -15,6 +15,6 @@ router.get('/search', (req, res) => searchServiceListingsController.searchListin
 router.get('/:id', (req, res) => getServiceListingController.getListingDetails(req, res));
 router.get('/by-cleaner/:cleanerId', (req, res) => getServiceListingController.getAllListingDetails(req, res));
 router.put('/:id', (req, res) => editServiceListingController.editServiceListing(req, res));
-router.patch('/:id/suspend', (req, res) => suspendServiceListingController.suspendServiceListing(req, res));
+router.patch('/:id/toggle-status', (req, res) => suspendServiceListingController.toggleListingStatus(req, res));
 
 module.exports = router;
