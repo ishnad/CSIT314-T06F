@@ -15,11 +15,8 @@ class CleanerUI extends Component {
       showCreateForm: false,
       newListing: {
         serviceType: 'Basic Cleaning',
-        title: '',
         description: 'Describe your service',
-        ratePerHr: 30.00,
-        duration: 2,
-        availability: 'Mon-Fri 9am-5pm, Sat 10am-2pm'
+        ratePerHr: 30.00
       },
       createListingError: null,
       createListingSuccess: null,
@@ -38,7 +35,6 @@ class CleanerUI extends Component {
       isEditingListing: false,
       editFormData: {
         serviceType: '',
-        title: '',
         description: '',
         ratePerHr: '',
       },

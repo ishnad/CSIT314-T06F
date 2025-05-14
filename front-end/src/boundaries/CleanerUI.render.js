@@ -5,54 +5,42 @@ const renderingMethods = {
     const { newListing, isCreatingListing, createListingError, createListingSuccess } = this.state;
 
     return (
-      <div className="create-listing-container">
-        <h2>Create New Service Listing</h2>
-        <form onSubmit={this.handleCreateListingSubmit}>
-          <div className="form-group">
-            <label htmlFor="serviceType">Service Type:</label>
-            <select
-              id="serviceType"
-              name="serviceType"
-              value={newListing.serviceType}
-              onChange={this.handleCreateListingInputChange}
-              required
-            >
-              <option value="Basic Cleaning">Basic Cleaning</option>
-              <option value="Deep Cleaning">Deep Cleaning</option>
-              <option value="Office Cleaning">Office Cleaning</option>
-              <option value="Window Cleaning">Window Cleaning</option>
-              <option value="Carpet Cleaning">Carpet Cleaning</option>
-              <option value="Move-In/Move-Out Cleaning">Move-In/Move-Out Cleaning</option>
-            </select>
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="title">Title:</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={newListing.title}
-              onChange={this.handleCreateListingInputChange}
-              placeholder="Listing title"
-              required
-            />
-          </div>
+      <div className="modal-overlay">
+        <div className="edit-modal">
+          <h2>Create New Service Listing</h2>
+          <form onSubmit={this.handleCreateListingSubmit}>
+            <div className="form-group">
+              <label htmlFor="serviceType">Service Type:</label>
+              <select
+                id="serviceType"
+                name="serviceType"
+                value={newListing.serviceType}
+                onChange={this.handleCreateListingInputChange}
+                required
+              >
+                <option value="Basic Cleaning">Basic Cleaning</option>
+                <option value="Deep Cleaning">Deep Cleaning</option>
+                <option value="Office Cleaning">Office Cleaning</option>
+                <option value="Window Cleaning">Window Cleaning</option>
+                <option value="Carpet Cleaning">Carpet Cleaning</option>
+                <option value="Move-In/Move-Out Cleaning">Move-In/Move-Out Cleaning</option>
+              </select>
+            </div>
+            
 
-          <div className="form-group">
-            <label htmlFor="description">Description:</label>
-            <textarea
-              id="description"
-              name="description"
-              value={newListing.description}
-              onChange={this.handleCreateListingInputChange}
-              placeholder="Describe your service in detail"
-              required
-              rows="5"
-            />
-          </div>
+            <div className="form-group">
+              <label htmlFor="description">Description:</label>
+              <textarea
+                id="description"
+                name="description"
+                value={newListing.description}
+                onChange={this.handleCreateListingInputChange}
+                placeholder="Describe your service in detail"
+                required
+                rows="5"
+              />
+            </div>
 
-          <div className="form-row">
             <div className="form-group">
               <label htmlFor="ratePerHr">Rate per hour ($):</label>
               <input
@@ -67,54 +55,29 @@ const renderingMethods = {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="duration">Duration (hours):</label>
-              <input
-                type="number"
-                id="duration"
-                name="duration"
-                value={newListing.duration}
-                onChange={this.handleCreateListingInputChange}
-                min="1"
-                step="0.5"
-                required
-              />
+            {createListingError && <div className="error-message">{createListingError}</div>}
+            {createListingSuccess && <div className="success-message">{createListingSuccess}</div>}
+
+            <div className="modal-actions">
+              <div className="modal-right-actions">
+                <button 
+                  type="button" 
+                  onClick={() => this.setState({ showCreateForm: false })}
+                  className="cancel-button"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={isCreatingListing} 
+                  className="submit-button"
+                >
+                  {isCreatingListing ? 'Creating...' : 'Create Listing'}
+                </button>
+              </div>
             </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="availability">Availability:</label>
-            <textarea
-              id="availability"
-              name="availability"
-              value={newListing.availability}
-              onChange={this.handleCreateListingInputChange}
-              placeholder="Example: Mon-Fri 9am-5pm, Sat 10am-2pm"
-              required
-              rows="3"
-            />
-          </div>
-
-          {createListingError && <div className="error-message">{createListingError}</div>}
-          {createListingSuccess && <div className="success-message">{createListingSuccess}</div>}
-
-          <div className="form-actions">
-            <button 
-              type="button" 
-              onClick={() => this.props.onNavigate('myListings')}
-              className="back-button"
-            >
-              Back to My Listings
-            </button>
-            <button 
-              type="submit" 
-              disabled={isCreatingListing} 
-              className="submit-button"
-            >
-              {isCreatingListing ? 'Creating...' : 'Create Listing'}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     );
   },
@@ -215,126 +178,14 @@ const renderingMethods = {
           <div className="no-listings">You haven't created any service listings yet.</div>
         )}
 
-        {!showCreateForm ? (
-          <button 
-            className="create-listing-button"
-            onClick={() => this.setState({ showCreateForm: true })}
-          >
-            + Create New Listing
-          </button>
-        ) : (
-          <div className="create-listing-form-container">
-            <h3>Create New Service Listing</h3>
-            <form onSubmit={this.handleCreateListingSubmit}>
-              <div className="form-group">
-                <label htmlFor="serviceType">Service Type:</label>
-                <select
-                  id="serviceType"
-                  name="serviceType"
-                  value={newListing.serviceType}
-                  onChange={this.handleCreateListingInputChange}
-                  required
-                >
-                  <option value="Basic Cleaning">Basic Cleaning</option>
-                  <option value="Deep Cleaning">Deep Cleaning</option>
-                  <option value="Office Cleaning">Office Cleaning</option>
-                  <option value="Window Cleaning">Window Cleaning</option>
-                  <option value="Carpet Cleaning">Carpet Cleaning</option>
-                  <option value="Move-In/Move-Out Cleaning">Move-In/Move-Out Cleaning</option>
-                </select>
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="title">Title:</label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  value={newListing.title}
-                  onChange={this.handleCreateListingInputChange}
-                  placeholder="Listing title"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="description">Description:</label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={newListing.description}
-                  onChange={this.handleCreateListingInputChange}
-                  placeholder="Describe your service in detail"
-                  required
-                  rows="5"
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="ratePerHr">Rate per hour ($):</label>
-                  <input
-                    type="number"
-                    id="ratePerHr"
-                    name="ratePerHr"
-                    value={newListing.ratePerHr}
-                    onChange={this.handleCreateListingInputChange}
-                    min="0"
-                    step="0.01"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="duration">Duration (hours):</label>
-                  <input
-                    type="number"
-                    id="duration"
-                    name="duration"
-                    value={newListing.duration}
-                    onChange={this.handleCreateListingInputChange}
-                    min="1"
-                    step="0.5"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="availability">Availability:</label>
-                <textarea
-                  id="availability"
-                  name="availability"
-                  value={newListing.availability}
-                  onChange={this.handleCreateListingInputChange}
-                  placeholder="Example: Mon-Fri 9am-5pm, Sat 10am-2pm"
-                  required
-                  rows="3"
-                />
-              </div>
-
-              {createListingError && <div className="error-message">{createListingError}</div>}
-              {createListingSuccess && <div className="success-message">{createListingSuccess}</div>}
-
-              <div className="form-actions">
-                <button 
-                  type="button" 
-                  onClick={() => this.setState({ showCreateForm: false })}
-                  className="cancel-button"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  disabled={isCreatingListing} 
-                  className="submit-button"
-                >
-                  {isCreatingListing ? 'Creating...' : 'Create Listing'}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
+        <button 
+          className="create-listing-button"
+          onClick={() => this.setState({ showCreateForm: true })}
+        >
+          + Create New Listing
+        </button>
+        
+        {this.state.showCreateForm && this.renderCreateListing()}
       </div>
     );
   },
@@ -388,17 +239,6 @@ const renderingMethods = {
                 <option value="Office Cleaning">Office Cleaning</option>
                 <option value="Window Cleaning">Window Cleaning</option>
               </select>
-            </div>
-            <div className="form-group">
-              <label htmlFor="title">Title</label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                value={editFormData.title}
-                onChange={this.handleEditInputChange}
-                required
-              />
             </div>
             <div className="form-group">
               <label htmlFor="description">Description</label>

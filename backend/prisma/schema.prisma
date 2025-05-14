@@ -81,11 +81,8 @@ enum UserProfileStatus {
 model ServiceListing {
   id          String   @id @default(cuid())
   serviceType String   // e.g., "Deep Cleaning", "Basic Cleaning", "Window Cleaning"
-  title       String
   description String
   ratePerHr   Float    // Rate per hour
-  duration    Float?   // Duration in hours (optional for existing records)
-  availability String? // Availability schedule (optional for existing records)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
