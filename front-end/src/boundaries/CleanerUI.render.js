@@ -26,7 +26,6 @@ const renderingMethods = {
                 <option value="Move-In/Move-Out Cleaning">Move-In/Move-Out Cleaning</option>
               </select>
             </div>
-            
 
             <div className="form-group">
               <label htmlFor="description">Description:</label>
@@ -60,16 +59,16 @@ const renderingMethods = {
 
             <div className="modal-actions">
               <div className="modal-right-actions">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => this.setState({ showCreateForm: false })}
                   className="cancel-button"
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
-                  disabled={isCreatingListing} 
+                <button
+                  type="submit"
+                  disabled={isCreatingListing}
                   className="submit-button"
                 >
                   {isCreatingListing ? 'Creating...' : 'Create Listing'}
@@ -81,12 +80,14 @@ const renderingMethods = {
       </div>
     );
   },
+
   renderSearchListings() {
     const { searchKeyword, searchLoading, searchError, searchMessage, searchResults } = this.state;
 
     return (
       <div className="search-listings-container">
-        <h2>{this.state.searchKeyword ? 'Search Results' : 'All Listings'}</h2>
+        {/* Use destructured variable 'searchKeyword' */}
+        <h2>{searchKeyword ? 'Search Results' : 'All Listings'}</h2>
         <form onSubmit={this.handleSearchSubmit}>
           <div className="search-group">
             <label htmlFor="keyword">Search Keyword:</label>
@@ -119,7 +120,7 @@ const renderingMethods = {
                     <span className="service-by">By: {listing.cleanerUsername || 'Unknown'}</span>
                   </div>
                   <div className="listing-actions">
-                    <button 
+                    <button
                       onClick={() => this.getListingDetails(listing.id)}
                       className="details-button"
                     >
@@ -140,21 +141,17 @@ const renderingMethods = {
   },
 
   renderUserListings() {
-    const { 
-      loadingListings, 
-      listingsError, 
+    const {
+      loadingListings,
+      listingsError,
       serviceListings,
-      showCreateForm,
-      newListing,
-      isCreatingListing,
-      createListingError,
-      createListingSuccess
+      showCreateForm, // Destructured showCreateForm for consistency
     } = this.state;
 
     return (
       <div className="user-listings-container">
         <h2>Your Service Listings</h2>
-        
+
         {loadingListings ? (
           <div className="loading">Loading your listings...</div>
         ) : listingsError ? (
@@ -166,14 +163,21 @@ const renderingMethods = {
                 <div className="listing-header">
                   <span className="service-category">{listing.serviceCatName}</span>
                   <span className="service-rate">${listing.ratePerHr}/hr</span>
-                  <span className="service-by">By: {listing.cleanerUsername || 'Unknown'}</span>
+                  <span className="service-by">By: {listing.cleanerUsername || 'You'}</span>
                 </div>
                 <div className="listing-actions">
-                  <button 
+                  <button
                     onClick={() => this.getListingDetails(listing.id)}
                     className="details-button"
                   >
                     View Details
+                  </button>
+                  <button
+                    onClick={() => this.openEditModal(listing)} // Ensure openEditModal is bound and available
+                    className="edit-button" // Added a class for styling
+                    style={{ marginLeft: '10px' }} // Example styling
+                  >
+                    Edit
                   </button>
                 </div>
               </div>
@@ -183,14 +187,15 @@ const renderingMethods = {
           <div className="no-listings">You haven't created any service listings yet.</div>
         )}
 
-        <button 
+        <button
           className="create-listing-button"
           onClick={() => this.setState({ showCreateForm: true })}
         >
           + Create New Listing
         </button>
-        
-        {this.state.showCreateForm && this.renderCreateListing()}
+
+        {/* Use destructured variable 'showCreateForm' */}
+        {showCreateForm && this.renderCreateListing()}
       </div>
     );
   },
@@ -198,7 +203,19 @@ const renderingMethods = {
   renderListingDetails() {
     const { listingDetails, loadingDetails, detailsError } = this.state;
 
-    if (!listingDetails) return null;
+    // Early return if no listingDetails, or if it's selected but not yet loaded.
+    // The `selectedListingId` state in CleanerUI.js indicates a request to show details.
+    // This function should only render if listingDetails is populated.
+    if (!this.state.selectedListingId || (!listingDetails && !loadingDetails && !detailsError)) {
+        return null;
+    }
+    // If loading or error, modal structure might still be useful
+    if (!listingDetails && !loadingDetails && detailsError) {
+       // To show error within modal
+    } else if (!listingDetails && !loadingDetails) {
+        return null; // Nothing to show yet
+    }
+
 
     return (
       <div className="modal-overlay">
@@ -208,12 +225,19 @@ const renderingMethods = {
             <div className="loading">Loading details...</div>
           ) : detailsError ? (
             <div className="error-message">{detailsError}</div>
-          ) : (
+          ) : listingDetails ? ( // Ensure listingDetails is not null before accessing its properties
             <div className="details-content">
               <div className="detail-row">
                 <span className="detail-label">Service Category:</span>
                 <span className="detail-value">{listingDetails.serviceCatName}</span>
               </div>
+              {/* Add title if it exists */}
+              {listingDetails.title && (
+                <div className="detail-row">
+                    <span className="detail-label">Title:</span>
+                    <span className="detail-value">{listingDetails.title}</span>
+                </div>
+              )}
               <div className="detail-row">
                 <span className="detail-label">Description:</span>
                 <span className="detail-value">{listingDetails.description}</span>
@@ -222,10 +246,10 @@ const renderingMethods = {
                 <span className="detail-label">Price:</span>
                 <span className="detail-value">${listingDetails.ratePerHr}/hr</span>
               </div>
-              
+
               <div className="modal-actions">
-                <button 
-                  onClick={() => this.setState({ listingDetails: null })}
+                <button
+                  onClick={() => this.setState({ selectedListingId: null, listingDetails: null })} // Clear selectedListingId too
                   className="cancel-button"
                   style={{ marginLeft: 'auto' }}
                 >
@@ -233,28 +257,98 @@ const renderingMethods = {
                 </button>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     );
   },
 
-  renderEditModal() {
-    const { showEditModal, editFormData, isSavingChanges, editError } = this.state;
+  renderInsights() {
+    const { profileInsights, shortlistCount, insightsLoading, insightsError } = this.state;
 
-    if (!showEditModal) return null;
+    return (
+      <div className="insights-container">
+        <div className="insights-white-box" style={{
+          backgroundColor: 'white',
+          color: 'black',
+          padding: '20px',
+          borderRadius: '8px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          margin: '20px 0'
+        }}>
+          <h2>Profile Insights</h2>
+
+          {insightsLoading ? (
+            <div className="loading">Loading insights...</div>
+          ) : insightsError ? (
+            <div className="error-message">{insightsError}</div>
+          ) : (
+            <div className="insights-grid">
+              <div className="insight-card">
+                <h3>Profile Views</h3>
+                {profileInsights && profileInsights.totalViews !== undefined ? (
+                  <>
+                    <div className="insight-value">{profileInsights.totalViews}</div>
+                    <div className="insight-label">Total Views</div>
+                    <div className="insight-chart">
+                      {/* Use a more stable key if day.date is unique, otherwise index is fallback */}
+                      {profileInsights.dailyViewsLastWeek && profileInsights.dailyViewsLastWeek.map((day, index) => (
+                        <div key={day.date || index} className="chart-bar"> {/* Prefer day.date if unique & available */}
+                          <div
+                            className="bar-fill"
+                            style={{ height: `${Math.min(day.views * 10, 100)}%` }} // Example scaling
+                          ></div>
+                          <div className="bar-label">{new Date(day.date).getDate()}</div> {/* Format date for label */}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="no-data">No view data available</div>
+                )}
+              </div>
+
+              <div className="insight-card">
+                <h3>Shortlisted By</h3>
+                {/* shortlistCount from state is directly the number after fetchShortlistCount */}
+                {shortlistCount !== null && shortlistCount !== undefined ? (
+                  <>
+                    {/* Corrected: shortlistCount is the value itself */}
+                    <div className="insight-value">{shortlistCount}</div>
+                    <div className="insight-label">Homeowners</div>
+                  </>
+                ) : (
+                  <div className="no-data">No shortlist data available</div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div> // Missing closing div for insights-container, assuming it was intended here or above.
+            // Based on indentation, it seems the one for insights-white-box is the one before this comment.
+            // The outer one for insights-container is likely missing if this is the end of the function.
+            // Correcting this:
+    ); // This parenthesis closes the return statement. The div for insights-container is the outermost.
+  }, // This comma was missing if renderInsights was the last method before renderEditModal. Add if necessary.
+
+  renderEditModal() {
+    // Ensure editFormData in CleanerUI's state is populated with id and status by openEditModal
+    const { showEditModal, editFormData, isSavingChanges, editError, editingListingId, isSuspending } = this.state;
+
+    if (!showEditModal || !editFormData) return null; // Add check for editFormData
 
     return (
       <div className="modal-overlay">
         <div className="edit-modal">
           <h2>Edit Listing</h2>
-          <form onSubmit={(e) => this.handleSaveListingChanges(e)}>
+          {/* Pass the event to handleSaveListingChanges if it uses e.preventDefault() */}
+          <form onSubmit={this.handleSaveListingChanges}>
             <div className="form-group">
-              <label htmlFor="serviceCatName">Service Category:</label>
+              <label htmlFor="editServiceCatName">Service Category:</label> {/* Changed id to avoid conflict if create form is also in DOM */}
               <select
-                id="serviceCatName"
-                name="serviceCatName"
-                value={editFormData.serviceCatName}
+                id="editServiceCatName"
+                name="serviceCatName" // Ensure this matches the property name in editFormData and handleEditInputChange
+                value={editFormData.serviceCatName || ''} // Use initial '' if undefined
                 onChange={this.handleEditInputChange}
                 required
               >
@@ -262,25 +356,43 @@ const renderingMethods = {
                 <option value="Deep Cleaning">Deep Cleaning</option>
                 <option value="Office Cleaning">Office Cleaning</option>
                 <option value="Window Cleaning">Window Cleaning</option>
+                {/* Add other relevant options */}
               </select>
             </div>
+
+            {/* Add title field if it's editable */}
+            {/* Example for title:
             <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                name="description"
-                value={editFormData.description}
+              <label htmlFor="editTitle">Title:</label>
+              <input
+                type="text"
+                id="editTitle"
+                name="title"
+                value={editFormData.title || ''}
                 onChange={this.handleEditInputChange}
                 required
               />
             </div>
+            */}
+
             <div className="form-group">
-              <label htmlFor="ratePerHr">Rate per hour ($)</label>
+              <label htmlFor="editDescription">Description</label>
+              <textarea
+                id="editDescription"
+                name="description"
+                value={editFormData.description || ''}
+                onChange={this.handleEditInputChange}
+                required
+                rows="4" // Example
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="editRatePerHr">Rate per hour ($)</label>
               <input
                 type="number"
-                id="ratePerHr"
+                id="editRatePerHr"
                 name="ratePerHr"
-                value={editFormData.ratePerHr}
+                value={editFormData.ratePerHr || ''}
                 onChange={this.handleEditInputChange}
                 min="0"
                 step="0.01"
@@ -290,26 +402,27 @@ const renderingMethods = {
             {editError && <div className="error-message">{editError}</div>}
             <div className="modal-actions">
               <div className="modal-left-actions">
-                <button 
-                  type="button" 
-                  onClick={() => this.handleToggleListingStatus(editFormData.id)}
+                <button
+                  type="button"
+                  // Use editingListingId for the action, and editFormData.status for display logic
+                  onClick={() => this.handleToggleListingStatus(editingListingId)}
                   className={editFormData.status === 'SUSPENDED' ? 'activate-button' : 'suspend-button'}
-                  disabled={this.state.isSuspending}
+                  disabled={isSuspending} // Use isSuspending from state
                 >
-                  {this.state.isSuspending ? 'Processing...' : 
-                   editFormData.status === 'SUSPENDED' ? 'Activate Listing' : 'Suspend Listing'}
+                  {isSuspending ? 'Processing...' :
+                    editFormData.status === 'SUSPENDED' ? 'Activate Listing' : 'Suspend Listing'}
                 </button>
               </div>
               <div className="modal-right-actions">
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isSavingChanges}
-                  className="save-button"
+                  className="save-button" // Changed from submit-button to save-button for clarity
                 >
                   {isSavingChanges ? 'Saving...' : 'Save Changes'}
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={this.closeEditModal}
                   className="cancel-button"
                 >
@@ -321,7 +434,7 @@ const renderingMethods = {
         </div>
       </div>
     );
-  }
+  } // No comma if this is the last method in the object
 };
 
 export default renderingMethods;

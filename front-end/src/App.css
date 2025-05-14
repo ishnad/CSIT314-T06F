@@ -243,6 +243,74 @@ body {
   padding-left: 10px;
 }
 
+.insights-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.insight-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.insight-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2c2c54;
+  text-align: center;
+  margin: 10px 0;
+}
+
+.insight-label {
+  text-align: center;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.insight-chart {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 150px;
+  margin-top: 20px;
+}
+
+.chart-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30px;
+}
+
+.bar-fill {
+  width: 20px;
+  background: #4CAF50;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease;
+}
+
+.bar-label {
+  margin-top: 5px;
+  font-size: 0.8rem;
+}
+
+.no-data {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 20px 0;
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;

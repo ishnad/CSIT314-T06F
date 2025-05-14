@@ -44,6 +44,19 @@ function Navbar({ currentPage, navigateTo, user, onLogout }) {
                 Confirmed Matches
               </button>
             </li>
+            <li className={`nav-item ${currentPage === 'insights' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => {
+                  handleTabClick('insights');
+                  if (typeof window.refreshActiveTab === 'function') {
+                    window.refreshActiveTab();
+                  }
+                }}
+              >
+                Profile Insights
+              </button>
+            </li>
           </>
         ) : (
           <>

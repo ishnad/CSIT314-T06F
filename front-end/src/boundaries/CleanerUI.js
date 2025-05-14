@@ -82,12 +82,14 @@ class CleanerUI extends Component {
     if (this.props.user && this.props.user.id) {
         this.fetchInitialData(this.props.user.id);
         this.handleSearchSubmit(); // Load initial search results
+        this.fetchProfileInsights(this.props.user.id);
+        this.fetchShortlistCount(this.props.user.id);
     } else {
         console.warn("CleanerUI: User ID not available on mount. Cannot fetch initial data.");
         this.setState({
-            listingsError: "User ID not available. Please re-login.", // Or a more appropriate message
-            loadingListings: false, // Ensure loading is stopped
-            // Potentially set similar errors for insights if they also depend on this ID
+            listingsError: "User ID not available. Please re-login.",
+            loadingListings: false,
+            insightsError: "User ID not available. Please re-login."
         });
     }
   }
@@ -120,8 +122,24 @@ class CleanerUI extends Component {
     });
     try {
       if (!cleanerId) throw new Error("Cleaner ID not available for profile insights.");
-      const response = await fetch(`/api/cleaners/${cleanerId}/insights/views`);
+      const response = await fetch(`/api/insights/cleaner/${cleanerId}/views`);
       
+      // Handle cases where there might be no views yet
+      if (response.status === 404) {
+        // Return empty data structure
+        return {
+          totalViews: 0,
+          dailyViewsLastWeek: Array.from({length: 7}, (_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            return {
+              date: d.toISOString().split('T')[0],
+              views: 0
+            };
+          })
+        };
+      }
+
       // First check if response is JSON
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
@@ -154,30 +172,42 @@ class CleanerUI extends Component {
       insightsError: null
     });
     try {
-      if (!cleanerId) throw new Error("Cleaner ID not available for shortlist count.");
-      const response = await fetch(`/api/cleaners/${cleanerId}/insights/shortlist-count`);
-      
-      // First check if response is JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        throw new Error(`Expected JSON but got: ${text.substring(0, 100)}`);
+      if (!cleanerId) {
+        console.error('Cleaner ID not available for shortlist count');
+        this.setState({ 
+          shortlistCount: 0,
+          insightsError: "Cleaner information not available"
+        });
+        return;
       }
 
+      const response = await fetch(`/api/insights/cleaner/${cleanerId}/shortlist-count`);
+      
       if (!response.ok) {
+        // If 404, it's not an error - just means count is 0
+        if (response.status === 404) {
+          this.setState({ shortlistCount: 0 });
+          return;
+        }
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      this.setState({ shortlistCount: data.count });
+      this.setState({ 
+        shortlistCount: data.shortlistCount || 0 
+      });
     } catch (error) {
       console.error('Error fetching shortlist count:', error);
-      this.setState({
-        insightsError: error.message,
-        message: { text: `Error fetching shortlist count: ${error.message}`, type: 'error' }
-      });
-      setTimeout(() => this.setState({ message: null }), 5000);
+      // Don't show error for empty shortlist case
+      if (error.message !== "You have not been shortlisted yet") {
+        this.setState({
+          insightsError: error.message,
+          message: { text: `Error fetching shortlist count: ${error.message}`, type: 'error' }
+        });
+      } else {
+        this.setState({ shortlistCount: 0 });
+      }
     } finally {
       this.setState({ insightsLoading: false });
     }
@@ -581,6 +611,7 @@ class CleanerUI extends Component {
       <div className="cleaner-ui-container">
         {currentPage === 'search' && this.renderSearchListings()}
         {currentPage === 'myListings' && this.renderUserListings()}
+        {currentPage === 'insights' && this.renderInsights()}
         {currentPage === 'matches' && (
           <div className="matches-container">
             <h2>Confirmed Matches</h2>
