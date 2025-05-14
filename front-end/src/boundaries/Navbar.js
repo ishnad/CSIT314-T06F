@@ -6,8 +6,6 @@ function Navbar({ currentPage, navigateTo, user, onLogout }) {
   const handleTabClick = (tabName) => {
     // If already on the same tab, just refresh the data
     if (currentPage === tabName) {
-      // We need to communicate with parent to refresh the tab
-      // This assumes you add a refreshActiveTab prop to Navbar
       if (typeof window.refreshActiveTab === 'function') {
         window.refreshActiveTab();
       }
@@ -55,7 +53,12 @@ function Navbar({ currentPage, navigateTo, user, onLogout }) {
       </ul>
       
       <div className="navbar-user">
-        <span className="user-greeting">Welcome, {user}</span>
+        {/* Render user.username instead of the whole user object */}
+        <span className="user-greeting">Welcome, {user?.username}</span>
+        {/* Optional: Show profile name if available */}
+        {user?.profile?.name && (
+          <span className="user-role">({user.profile.name})</span>
+        )}
         <button className="logout-button" onClick={onLogout}>
           Logout
         </button>

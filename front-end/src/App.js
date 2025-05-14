@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import Navbar from './boundaries/Navbar';
 import UserAdminUi from './boundaries/UserAdminUI';
+import CleanerUi from './boundaries/CleanerUI';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('create');
@@ -10,19 +11,24 @@ function App() {
   
   // Create a ref to the UserAdminUi component
   const userAdminRef = useRef(null);
+
+  const cleanerUiRef = useRef(null);
   
   // Check if user is already logged in (from localStorage)
   useEffect(() => {
     const loggedInUser = localStorage.getItem('user');
     if (loggedInUser) {
       setIsAuthenticated(true);
-      setUser(loggedInUser);
+      setUser(JSON.parse(loggedInUser));
     }
     
     // Define the global refresh function for the Navbar to call
     window.refreshActiveTab = () => {
       if (userAdminRef.current && typeof userAdminRef.current.refreshActiveTabData === 'function') {
         userAdminRef.current.refreshActiveTabData();
+      }
+      if (cleanerUiRef.current && typeof cleanerUiRef.current.refreshActiveTabData === 'function') {
+        cleanerUiRef.current.refreshActiveTabData();
       }
     };
     
@@ -35,13 +41,12 @@ function App() {
   const navigateTo = (page) => {
     setCurrentPage(page);
   };
-  
-  const handleLogin = (username) => {
+
+  const handleLogin = (username, userData) => {
     setIsAuthenticated(true);
-    setUser(username);
-    // Store in localStorage for persistence across page refreshes
-    localStorage.setItem('user', username);
-  };
+    setUser(userData);  // store the complete user object
+    localStorage.setItem('user', JSON.stringify(userData));
+};
   
   const handleLogout = () => {
     setIsAuthenticated(false);
@@ -67,12 +72,23 @@ function App() {
           />
           
           <main className="app-content">
-            <UserAdminUi 
-              ref={userAdminRef}
-              initialTab={currentPage} 
-              isAuthenticated={true}
-              onNavigate={navigateTo}
-            />
+            {user?.profile?.name === 'UserAdmin' && (
+              <UserAdminUi 
+                ref={userAdminRef}
+                initialTab={currentPage} 
+                isAuthenticated={true}
+                onNavigate={navigateTo}
+              />
+            )}
+
+            {user?.profile?.name === 'Cleaner' && (
+              <CleanerUi 
+                ref={cleanerUiRef}
+                initialTab={currentPage}
+                isAuthenticated={true}
+                onNavigate={navigateTo}
+              />
+            )}
           </main>
           
           <footer className="app-footer">
@@ -81,7 +97,7 @@ function App() {
         </>
       ) : (
         // Show just the UserAdminUi for login when not authenticated
-        <UserAdminUi 
+        <UserAdminUi
           onLogin={handleLogin} 
           isAuthenticated={false}
         />

@@ -11,6 +11,7 @@ class UserAdminUI extends Component {
       loginPassword: '',
       loginError: null,
       isLoading: false,
+      currentUser: null,
 
       // ManageUsers state
       users: [],
@@ -145,34 +146,44 @@ class UserAdminUI extends Component {
     this.setState({ [name]: value });
   };
 
-  handleLoginSubmit = async (e) => {
-    e.preventDefault();
-    const { loginUsername, loginPassword } = this.state;
+  // In UserAdminUI.js, modify the handleLoginSubmit method:
+handleLoginSubmit = async (e) => {
+  e.preventDefault();
+  this.setState({ isLoading: true, loginError: '' });
 
-    // Show loading state
-    this.setState({ isLoading: true, loginError: null });
+  const { loginUsername, loginPassword } = this.state;
 
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+  const response = await fetch('http://localhost:3001/api/auth/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ username: loginUsername, password: loginPassword }),
+  });
+  
+  const data = await response.json();
 
-    // For demo purposes, using hardcoded admin credentials
-    if (loginUsername === 'admin' && loginPassword === 'admin123') {
-      // Call the parent component's login handler
-      this.props.onLogin(loginUsername);
-
-      this.setState({
-        loginUsername: '',
-        loginPassword: '',
-        loginError: null,
-        isLoading: false
-      });
-    } else {
-      this.setState({
-        loginError: 'Invalid username or password. Try admin/admin123',
-        isLoading: false
-      });
+  if (response.ok) {
+    // Login successful
+    this.setState({ 
+      loginUsername: '',
+      loginPassword: '',
+      loginError: null,
+      isLoading: false,
+      currentUser: data.user,
+      activeTab: 'manage'
+    });
+    
+    // Call the onLogin prop if it exists
+    if (this.props.onLogin) {
+      this.props.onLogin(data.user.username, data.user);
     }
-  };
+  } else {
+    // Login failed
+    this.setState({ loginError: data.message || 'Login failed', isLoading: false });
+  }
+};
+
 
   // Get all profiles
   getAllProfiles = async () => {

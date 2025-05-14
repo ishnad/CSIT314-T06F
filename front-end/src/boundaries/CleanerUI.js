@@ -81,7 +81,7 @@ const CleanerUI = ({ currentCleanerId }) => {
         setInsightsLoading(true);
         setInsightsError(null);
         try {
-            const response = await fetch(`/api/cleaners/${currentCleanerId}/insights/views`); // Adjusted route
+            const response = await fetch(`/api/cleaners/${currentCleanerId}/insights/views`);
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
@@ -164,20 +164,30 @@ const CleanerUI = ({ currentCleanerId }) => {
     };
 
     // Service Listings Actions
-    const fetchServiceListings = async (cleanerId) => {
+    const fetchServiceListings = async (currentCleanerId) => {
         setLoadingListings(true);
         setListingsError(null);
         try {
-            const response = await fetch(`/api/cleaners/${cleanerId}/listings`); // Assuming you have a route to get cleaner's listings
+            if (!currentCleanerId) {
+                // Handle case where cleanerId might not be available yet
+                setListingsError("Cleaner ID not available to fetch listings.");
+                setServiceListings([]);
+                return;
+            }
+
+            const response = await fetch(`/api/listings/by-cleaner/${currentCleanerId}`);
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            setServiceListings(data);
+            // If backend returns null or empty array, setServiceListings will handle it fine.
+            setServiceListings(data || []); // Ensure data is an array
         } catch (error) {
             console.error('Error fetching service listings:', error);
             setListingsError(error.message);
+            setServiceListings([]); // Clear listings on error
             setMessage({ text: `Error fetching service listings: ${error.message}`, type: 'error' });
             setTimeout(() => setMessage(null), 5000);
         } finally {

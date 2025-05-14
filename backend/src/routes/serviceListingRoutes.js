@@ -13,6 +13,7 @@ const searchServiceListingsController = new serviceListingController.SearchServi
 router.post('/', (req, res) => createServiceListingController.createServiceListing(req, res));
 router.get('/search', (req, res) => searchServiceListingsController.searchListings(req, res));
 router.get('/:id', (req, res) => getServiceListingController.getListingDetails(req, res));
+router.get('/by-cleaner/:cleanerId', (req, res) => getServiceListingController.getAllListingDetails(req, res));
 router.put('/:id', (req, res) => editServiceListingController.editServiceListing(req, res));
 router.patch('/:id/suspend', (req, res) => suspendServiceListingController.suspendServiceListing(req, res));
 

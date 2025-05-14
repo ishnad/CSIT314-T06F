@@ -45,6 +45,26 @@ class GetServiceListingController {
      * @param {object} req - Express request object.
      * @param {object} res - Express response object.
      */
+    async getAllListingDetails(req, res) {
+        const requestingUserId = req.user?.id;
+
+        // Call the entity method, passing both listing ID and the requesting user's ID
+        const result = await this.serviceListingEntity.getAllListingDetails(requestingUserId);
+
+        if (result.error) {
+            // If the entity returned an error object, use its status and message
+            res.status(result.error.status).json({ error: result.error.error });
+        } else {
+            // Success: return the listing data
+            res.status(200).json({listing: result });
+        }
+    }
+
+    /**
+     * Handles the HTTP request to get details for a specific service listing.
+     * @param {object} req - Express request object.
+     * @param {object} res - Express response object.
+     */
     async getListingDetails(req, res) {
         const requestingUserId = req.user?.id;
         const listingId = req.params.id; // Get listing ID from route parameters

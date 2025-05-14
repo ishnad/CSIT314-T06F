@@ -64,6 +64,52 @@ class ServiceListingEntity {
     }
 
     /**
+     * Retrieves a list of all service listings for a specific cleaner with key details.
+     * This function is typically called when the cleaner navigates to their "My Listings" page.
+     * @param {string} requestingCleanerId - The ID of the cleaner whose listings are to be retrieved.
+     * @returns {Promise<Array<object>|null|object>} An array of listing objects with key details,
+     * or null if no listings are found (as per use case alternate flow),
+     * or an error object.
+     */
+    async getAllCleanerListings(requestingCleanerId) {
+        try {
+            const listings = await this.prisma.serviceListing.findMany({
+                where: {
+                    cleanerId: requestingCleanerId // Filter listings by the logged-in cleaner
+                },
+                select: {
+                    // Key details as specified in the use case for the list view
+                    id: true,          // Essential for linking to the full detail view
+                    serviceType: true,
+                    description: true, // You might want to send a summary if descriptions are long
+                    ratePerHr: true,
+                    title: true,       // Title is usually a good key detail for a list
+                    // Include other fields you deem "key" for a list preview
+                },
+                orderBy: {
+                    createdAt: 'desc' // Optional: order listings, e.g., newest first
+                }
+            });
+
+            // Handle the alternate flow: "No listings exist"
+            if (!listings || listings.length === 0) {
+                // As per use case: "The system returns NULL"
+                // The UI then "displays message 'No listings have been created yet' and shows a 'Create Listing' button"
+                return null;
+                // Alternatively, returning an empty array ([]) can sometimes be easier for front-end handling.
+                // Choose the approach that best fits your API design and front-end expectations.
+            }
+
+            return listings; // Returns an array of listing objects with their key details
+
+        } catch (error) {
+            console.error(`Error retrieving service listings for cleaner ${requestingCleanerId}:`, error);
+            // You can add more specific error handling similar to your getListingDetails function
+            return { error: { status: 500, error: 'Failed to retrieve service listings due to a server error.' } };
+        }
+    }
+
+    /**
      * Retrieves the details of a specific service listing, ensuring the requester is the owner.
      * @param {string} listingId - The ID of the listing to retrieve.
      * @param {string} requestingCleanerId - The ID of the user requesting the details.
