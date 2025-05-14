@@ -571,20 +571,32 @@ class CleanerUI extends Component {
     }));
   };
 
-  applyFilters = async () => {
+  handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    this.setState(prevState => ({
+      filters: {
+        ...prevState.filters,
+        [name]: value
+      }
+    }));
+  };
+
+  handleMatchFilterSubmit = async (e) => {
+    e.preventDefault();
     this.setState({
       loadingMatches: true,
-      matchesError: null,
-      confirmedMatches: []
+      matchesError: null
     });
+
     try {
-      const response = await fetch(`/api/cleaners/${this.props.currentCleanerId}/matches`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(this.state.filters),
-      });
+      const { serviceType, startDate, endDate } = this.state.filters;
+      let url = `/api/matches/cleaner/confirmed?cleanerId=${this.props.user?.id}`;
+      
+      if (serviceType) url += `&serviceType=${encodeURIComponent(serviceType)}`;
+      if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
+      if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
+
+      const response = await fetch(url);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
@@ -609,66 +621,118 @@ class CleanerUI extends Component {
 
     return (
       <div className="cleaner-ui-container">
+        <style>
+          {`
+            .white-box {
+              color: black;
+            }
+            .white-box h2,
+            .white-box h3,
+            .white-box p,
+            .white-box span,
+            .white-box div:not(.error-message):not(.loading) {
+              color: inherit;
+            }
+            .matches-container .filters {
+              color: initial;
+            }
+          `}
+        </style>
         {currentPage === 'search' && this.renderSearchListings()}
         {currentPage === 'myListings' && this.renderUserListings()}
         {currentPage === 'insights' && this.renderInsights()}
         {currentPage === 'matches' && (
           <div className="matches-container">
             <h2>Confirmed Matches</h2>
-            <div className="filters">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                this.applyFilters();
-              }}>
-                <div className="filter-group">
-                  <label>Service Type:</label>
-                  <input
-                    type="text"
+            
+            <div className="filters" style={{ 
+              display: 'flex', 
+              alignItems: 'flex-end',
+              gap: '20px',
+              marginBottom: '30px',
+              padding: '15px',
+              backgroundColor: '#f5f5f5',
+              borderRadius: '8px'
+            }}>
+              <form onSubmit={this.handleMatchFilterSubmit} style={{ display: 'flex', gap: '20px', width: '100%' }}>
+                <div className="filter-group" style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>Service Category:</label>
+                  <select
                     name="serviceType"
                     value={this.state.filters.serviceType}
                     onChange={this.handleFilterChange}
-                  />
+                    style={{ width: '100%', padding: '8px' }}
+                  >
+                    <option value="">All Services</option>
+                    <option value="Basic Cleaning">Basic Cleaning</option>
+                    <option value="Deep Cleaning">Deep Cleaning</option>
+                    <option value="Office Cleaning">Office Cleaning</option>
+                    <option value="Window Cleaning">Window Cleaning</option>
+                  </select>
                 </div>
-                <div className="filter-group">
-                  <label>Start Date:</label>
+                
+                <div className="filter-group" style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>From:</label>
                   <input
                     type="date"
                     name="startDate"
                     value={this.state.filters.startDate}
                     onChange={this.handleFilterChange}
+                    style={{ width: '100%', padding: '8px' }}
                   />
                 </div>
-                <div className="filter-group">
-                  <label>End Date:</label>
+                
+                <div className="filter-group" style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>To:</label>
                   <input
                     type="date"
                     name="endDate"
                     value={this.state.filters.endDate}
                     onChange={this.handleFilterChange}
+                    style={{ width: '100%', padding: '8px' }}
                   />
                 </div>
-                <button type="submit" disabled={this.state.loadingMatches}>
-                  Apply Filters
-                </button>
+                
+                <div className="filter-group" style={{ alignSelf: 'flex-end' }}>
+                  <button 
+                    type="submit" 
+                    style={{ 
+                      padding: '8px 20px',
+                      backgroundColor: '#4a6fa5',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Filter
+                  </button>
+                </div>
               </form>
             </div>
 
-            {this.state.loadingMatches && <div className="loading">Loading matches...</div>}
-            {this.state.matchesError && <div className="error-message">{this.state.matchesError}</div>}
-
-            {this.state.confirmedMatches.length > 0 ? (
-              <div className="matches-list">
+            {this.state.loadingMatches ? (
+              <div className="loading">Loading matches...</div>
+            ) : this.state.matchesError ? (
+              <div className="error-message">{this.state.matchesError}</div>
+            ) : this.state.confirmedMatches.length > 0 ? (
+              <div className="matches-grid">
                 {this.state.confirmedMatches.map(match => (
-                  <div key={match.id} className="match-card">
-                    <h3>{match.serviceListing?.title || 'Untitled Service'}</h3>
-                    <p>Client: {match.client?.username || 'Unknown'}</p>
-                    <p>Date: {new Date(match.date).toLocaleDateString()}</p>
-                    <p>Status: {match.status}</p>
+                  <div key={match.matchId} className="match-card">
+                    <div className="match-header">
+                      <h3>{match.serviceTitle}</h3>
+                      <span className="match-type">{match.serviceType}</span>
+                    </div>
+                    <div className="match-details">
+                      <p><strong>Homeowner:</strong> {match.homeownerUsername}</p>
+                      <p><strong>Confirmed:</strong> {new Date(match.confirmationDate).toLocaleDateString()}</p>
+                      <p><strong>Rate:</strong> ${match.serviceRatePerHr}/hr</p>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              !this.state.loadingMatches && <div className="no-matches">No confirmed matches found</div>
+              <div className="no-matches">No confirmed matches found</div>
             )}
           </div>
         )}

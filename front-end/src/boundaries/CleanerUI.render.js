@@ -268,9 +268,8 @@ const renderingMethods = {
 
     return (
       <div className="insights-container">
-        <div className="insights-white-box" style={{
+        <div className="white-box" style={{
           backgroundColor: 'white',
-          color: 'black',
           padding: '20px',
           borderRadius: '8px',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
