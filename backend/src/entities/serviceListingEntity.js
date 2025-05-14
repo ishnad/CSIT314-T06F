@@ -244,7 +244,7 @@ class ServiceListingEntity {
         if (keyword && typeof keyword === 'string' && keyword.trim() !== '') {
             const trimmedKeyword = keyword.trim();
             whereConditions.OR = [
-                { title: { contains: trimmedKeyword, mode: 'insensitive' } },
+                { serviceCatName: { contains: trimmedKeyword, mode: 'insensitive' } },
                 { description: { contains: trimmedKeyword, mode: 'insensitive' } },
             ];
         }

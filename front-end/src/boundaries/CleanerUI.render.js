@@ -86,23 +86,99 @@ const renderingMethods = {
 
     return (
       <div className="search-listings-container">
-        {/* Use destructured variable 'searchKeyword' */}
         <h2>{searchKeyword ? 'Search Results' : 'All Listings'}</h2>
-        <form onSubmit={this.handleSearchSubmit}>
-          <div className="search-group">
-            <label htmlFor="keyword">Search Keyword:</label>
-            <input
-              type="text"
-              id="keyword"
-              value={searchKeyword}
-              onChange={this.handleSearchInputChange}
-              placeholder="Search for services..."
-            />
-            <button type="submit" disabled={searchLoading}>
-              {searchLoading ? 'Searching...' : 'Search'}
-            </button>
-          </div>
-        </form>
+        
+        <div className="filters" style={{ 
+          display: 'flex', 
+          alignItems: 'flex-end',
+          gap: '20px',
+          marginBottom: '30px',
+          padding: '15px',
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          color: 'black'
+        }}>
+          <form onSubmit={this.handleSearchSubmit} style={{ display: 'flex', gap: '20px', width: '100%' }}>
+            <div className="search-group" style={{ flex: 2, alignSelf: 'flex-end' }}>
+              <label style={{ display: 'block', marginBottom: '5px', color: 'black' }}>Search:</label>
+              <input
+                type="text"
+                id="keyword"
+                value={searchKeyword}
+                onChange={this.handleSearchInputChange}
+                placeholder="Search service types or descriptions..."
+                style={{ 
+                  width: '100%', 
+                  padding: '8px',
+                  backgroundColor: 'white',
+                  color: 'black',
+                  border: '1px solid #ccc'
+                }}
+              />
+            </div>
+
+            <div className="filter-group" style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '5px' }}>Service Category:</label>
+              <select
+                name="serviceType"
+                value={this.state.searchFilters.serviceType || ''}
+                onChange={this.handleSearchFilterChange}
+                style={{ width: '100%', padding: '8px' }}
+              >
+                <option value="">All Services</option>
+                <option value="Basic Cleaning">Basic Cleaning</option>
+                <option value="Deep Cleaning">Deep Cleaning</option>
+                <option value="Office Cleaning">Office Cleaning</option>
+                <option value="Window Cleaning">Window Cleaning</option>
+              </select>
+            </div>
+
+            <div className="price-range-group" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '5px' }}>Min $</label>
+                <input
+                  type="number"
+                  name="minRate"
+                  value={this.state.searchFilters.minRate || ''}
+                  onChange={this.handleSearchFilterChange}
+                  min="0"
+                  step="0.01"
+                  style={{ width: '80px', padding: '8px' }}
+                />
+              </div>
+              <span>-</span>
+              <div>
+                <label style={{ display: 'block', marginBottom: '5px' }}>Max $</label>
+                <input
+                  type="number"
+                  name="maxRate"
+                  value={this.state.searchFilters.maxRate || ''}
+                  onChange={this.handleSearchFilterChange}
+                  min="0"
+                  step="0.01"
+                  style={{ width: '80px', padding: '8px' }}
+                />
+              </div>
+            </div>
+
+            <div className="filter-group" style={{ alignSelf: 'flex-end' }}>
+              <button 
+                type="submit" 
+                style={{ 
+                  padding: '8px 20px',
+                  backgroundColor: '#4a6fa5',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+                disabled={searchLoading}
+              >
+                {searchLoading ? 'Searching...' : 'Search'}
+              </button>
+            </div>
+          </form>
+        </div>
 
         {searchLoading && <div className="loading">Searching for listings...</div>}
         {searchError && <div className="error-message">Error: {searchError}</div>}

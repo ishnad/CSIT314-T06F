@@ -5,6 +5,12 @@ class CleanerUI extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      // Search Filters
+      searchFilters: {
+        serviceType: '',
+        minRate: '',
+        maxRate: ''
+      },
       // Insights State
       profileInsights: null,
       shortlistCount: null,
@@ -513,6 +519,16 @@ class CleanerUI extends Component {
     this.setState({ searchKeyword: e.target.value });
   };
 
+  handleSearchFilterChange = (e) => {
+    const { name, value } = e.target;
+    this.setState(prevState => ({
+      searchFilters: {
+        ...prevState.searchFilters,
+        [name]: value
+      }
+    }));
+  };
+
   handleSearchSubmit = async (e) => {
     if (e) e.preventDefault();
     this.setState({
@@ -523,8 +539,16 @@ class CleanerUI extends Component {
 
     try {
       let url = '/api/listings/search';
-      if (this.state.searchKeyword) {
-        url += `?keyword=${encodeURIComponent(this.state.searchKeyword)}`;
+      const { searchKeyword, searchFilters } = this.state;
+      const params = new URLSearchParams();
+      
+      if (searchKeyword && searchKeyword.trim() !== '') params.append('keyword', searchKeyword.trim());
+      if (searchFilters.serviceType) params.append('serviceType', searchFilters.serviceType);
+      if (searchFilters.minRate) params.append('minRate', searchFilters.minRate);
+      if (searchFilters.maxRate) params.append('maxRate', searchFilters.maxRate);
+
+      if (params.toString()) {
+        url += `?${params.toString()}`;
       }
 
       const response = await fetch(url, {
