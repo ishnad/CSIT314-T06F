@@ -153,17 +153,25 @@ handleLoginSubmit = async (e) => {
 
   const { loginUsername, loginPassword } = this.state;
 
-  const response = await fetch('http://localhost:3001/api/auth/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ username: loginUsername, password: loginPassword }),
-  });
-  
-  const data = await response.json();
+  try {
+    const response = await fetch('http://localhost:3001/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ 
+        username: loginUsername, 
+        password: loginPassword 
+      }),
+    });
+      
+    const data = await response.json();
 
-  if (response.ok) {
+    if (!response.ok) {
+      throw new Error(data.message || 'Login failed');
+    }
+
     // Login successful
     this.setState({ 
       loginUsername: '',
@@ -173,14 +181,18 @@ handleLoginSubmit = async (e) => {
       currentUser: data.user,
       activeTab: 'manage'
     });
-    
+      
     // Call the onLogin prop if it exists
     if (this.props.onLogin) {
       this.props.onLogin(data.user.username, data.user);
     }
-  } else {
-    // Login failed
-    this.setState({ loginError: data.message || 'Login failed', isLoading: false });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    this.setState({ 
+      loginError: error.message || 'Login failed', 
+      isLoading: false 
+    });
   }
 };
 

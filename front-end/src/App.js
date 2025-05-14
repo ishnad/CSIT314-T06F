@@ -16,10 +16,23 @@ function App() {
   
   // Check if user is already logged in (from localStorage)
   useEffect(() => {
-    const loggedInUser = localStorage.getItem('user');
-    if (loggedInUser) {
-      setIsAuthenticated(true);
-      setUser(JSON.parse(loggedInUser));
+    try {
+      const loggedInUser = localStorage.getItem('user');
+      if (loggedInUser) {
+          const parsedUser = JSON.parse(loggedInUser);
+          // Crucially check for parsedUser.id as well
+          if (parsedUser && parsedUser.username && parsedUser.id) {
+              setIsAuthenticated(true);
+              setUser(parsedUser);
+          } else {
+              // If essential info like ID is missing, treat as not properly logged in
+              localStorage.removeItem('user');
+          }
+      }
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      // Clear invalid data from localStorage
+      localStorage.removeItem('user');
     }
     
     // Define the global refresh function for the Navbar to call
@@ -43,10 +56,29 @@ function App() {
   };
 
   const handleLogin = (username, userData) => {
-    setIsAuthenticated(true);
-    setUser(userData);  // store the complete user object
-    localStorage.setItem('user', JSON.stringify(userData));
-};
+    if (userData && userData.id) { // Ensure userData.id exist
+        try {
+            const userToStore = {
+                id: userData.id, // Store the ID
+                username: username,
+                profile: userData.profile || null,
+                email: userData.email || '',
+                status: userData.status || 'ACTIVE'
+            };
+            setIsAuthenticated(true);
+            setUser(userToStore);
+            localStorage.setItem('user', JSON.stringify(userToStore));
+        } catch (error) {
+            console.error('Error saving user data:', error);
+            // Clear any partial data that might have been stored
+            localStorage.removeItem('user');
+        }
+    } else {
+        console.error('Login failed: User data, ID missing.', userData);
+        // Clear any existing auth data
+        localStorage.removeItem('user');
+    }
+  };
   
   const handleLogout = () => {
     setIsAuthenticated(false);
@@ -72,21 +104,24 @@ function App() {
           />
           
           <main className="app-content">
-            {user?.profile?.name === 'UserAdmin' && (
+            {user?.profile?.name === 'UserAdmin' ? (
               <UserAdminUi 
                 ref={userAdminRef}
                 initialTab={currentPage} 
                 isAuthenticated={true}
                 onNavigate={navigateTo}
               />
-            )}
-
-            {user?.profile?.name === 'Cleaner' && (
+            ) : (
               <CleanerUi 
                 ref={cleanerUiRef}
-                initialTab={currentPage}
                 isAuthenticated={true}
                 onNavigate={navigateTo}
+                currentPage={currentPage}
+                user={user ? { 
+                  ...user, // Spread all user properties
+                  id: user.id, // Ensure id is included
+                  profile: user.profile || null // Ensure profile exists
+                } : null}
               />
             )}
           </main>

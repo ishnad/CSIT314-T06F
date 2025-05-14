@@ -16,13 +16,8 @@ class ServiceListingEntity {
      */
     async createServiceListing(serviceType, title, description, ratePerHr, cleanerId) {
         try {
-            // Verify cleanerId exists
-            const cleanerAccount = await this.prisma.userAccount.findUnique({
-                where: { id: cleanerId },
-                include: { userProfile: true }
-            });
-            if (!cleanerAccount) {
-                 return { error: { status: 404, error: `User with ID ${cleanerId} not found.` } };
+            if (!cleanerId) {
+                return { error: { status: 400, error: 'Cleaner ID is required' } };
             }
 
             await this.prisma.serviceListing.create({
@@ -75,36 +70,30 @@ class ServiceListingEntity {
         try {
             const listings = await this.prisma.serviceListing.findMany({
                 where: {
-                    cleanerId: requestingCleanerId // Filter listings by the logged-in cleaner
+                    cleanerId: requestingCleanerId
                 },
                 select: {
-                    // Key details as specified in the use case for the list view
-                    id: true,          // Essential for linking to the full detail view
+                    id: true,
                     serviceType: true,
-                    description: true, // You might want to send a summary if descriptions are long
+                    title: true,
+                    description: true,
                     ratePerHr: true,
-                    title: true,       // Title is usually a good key detail for a list
-                    // Include other fields you deem "key" for a list preview
+                    status: true,
+                    createdAt: true,
+                    updatedAt: true
                 },
                 orderBy: {
-                    createdAt: 'desc' // Optional: order listings, e.g., newest first
+                    createdAt: 'desc'
                 }
             });
 
-            // Handle the alternate flow: "No listings exist"
-            if (!listings || listings.length === 0) {
-                // As per use case: "The system returns NULL"
-                // The UI then "displays message 'No listings have been created yet' and shows a 'Create Listing' button"
-                return null;
-                // Alternatively, returning an empty array ([]) can sometimes be easier for front-end handling.
-                // Choose the approach that best fits your API design and front-end expectations.
-            }
-
-            return listings; // Returns an array of listing objects with their key details
+            return listings || [];
 
         } catch (error) {
             console.error(`Error retrieving service listings for cleaner ${requestingCleanerId}:`, error);
-            // You can add more specific error handling similar to your getListingDetails function
+            if (error.code === 'P2023') {
+                return { error: { status: 400, error: 'Invalid cleaner ID format.' } };
+            }
             return { error: { status: 500, error: 'Failed to retrieve service listings due to a server error.' } };
         }
     }
@@ -115,7 +104,7 @@ class ServiceListingEntity {
      * @param {string} requestingCleanerId - The ID of the user requesting the details.
      * @returns {Promise<object>} The listing object or an error object.
      */
-    async getListingDetails(listingId, requestingCleanerId) {
+    async getListingDetails(listingId) {
         try {
             const listing = await this.prisma.serviceListing.findUnique({
                 where: { id: listingId },
@@ -126,8 +115,7 @@ class ServiceListingEntity {
                     description: true,
                     ratePerHr: true,
                     createdAt: true,
-                    cleanerId: true, // Need cleanerId to verify ownership
-                    cleaner: { // Include cleaner's username for context
+                    cleaner: {
                         select: {
                             username: true
                         }
@@ -139,17 +127,10 @@ class ServiceListingEntity {
                 return { error: { status: 404, error: `Service listing with ID ${listingId} not found.` } };
             }
 
-            // Verify ownership
-            if (listing.cleanerId !== requestingCleanerId) {
-                // Although the user is authenticated, they don't own this specific listing
-                return { error: { status: 403, error: 'Forbidden: You do not have permission to view this listing.' } };
-            }
-
-            // Remap cleaner info for a cleaner response structure
-             return {
+            return {
                 ...listing,
-                cleanerUsername: listing.cleaner.username,
-                cleaner: undefined // Remove nested cleaner object
+                cleanerUsername: listing.cleaner?.username,
+                cleaner: undefined
             };
 
         } catch (error) {
@@ -169,8 +150,8 @@ class ServiceListingEntity {
      * @param {object} updateData - Data to update the listing with.
      * @returns {Promise<boolean|object>} True if successful, or an error object.
      */
-    async editServiceListing(listingId, cleanerId, updateData) {
-        const allowedUpdateFields = ['serviceType', 'description', 'ratePerHr'];
+    async editServiceListing(listingId, updateData) {
+        const allowedUpdateFields = ['serviceType', 'title', 'description', 'ratePerHr'];
         const actualUpdateData = {};
         for (const field of allowedUpdateFields) {
             if (updateData[field] !== undefined) {
@@ -205,7 +186,7 @@ class ServiceListingEntity {
      * @param {string} cleanerId - The ID of the cleaner attempting the suspension (for ownership verification).
      * @returns {Promise<boolean|object>} True if successful, or an error object.
      */
-    async suspendServiceListing(listingId, cleanerId) {
+    async suspendServiceListing(listingId) {
         try {
             // Verify listing exists and cleanerId is the owner
             const existingListing = await this.prisma.serviceListing.findUnique({

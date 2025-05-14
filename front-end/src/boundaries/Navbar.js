@@ -18,38 +18,77 @@ function Navbar({ currentPage, navigateTo, user, onLogout }) {
   return (
     <nav className="navbar">
       <ul className="navbar-nav">
-        <li className={`nav-item ${currentPage === 'create' ? 'active' : ''}`}>
-          <button 
-            className="nav-link" 
-            onClick={() => handleTabClick('create')}
-          >
-            Create User
-          </button>
-        </li>
-        <li className={`nav-item ${currentPage === 'manage' ? 'active' : ''}`}>
-          <button 
-            className="nav-link" 
-            onClick={() => handleTabClick('manage')}
-          >
-            Manage Users
-          </button>
-        </li>
-        <li className={`nav-item ${currentPage === 'profile' ? 'active' : ''}`}>
-          <button 
-            className="nav-link" 
-            onClick={() => handleTabClick('profile')}
-          >
-            Create User Profile
-          </button>
-        </li>
-        <li className={`nav-item ${currentPage === 'manageProfiles' ? 'active' : ''}`}>
-          <button 
-            className="nav-link" 
-            onClick={() => handleTabClick('manageProfiles')}
-          >
-            Manage Profiles
-          </button>
-        </li>
+        {user?.profile?.name === 'Cleaner' ? (
+          <>
+            <li className={`nav-item ${currentPage === 'search' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('search')}
+              >
+                Search Listings
+              </button>
+            </li>
+            <li className={`nav-item ${currentPage === 'createListing' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('createListing')}
+              >
+                Create Listing
+              </button>
+            </li>
+            <li className={`nav-item ${currentPage === 'myListings' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('myListings')}
+              >
+                My Listings
+              </button>
+            </li>
+            <li className={`nav-item ${currentPage === 'matches' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('matches')}
+              >
+                Confirmed Matches
+              </button>
+            </li>
+          </>
+        ) : (
+          <>
+            <li className={`nav-item ${currentPage === 'create' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('create')}
+              >
+                Create User
+              </button>
+            </li>
+            <li className={`nav-item ${currentPage === 'manage' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('manage')}
+              >
+                Manage Users
+              </button>
+            </li>
+            <li className={`nav-item ${currentPage === 'profile' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('profile')}
+              >
+                Create User Profile
+              </button>
+            </li>
+            <li className={`nav-item ${currentPage === 'manageProfiles' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('manageProfiles')}
+              >
+                Manage Profiles
+              </button>
+            </li>
+          </>
+        )}
       </ul>
       
       <div className="navbar-user">

@@ -15,7 +15,10 @@ const confirmedMatchesRoutes = require('./routes/confirmedMatchesRoutes');
 const serviceHistoryRoutes = require('./routes/serviceHistoryRoutes');
 const shortlistRoutes = require('./routes/shortlistRoutes');
 
-app.use(cors()); // Enable CORS for all routes
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json()); // Middleware to parse JSON bodies
 
 // --- API routes ---

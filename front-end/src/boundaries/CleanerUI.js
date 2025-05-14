@@ -1,461 +1,604 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react'; // Removed useState, useEffect
+import renderingMethods from './CleanerUI.render';
 
-const CleanerUI = ({ currentCleanerId }) => {
-    // Insights State
-    const [profileInsights, setProfileInsights] = useState(null);
-    const [shortlistCount, setShortlistCount] = useState(null);
-    const [insightsError, setInsightsError] = useState(null);
-    const [insightsLoading, setInsightsLoading] = useState(false);
+class CleanerUI extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      // Insights State
+      profileInsights: null,
+      shortlistCount: null,
+      insightsError: null,
+      insightsLoading: false,
 
-    // Create Listing State
-    const [newListing, setNewListing] = useState({
+      // Create Listing State
+      newListing: {
         serviceType: 'Basic Cleaning',
         title: '',
         description: 'Describe your service',
         ratePerHr: 30.00,
-    });
-    const [createListingError, setCreateListingError] = useState(null);
-    const [createListingSuccess, setCreateListingSuccess] = useState(null);
-    const [isCreatingListing, setIsCreatingListing] = useState(false);
+      },
+      createListingError: null,
+      createListingSuccess: null,
+      isCreatingListing: false,
 
-    // Service Listings State (for cleaner's own listings)
-    const [serviceListings, setServiceListings] = useState([]);
-    const [loadingListings, setLoadingListings] = useState(false);
-    const [listingsError, setListingsError] = useState(null);
-    const [selectedListingId, setSelectedListingId] = useState(null);
-    const [listingDetails, setListingDetails] = useState(null);
-    const [loadingDetails, setLoadingDetails] = useState(false);
-    const [detailsError, setDetailsError] = useState(null);
+      // Service Listings State
+      serviceListings: [],
+      loadingListings: false,
+      listingsError: null,
+      selectedListingId: null,
+      listingDetails: null,
+      loadingDetails: false,
+      detailsError: null,
 
-    // Edit Listing State
-    const [isEditingListing, setIsEditingListing] = useState(false);
-    const [editFormData, setEditFormData] = useState({
+      // Edit Listing State
+      isEditingListing: false,
+      editFormData: {
+        serviceType: '',
         title: '',
         description: '',
         ratePerHr: '',
-    });
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [editingListingId, setEditingListingId] = useState(null);
-    const [editError, setEditError] = useState(null);
-    const [isSavingChanges, setIsSavingChanges] = useState(false);
+      },
+      showEditModal: false,
+      editingListingId: null,
+      editError: null,
+      isSavingChanges: false,
 
-    // Suspend/Abort Listing State
-    const [suspendingListingId, setSuspendingListingId] = useState(null);
-    const [isSuspending, setIsSuspending] = useState(false);
-    const [suspensionError, setSuspensionError] = useState(null);
+      // Suspend Listing State
+      suspendingListingId: null,
+      isSuspending: false,
+      suspensionError: null,
 
-    // Confirmed Matches State (assuming an endpoint exists for this)
-    const [confirmedMatches, setConfirmedMatches] = useState([]);
-    const [loadingMatches, setLoadingMatches] = useState(false);
-    const [matchesError, setMatchesError] = useState(null);
-    const [filters, setFilters] = useState({
+      // Confirmed Matches State
+      confirmedMatches: [],
+      loadingMatches: false,
+      matchesError: null,
+      filters: {
         serviceType: '',
         startDate: '',
         endDate: '',
+      },
+
+      // Search Listings State
+      searchResults: [],
+      searchKeyword: '',
+      searchLoading: false,
+      searchError: null,
+      searchMessage: null,
+
+      // General Message State
+      message: null
+    }; // End of this.state
+
+    // Bind rendering methods to this instance - MOVED INSIDE CONSTRUCTOR
+    for (const methodName in renderingMethods) {
+      if (renderingMethods.hasOwnProperty(methodName)) {
+        this[methodName] = renderingMethods[methodName].bind(this);
+      }
+    }
+  } // End of constructor
+
+  componentDidMount() {
+    // Ensure user and user.id are available before fetching
+    if (this.props.user && this.props.user.id) {
+        this.fetchInitialData(this.props.user.id); // Pass ID to fetchInitialData
+    } else {
+        console.warn("CleanerUI: User ID not available on mount. Cannot fetch initial data.");
+        this.setState({
+            listingsError: "User ID not available. Please re-login.", // Or a more appropriate message
+            loadingListings: false, // Ensure loading is stopped
+            // Potentially set similar errors for insights if they also depend on this ID
+        });
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    // Check if user.id has changed and is available
+    if (this.props.user && this.props.user.id && (prevProps.user?.id !== this.props.user.id)) {
+        this.fetchInitialData(this.props.user.id); // Pass new ID to fetchInitialData
+    }
+  }
+
+  fetchInitialData = async (cleanerId) => {
+    if (!cleanerId) {
+        this.setState({ listingsError: "Cannot fetch data: Cleaner ID is missing.", loadingListings: false });
+        return;
+    }
+    this.setState({ loadingListings: true, insightsLoading: true }); // Set loading for all
+    await Promise.all([
+        this.fetchProfileInsights(cleanerId),
+        this.fetchShortlistCount(cleanerId),
+        this.fetchServiceListings(cleanerId),
+    ]);
+  };
+
+  // Insights Actions
+  fetchProfileInsights = async (cleanerId) => {
+    this.setState({
+      insightsLoading: true,
+      insightsError: null
+    });
+    try {
+      if (!cleanerId) throw new Error("Cleaner ID not available for profile insights.");
+      const response = await fetch(`/api/cleaners/${cleanerId}/insights/views`);
+      
+      // First check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(`Expected JSON but got: ${text.substring(0, 100)}`);
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      this.setState({ profileInsights: data });
+    } catch (error) {
+      console.error('Error fetching profile insights:', error);
+      this.setState({
+        insightsError: error.message,
+        message: { text: `Error fetching profile insights: ${error.message}`, type: 'error' }
+      });
+      setTimeout(() => this.setState({ message: null }), 5000);
+    } finally {
+      this.setState({ insightsLoading: false });
+    }
+  };
+
+  fetchShortlistCount = async (cleanerId) => {
+    this.setState({
+      insightsLoading: true,
+      insightsError: null
+    });
+    try {
+      if (!cleanerId) throw new Error("Cleaner ID not available for shortlist count.");
+      const response = await fetch(`/api/cleaners/${cleanerId}/insights/shortlist-count`);
+      
+      // First check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(`Expected JSON but got: ${text.substring(0, 100)}`);
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      this.setState({ shortlistCount: data.count });
+    } catch (error) {
+      console.error('Error fetching shortlist count:', error);
+      this.setState({
+        insightsError: error.message,
+        message: { text: `Error fetching shortlist count: ${error.message}`, type: 'error' }
+      });
+      setTimeout(() => this.setState({ message: null }), 5000);
+    } finally {
+      this.setState({ insightsLoading: false });
+    }
+  };
+
+  // Create Listing Actions
+  handleCreateListingInputChange = (e) => {
+    const { name, value } = e.target;
+    this.setState(prevState => ({
+      newListing: {
+        ...prevState.newListing,
+        [name]: value
+      }
+    }));
+  };
+
+  handleCreateListingSubmit = async (e) => {
+    e.preventDefault();
+    this.setState({
+      isCreatingListing: true,
+      createListingError: null,
+      createListingSuccess: null
     });
 
-    // Search Listings (for searching other cleaners' listings) State
-    const [searchResults, setSearchResults] = useState([]);
-    const [searchKeyword, setSearchKeyword] = useState('');
-    const [searchLoading, setSearchLoading] = useState(false);
-    const [searchError, setSearchError] = useState(null);
-    const [searchMessage, setSearchMessage] = useState(null);
+    try {
+      const response = await fetch('/api/listings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...this.state.newListing,
+          cleanerId: this.props.user?.id
+        }),
+      });
 
-    // General Message State
-    const [message, setMessage] = useState(null);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
 
-    useEffect(() => {
-        fetchInitialData();
-    }, [currentCleanerId]);
+      this.setState({
+        newListing: { serviceType: 'Basic Cleaning', title: '', description: 'Describe your service', ratePerHr: 30.00 },
+        createListingSuccess: 'Listing created successfully!'
+      });
+      this.fetchServiceListings(this.props.currentCleanerId);
+    } catch (error) {
+      console.error('Error creating listing:', error);
+      this.setState({
+        createListingError: error.message,
+        message: { text: `Error creating listing: ${error.message}`, type: 'error' }
+      });
+      setTimeout(() => this.setState({ message: null }), 5000);
+    } finally {
+      this.setState({ isCreatingListing: false });
+      setTimeout(() => this.setState({ createListingSuccess: null }), 3000);
+      setTimeout(() => this.setState({ createListingError: null }), 3000);
+    }
+  };
 
-    const fetchInitialData = async () => {
-        await Promise.all([
-            fetchProfileInsights(),
-            fetchShortlistCount(),
-            fetchServiceListings(currentCleanerId),
-        ]);
-    };
-
-    // Insights Actions
-    const fetchProfileInsights = async () => {
-        setInsightsLoading(true);
-        setInsightsError(null);
-        try {
-            const response = await fetch(`/api/cleaners/${currentCleanerId}/insights/views`);
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            setProfileInsights(data);
-        } catch (error) {
-            console.error('Error fetching profile insights:', error);
-            setInsightsError(error.message);
-            setMessage({ text: `Error fetching profile insights: ${error.message}`, type: 'error' });
-            setTimeout(() => setMessage(null), 5000);
-        } finally {
-            setInsightsLoading(false);
-        }
-    };
-
-    const fetchShortlistCount = async () => {
-        setInsightsLoading(true);
-        setInsightsError(null);
-        try {
-            const response = await fetch(`/api/cleaners/${currentCleanerId}/insights/shortlist-count`); // Adjusted route
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            setShortlistCount(data.count); // Assuming the count is in a 'count' property
-        } catch (error) {
-            console.error('Error fetching shortlist count:', error);
-            setInsightsError(error.message);
-            setMessage({ text: `Error fetching shortlist count: ${error.message}`, type: 'error' });
-            setTimeout(() => setMessage(null), 5000);
-        } finally {
-            setInsightsLoading(false);
-        }
-    };
-
-    // Create Listing Actions
-    const handleCreateListingInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewListing(prevState => ({
-            ...prevState,
-            [name]: value,
-        }));
-    };
-
-    const handleCreateListingSubmit = async (e) => {
-        e.preventDefault();
-        setIsCreatingListing(true);
-        setCreateListingError(null);
-        setCreateListingSuccess(null);
-
-        try {
-            const response = await fetch('/api/listings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ ...newListing, cleanerId: currentCleanerId }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-
-            setNewListing({ serviceType: 'Basic Cleaning', title: '', description: 'Describe your service', ratePerHr: 30.00 });
-            setCreateListingSuccess('Listing created successfully!');
-            fetchServiceListings(currentCleanerId); // Refresh listings
-        } catch (error) {
-            console.error('Error creating listing:', error);
-            setCreateListingError(error.message);
-            setMessage({ text: `Error creating listing: ${error.message}`, type: 'error' });
-            setTimeout(() => setMessage(null), 5000);
-        } finally {
-            setIsCreatingListing(false);
-            setTimeout(() => setCreateListingSuccess(null), 3000);
-            setTimeout(() => setCreateListingError(null), 3000);
-        }
-    };
-
-    // Service Listings Actions
-    const fetchServiceListings = async (currentCleanerId) => {
-        setLoadingListings(true);
-        setListingsError(null);
-        try {
-            if (!currentCleanerId) {
-                // Handle case where cleanerId might not be available yet
-                setListingsError("Cleaner ID not available to fetch listings.");
-                setServiceListings([]);
-                return;
-            }
-
-            const response = await fetch(`/api/listings/by-cleaner/${currentCleanerId}`);
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            // If backend returns null or empty array, setServiceListings will handle it fine.
-            setServiceListings(data || []); // Ensure data is an array
-        } catch (error) {
-            console.error('Error fetching service listings:', error);
-            setListingsError(error.message);
-            setServiceListings([]); // Clear listings on error
-            setMessage({ text: `Error fetching service listings: ${error.message}`, type: 'error' });
-            setTimeout(() => setMessage(null), 5000);
-        } finally {
-            setLoadingListings(false);
-        }
-    };
-
-    const getListingDetails = async (listingId) => {
-        setSelectedListingId(listingId);
-        setLoadingDetails(true);
-        setDetailsError(null);
-        setListingDetails(null);
-        try {
-            const response = await fetch(`/api/listings/${listingId}`);
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            setListingDetails(data);
-        } catch (error) {
-            console.error(`Error fetching details for listing ${listingId}:`, error);
-            setDetailsError(error.message);
-            setMessage({ text: `Error fetching listing details: ${error.message}`, type: 'error' });
-            setTimeout(() => setMessage(null), 5000);
-        } finally {
-            setLoadingDetails(false);
-        }
-    };
-
-    // Edit Listing Actions
-    const openEditModal = (listing) => {
-        setEditingListingId(listing.id); // Assuming your listing object has an 'id' property
-        setEditFormData({
-            title: listing.title || '',
-            description: listing.description || '',
-            ratePerHr: listing.ratePerHr ? listing.ratePerHr.toString() : '',
+  // Service Listings Actions
+  fetchServiceListings = async (currentCleanerId) => {
+    this.setState({
+      loadingListings: true,
+      listingsError: null
+    });
+    try {
+      if (!currentCleanerId) {
+        this.setState({
+          listingsError: "Cleaner ID not available to fetch listings.",
+          serviceListings: []
         });
-        setShowEditModal(true);
-    };
+        return;
+      }
+      const response = await fetch(`/api/listings/by-cleaner/${currentCleanerId}`);
+      
+      // First check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(`Expected JSON but got: ${text.substring(0, 100)}`);
+      }
 
-    const closeEditModal = () => {
-        setShowEditModal(false);
-        setEditingListingId(null);
-        setEditError(null);
-    };
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
 
-    const handleEditInputChange = (e) => {
-        const { name, value } = e.target;
-        setEditFormData(prevData => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
+      const data = await response.json();
+      this.setState({ 
+        serviceListings: data.listings || [], 
+        loadingListings: false 
+      });
+    } catch (error) {
+      console.error('Error fetching service listings:', error);
+      this.setState({
+        listingsError: error.message,
+        serviceListings: [],
+        message: { text: `Error fetching service listings: ${error.message}`, type: 'error' }
+      });
+      setTimeout(() => this.setState({ message: null }), 5000);
+    } finally {
+      this.setState({ loadingListings: false });
+    }
+  };
 
-    const handleSaveListingChanges = async () => {
-        if (!editingListingId) return;
+  getListingDetails = async (listingId) => {
+    this.setState({
+      selectedListingId: listingId,
+      loadingDetails: true,
+      detailsError: null,
+      listingDetails: null
+    });
+    try {
+      const response = await fetch(`/api/listings/${listingId}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      this.setState({ listingDetails: data });
+    } catch (error) {
+      console.error(`Error fetching details for listing ${listingId}:`, error);
+      this.setState({
+        detailsError: error.message,
+        message: { text: `Error fetching listing details: ${error.message}`, type: 'error' }
+      });
+      setTimeout(() => this.setState({ message: null }), 5000);
+    } finally {
+      this.setState({ loadingDetails: false });
+    }
+  };
 
-        setIsSavingChanges(true);
-        setEditError(null);
+  // Edit Listing Actions
+  openEditModal = (listing) => {
+    this.setState({
+      editingListingId: listing.id,
+      editFormData: {
+        serviceType: listing.serviceType || 'Basic Cleaning',
+        title: listing.title || '',
+        description: listing.description || '',
+        ratePerHr: listing.ratePerHr ? listing.ratePerHr.toString() : '0',
+      },
+      showEditModal: true
+    });
+  };
 
-        if (!editFormData.title || !editFormData.description || !editFormData.ratePerHr) {
-            setEditError("Please fill in all required fields.");
-            setIsSavingChanges(false);
-            return;
-        }
+  closeEditModal = () => {
+    this.setState({
+      showEditModal: false,
+      editingListingId: null,
+      editError: null
+    });
+  };
 
-        try {
-            const response = await fetch(`/api/listings/${editingListingId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(editFormData),
-            });
+  handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    this.setState(prevState => ({
+      editFormData: {
+        ...prevState.editFormData,
+        [name]: value
+      }
+    }));
+  };
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
+  handleSaveListingChanges = async () => {
+    if (!this.state.editingListingId) return;
 
-            setMessage({ text: 'Changes saved successfully!', type: 'success' });
-            closeEditModal();
-            fetchServiceListings(currentCleanerId); // Refresh listings
-        } catch (error) {
-            console.error('Error updating listing:', error);
-            setEditError(error.message);
-            setMessage({ text: `Error updating listing: ${error.message}`, type: 'error' });
-        } finally {
-            setIsSavingChanges(false);
-            setTimeout(() => setMessage(null), 5000);
-        }
-    };
+    this.setState({
+      isSavingChanges: true,
+      editError: null
+    });
 
-    // Suspend Listing Actions
-    const handleSuspendListing = async (listingId) => {
-        setSuspendingListingId(listingId);
-        setIsSuspending(true);
-        setSuspensionError(null);
+    if (!this.state.editFormData.title || !this.state.editFormData.description || !this.state.editFormData.ratePerHr) {
+      this.setState({
+        editError: "Please fill in all required fields.",
+        isSavingChanges: false
+      });
+      return;
+    }
 
-        try {
-            const response = await fetch(`/api/listings/${listingId}/suspend`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ cleanerId: currentCleanerId }), // You might need to send cleanerId for authorization
-            });
+    try {
+      const response = await fetch(`/api/listings/${this.state.editingListingId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            serviceType: this.state.editFormData.serviceType,
+            title: this.state.editFormData.title,
+            description: this.state.editFormData.description,
+            ratePerHr: this.state.editFormData.ratePerHr
+        }),
+      });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
 
-            const data = await response.json();
-            setMessage({ text: `Listing "${data.title || listingId}" suspended successfully.`, type: 'success' });
-            fetchServiceListings(currentCleanerId); // Refresh listings
-        } catch (error) {
-            console.error('Error suspending listing:', error);
-            setSuspensionError(error.message);
-            setMessage({ text: `Error suspending listing: ${error.message}`, type: 'error' });
-        } finally {
-            setIsSuspending(false);
-            setSuspendingListingId(null);
-            setTimeout(() => setMessage(null), 5000);
-        }
-    };
+      this.setState({
+        message: { text: 'Changes saved successfully!', type: 'success' }
+      });
+      this.closeEditModal();
+      this.fetchServiceListings(this.props.currentCleanerId);
+    } catch (error) {
+      console.error('Error updating listing:', error);
+      this.setState({
+        editError: error.message,
+        message: { text: `Error updating listing: ${error.message}`, type: 'error' }
+      });
+    } finally {
+      this.setState({ isSavingChanges: false });
+      setTimeout(() => this.setState({ message: null }), 5000);
+    }
+  };
 
-    // Search Listings Actions
-    const handleSearchInputChange = (e) => {
-        setSearchKeyword(e.target.value);
-    };
+  // Suspend Listing Actions
+  handleSuspendListing = async (listingId) => {
+    this.setState({
+      suspendingListingId: listingId,
+      isSuspending: true,
+      suspensionError: null
+    });
 
-    const handleSearchSubmit = async (e) => {
-        e.preventDefault();
-        setSearchLoading(true);
-        setSearchError(null);
-        setSearchResults([]);
-        setSearchMessage(null);
+    try {
+      const response = await fetch(`/api/listings/${listingId}/suspend`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cleanerId: this.props.currentCleanerId }),
+      });
 
-        try {
-            const queryParams = new URLSearchParams();
-            if (searchKeyword) queryParams.append('keyword', searchKeyword);
-            // Add other potential search filters here if your backend supports them
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
 
-            const url = `/api/listings/search?${queryParams.toString()}`;
+      const data = await response.json();
+      this.setState({
+        message: { text: `Listing "${data.title || listingId}" suspended successfully.`, type: 'success' }
+      });
+      this.fetchServiceListings(this.props.currentCleanerId);
+    } catch (error) {
+      console.error('Error suspending listing:', error);
+      this.setState({
+        suspensionError: error.message,
+        message: { text: `Error suspending listing: ${error.message}`, type: 'error' }
+      });
+    } finally {
+      this.setState({
+        isSuspending: false,
+        suspendingListingId: null
+      });
+      setTimeout(() => this.setState({ message: null }), 5000);
+    }
+  };
 
-            const response = await fetch(url);
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            setSearchResults(data);
-            if (data && data.length === 0) {
-                setSearchMessage('No matching listings found.');
-            }
-        } catch (error) {
-            console.error('Error searching listings:', error);
-            setSearchError(error.message);
-            setSearchResults([]);
-        } finally {
-            setSearchLoading(false);
-            setTimeout(() => setSearchMessage(null), 3000);
-            setTimeout(() => setSearchError(null), 3000);
-        }
-    };
+  // Search Listings Actions
+  handleSearchInputChange = (e) => {
+    this.setState({ searchKeyword: e.target.value });
+  };
 
-    // Confirmed Matches Actions (assuming an endpoint exists)
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilters(prevFilters => ({
-            ...prevFilters,
-            [name]: value,
-        }));
-    };
+  handleSearchSubmit = async (e) => {
+    e.preventDefault();
+    this.setState({
+      searchLoading: true,
+      searchError: null,
+      searchResults: [],
+      searchMessage: null
+    });
 
-    const applyFilters = async () => {
-        setLoadingMatches(true);
-        setMatchesError(null);
-        setConfirmedMatches([]);
-        try {
-            const response = await fetch(`/api/cleaners/${currentCleanerId}/matches`, { // Adjust this route to your actual endpoint
-                method: 'POST', // Or GET depending on your API design
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(filters),
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            setConfirmedMatches(data);
-        } catch (error) {
-            console.error('Error fetching confirmed matches:', error);
-            setMatchesError(error.message);
-            setMessage({ text: `Error fetching confirmed matches: ${error.message}`, type: 'error' });
-            setTimeout(() => setMessage(null), 5000);
-        } finally {
-            setLoadingMatches(false);
-        }
-    };
+    try {
+      const queryParams = new URLSearchParams();
+      if (this.state.searchKeyword) {
+        queryParams.append('keyword', this.state.searchKeyword);
+      }
+
+      const url = `/api/listings/search?${queryParams.toString()}`;
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      this.setState({
+        searchResults: data,
+        searchMessage: data && data.length === 0 ? 'No matching listings found.' : null
+      });
+    } catch (error) {
+      console.error('Error searching listings:', error);
+      this.setState({
+        searchError: error.message,
+        searchResults: []
+      });
+    } finally {
+      this.setState({ searchLoading: false });
+      setTimeout(() => this.setState({ searchMessage: null }), 3000);
+      setTimeout(() => this.setState({ searchError: null }), 3000);
+    }
+  };
+
+  // Confirmed Matches Actions (assuming an endpoint exists)
+  handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    this.setState(prevState => ({
+      filters: {
+        ...prevState.filters,
+        [name]: value
+      }
+    }));
+  };
+
+  applyFilters = async () => {
+    this.setState({
+      loadingMatches: true,
+      matchesError: null,
+      confirmedMatches: []
+    });
+    try {
+      const response = await fetch(`/api/cleaners/${this.props.currentCleanerId}/matches`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(this.state.filters),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      this.setState({ confirmedMatches: data });
+    } catch (error) {
+      console.error('Error fetching confirmed matches:', error);
+      this.setState({
+        matchesError: error.message,
+        message: { text: `Error fetching confirmed matches: ${error.message}`, type: 'error' }
+      });
+      setTimeout(() => this.setState({ message: null }), 5000);
+    } finally {
+      this.setState({ loadingMatches: false });
+    }
+  };
+  // NOTE: The misplaced loop and extra brace were here. They have been moved to the constructor.
+
+  render() {
+    const { currentPage } = this.props;
 
     return (
-        <div>
-            <h2>Search Service Listings</h2>
-            <form onSubmit={handleSearchSubmit}>
-                <div>
-                    <label htmlFor="keyword">Search Keyword:</label>
-                    <input
-                        type="text"
-                        id="keyword"
-                        value={searchKeyword}
-                        onChange={handleSearchInputChange}
-                    />
+      <div className="cleaner-ui-container">
+        {currentPage === 'search' && this.renderSearchListings()}
+        {currentPage === 'createListing' && this.renderCreateListing()}
+        {currentPage === 'myListings' && this.renderUserListings()}
+        {currentPage === 'matches' && (
+          <div className="matches-container">
+            <h2>Confirmed Matches</h2>
+            <div className="filters">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                this.applyFilters();
+              }}>
+                <div className="filter-group">
+                  <label>Service Type:</label>
+                  <input
+                    type="text"
+                    name="serviceType"
+                    value={this.state.filters.serviceType}
+                    onChange={this.handleFilterChange}
+                  />
                 </div>
-                <button type="submit" disabled={searchLoading}>
-                    {searchLoading ? 'Searching...' : 'Search'}
+                <div className="filter-group">
+                  <label>Start Date:</label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    value={this.state.filters.startDate}
+                    onChange={this.handleFilterChange}
+                  />
+                </div>
+                <div className="filter-group">
+                  <label>End Date:</label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    value={this.state.filters.endDate}
+                    onChange={this.handleFilterChange}
+                  />
+                </div>
+                <button type="submit" disabled={this.state.loadingMatches}>
+                  Apply Filters
                 </button>
-            </form>
+              </form>
+            </div>
 
-            {searchLoading && <p>Searching for listings...</p>}
-            {searchError && <p className="error-message">Error: {searchError}</p>}
-            {searchMessage && <p className="info-message">{searchMessage}</p>}
+            {this.state.loadingMatches && <div className="loading">Loading matches...</div>}
+            {this.state.matchesError && <div className="error-message">{this.state.matchesError}</div>}
 
-            {searchResults.length > 0 && (
-                <div>
-                    <h3>Search Results</h3>
-                    <ul>
-                        {searchResults.map(listing => (
-                            <li key={listing.id}>
-                                {listing.title} - Rate: ${listing.ratePerHr}/hr - By Cleaner: {listing.cleanerId}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-
-            <hr />
-
-            <h2>Your Service Listings</h2>
-            {loadingListings ? (
-                <p>Loading your listings...</p>
-            ) : listingsError ? (
-                <p className="error-message">{listingsError}</p>
-            ) : serviceListings.length > 0 ? (
-                <div className="service-listings-container">
-                    {serviceListings.map(listing => (
-                        <div key={listing.id} className="service-listing-item">
-                            <h3>{listing.title}</h3>
-                            <p>Service Type: {listing.serviceType}</p>
-                            <p>Rate: ${listing.ratePerHr}/hr</p>
-                            <p>{listing.description}</p>
-                            <button onClick={() => getListingDetails(listing.id)}>View Details</button>
-                            <button onClick={() => openEditModal(listing)}>Edit</button>
-                            <button onClick={() => handleSuspendListing(listing.id)} disabled={listing.status === 'SUSPENDED'}>
-                                {listing.status === 'SUSPENDED' ? 'Suspended' : 'Suspend'}
-                            </button>
-                        </div>
-                    ))}
-                </div>
+            {this.state.confirmedMatches.length > 0 ? (
+              <div className="matches-list">
+                {this.state.confirmedMatches.map(match => (
+                  <div key={match.id} className="match-card">
+                    <h3>{match.serviceListing?.title || 'Untitled Service'}</h3>
+                    <p>Client: {match.client?.username || 'Unknown'}</p>
+                    <p>Date: {new Date(match.date).toLocaleDateString()}</p>
+                    <p>Status: {match.status}</p>
+                  </div>
+                ))}
+              </div>
             ) : (
-                <p>You haven't created any service listings yet.</p>
+              !this.state.loadingMatches && <div className="no-matches">No confirmed matches found</div>
             )}
-        </div>
+          </div>
+        )}
+        {this.renderListingDetails()}
+        {this.renderEditModal()}
+      </div>
     );
-};
+  }
+}
 
 export default CleanerUI;
