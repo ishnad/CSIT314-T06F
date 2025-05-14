@@ -17,7 +17,7 @@ class CreateServiceListingController {
             return res.status(400).json({ error: "Cleaner ID is required" });
         }
 
-        const { serviceType, description, ratePerHr: ratePerHrString } = req.body;
+        const { serviceCatName, description, ratePerHr: ratePerHrString } = req.body;
         
         const numericRate = parseFloat(ratePerHrString);
         if (isNaN(numericRate)) {
@@ -25,7 +25,7 @@ class CreateServiceListingController {
         }
 
         const result = await this.serviceListingEntity.createServiceListing(
-            serviceType,
+            serviceCatName,
             description,
             numericRate,
             cleanerId
@@ -106,21 +106,20 @@ class EditServiceListingController {
             return res.status(400).json({ error: "Invalid request body" });
         }
 
-        const { serviceType, title, description, ratePerHr } = req.body;
+        const { serviceCatName, description, ratePerHr: ratePerHrString } = req.body;
         
         // Validate required fields
-        if (!serviceType || !title || !description || !ratePerHr) {
+        if (!serviceCatName || !description || !ratePerHrString) {
             return res.status(400).json({ error: "All fields are required" });
         }
 
-        const numericRate = parseFloat(ratePerHr);
+        const numericRate = parseFloat(ratePerHrString);
         if (isNaN(numericRate)) {
             return res.status(400).json({ error: "Invalid rate format" });
         }
 
         const updateData = {
-            serviceType,
-            title,
+            serviceCatName,
             description,
             ratePerHr: numericRate
         };

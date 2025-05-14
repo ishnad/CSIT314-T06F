@@ -10,11 +10,11 @@ const renderingMethods = {
           <h2>Create New Service Listing</h2>
           <form onSubmit={this.handleCreateListingSubmit}>
             <div className="form-group">
-              <label htmlFor="serviceType">Service Type:</label>
+              <label htmlFor="serviceCatName">Service Category:</label>
               <select
-                id="serviceType"
-                name="serviceType"
-                value={newListing.serviceType}
+                id="serviceCatName"
+                name="serviceCatName"
+                value={newListing.serviceCatName}
                 onChange={this.handleCreateListingInputChange}
                 required
               >
@@ -112,11 +112,21 @@ const renderingMethods = {
             <h3>{searchKeyword ? 'Search Results' : 'Available Listings'}</h3>
             <ul className="results-list">
               {searchResults.map(listing => (
-                <li key={listing.id} className="listing-item">
-                  <h4>{listing.title}</h4>
-                  <p>Service Type: {listing.serviceType}</p>
-                  <p>Rate: ${listing.ratePerHr}/hr</p>
-                </li>
+                <div key={listing.id} className="listing-item">
+                  <div className="listing-header">
+                    <span className="service-category">{listing.serviceCatName}</span>
+                    <span className="service-rate">${listing.ratePerHr}/hr</span>
+                    <span className="service-by">By: {listing.cleanerUsername || 'Unknown'}</span>
+                  </div>
+                  <div className="listing-actions">
+                    <button 
+                      onClick={() => this.getListingDetails(listing.id)}
+                      className="details-button"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
               ))}
             </ul>
           </div>
@@ -153,22 +163,17 @@ const renderingMethods = {
           <div className="listings-grid">
             {serviceListings.map(listing => (
               <div key={listing.id} className="listing-card">
-                <h3>{listing.title}</h3>
-                <p className="service-type">Service Type: {listing.serviceType}</p>
-                <p className="rate">Rate: ${listing.ratePerHr}/hr</p>
-                <p className="description">{listing.description}</p>
+                <div className="listing-header">
+                  <span className="service-category">{listing.serviceCatName}</span>
+                  <span className="service-rate">${listing.ratePerHr}/hr</span>
+                  <span className="service-by">By: {listing.cleanerUsername || 'Unknown'}</span>
+                </div>
                 <div className="listing-actions">
                   <button 
                     onClick={() => this.getListingDetails(listing.id)}
                     className="details-button"
                   >
                     View Details
-                  </button>
-                  <button 
-                    onClick={() => this.openEditModal(listing)}
-                    className="edit-button"
-                  >
-                    Edit
                   </button>
                 </div>
               </div>
@@ -196,21 +201,40 @@ const renderingMethods = {
     if (!listingDetails) return null;
 
     return (
-      <div className="listing-details-container">
-        <h3>Listing Details</h3>
-        {loadingDetails ? (
-          <div className="loading">Loading details...</div>
-        ) : detailsError ? (
-          <div className="error-message">{detailsError}</div>
-        ) : (
-          <div className="details-content">
-            <h4>{listingDetails.title}</h4>
-            <p><strong>Service Type:</strong> {listingDetails.serviceType}</p>
-            <p><strong>Rate:</strong> ${listingDetails.ratePerHr}/hr</p>
-            <p><strong>Description:</strong> {listingDetails.description}</p>
-            <p><strong>Status:</strong> {listingDetails.status}</p>
-          </div>
-        )}
+      <div className="modal-overlay">
+        <div className="details-modal">
+          <h2>Listing Details</h2>
+          {loadingDetails ? (
+            <div className="loading">Loading details...</div>
+          ) : detailsError ? (
+            <div className="error-message">{detailsError}</div>
+          ) : (
+            <div className="details-content">
+              <div className="detail-row">
+                <span className="detail-label">Service Category:</span>
+                <span className="detail-value">{listingDetails.serviceCatName}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Description:</span>
+                <span className="detail-value">{listingDetails.description}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Price:</span>
+                <span className="detail-value">${listingDetails.ratePerHr}/hr</span>
+              </div>
+              
+              <div className="modal-actions">
+                <button 
+                  onClick={() => this.setState({ listingDetails: null })}
+                  className="cancel-button"
+                  style={{ marginLeft: 'auto' }}
+                >
+                  Back to Listings
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   },
@@ -224,13 +248,13 @@ const renderingMethods = {
       <div className="modal-overlay">
         <div className="edit-modal">
           <h2>Edit Listing</h2>
-          <form onSubmit={this.handleSaveListingChanges}>
+          <form onSubmit={(e) => this.handleSaveListingChanges(e)}>
             <div className="form-group">
-              <label htmlFor="serviceType">Service Type:</label>
+              <label htmlFor="serviceCatName">Service Category:</label>
               <select
-                id="serviceType"
-                name="serviceType"
-                value={editFormData.serviceType}
+                id="serviceCatName"
+                name="serviceCatName"
+                value={editFormData.serviceCatName}
                 onChange={this.handleEditInputChange}
                 required
               >

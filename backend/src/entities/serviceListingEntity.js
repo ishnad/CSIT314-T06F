@@ -14,7 +14,7 @@ class ServiceListingEntity {
      * @param {string} cleanerId - ID of the user creating the listing.
      * @returns {Promise<boolean|{error: {status: number, error: string}}>} True on successful creation, or an error object on failure.
      */
-    async createServiceListing(serviceType, description, ratePerHr, cleanerId) {
+    async createServiceListing(serviceCatName, description, ratePerHr, cleanerId) {
         try {
             if (!cleanerId) {
                 return { error: { status: 400, error: 'Cleaner ID is required' } };
@@ -22,7 +22,7 @@ class ServiceListingEntity {
 
             await this.prisma.serviceListing.create({
                 data: {
-                    serviceType: serviceType.trim(),
+                    serviceCatName: serviceCatName.trim(),
                     description: description.trim(),
                     ratePerHr: ratePerHr,
                     cleanerId: cleanerId,
@@ -30,8 +30,7 @@ class ServiceListingEntity {
                 // Select the fields to return
                 select: {
                     id: true,
-                    serviceType: true,
-                    title: true,
+                    serviceCatName: true,
                     description: true,
                     ratePerHr: true,
                     createdAt: true,
@@ -73,20 +72,28 @@ class ServiceListingEntity {
                 },
                 select: {
                     id: true,
-                    serviceType: true,
-                    title: true,
+                    serviceCatName: true,
                     description: true,
                     ratePerHr: true,
                     status: true,
                     createdAt: true,
-                    updatedAt: true
+                    updatedAt: true,
+                    cleaner: {
+                        select: {
+                            username: true
+                        }
+                    }
                 },
                 orderBy: {
                     createdAt: 'desc'
                 }
             });
 
-            return listings || [];
+            return (listings || []).map(listing => ({
+                ...listing,
+                cleanerUsername: listing.cleaner?.username,
+                cleaner: undefined
+            }));
 
         } catch (error) {
             console.error(`Error retrieving service listings for cleaner ${requestingCleanerId}:`, error);
@@ -109,8 +116,7 @@ class ServiceListingEntity {
                 where: { id: listingId },
                 select: {
                     id: true,
-                    serviceType: true,
-                    title: true,
+                    serviceCatName: true,
                     description: true,
                     ratePerHr: true,
                     createdAt: true,
@@ -244,7 +250,7 @@ class ServiceListingEntity {
         }
 
         if (serviceType && typeof serviceType === 'string' && serviceType.trim() !== '') {
-            whereConditions.serviceType = {
+            whereConditions.serviceCatName = {
                 equals: serviceType.trim(),
                 mode: 'insensitive',
             };
@@ -269,8 +275,7 @@ class ServiceListingEntity {
                 where: whereConditions,
                 select: {
                     id: true,
-                    serviceType: true,
-                    title: true,
+                    serviceCatName: true,
                     description: true,
                     ratePerHr: true,
                     updatedAt: true, // To show how recent the listing is
@@ -298,7 +303,7 @@ class ServiceListingEntity {
                 ...listing,
                 cleanerId: listing.cleaner.id,
                 cleanerUsername: listing.cleaner.username,
-                cleaner: undefined,
+                cleaner: undefined
             }));
 
         } catch (error) {

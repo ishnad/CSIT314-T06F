@@ -80,7 +80,7 @@ enum UserProfileStatus {
 // Relation from UserAccount to ServiceListing
 model ServiceListing {
   id          String   @id @default(cuid())
-  serviceType String   // e.g., "Deep Cleaning", "Basic Cleaning", "Window Cleaning"
+  serviceCatName String?   // e.g., "Deep Cleaning", "Basic Cleaning", "Window Cleaning"
   description String
   ratePerHr   Float    // Rate per hour
   createdAt   DateTime @default(now())

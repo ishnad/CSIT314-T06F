@@ -14,7 +14,7 @@ class CleanerUI extends Component {
       // Create Listing State
       showCreateForm: false,
       newListing: {
-        serviceType: 'Basic Cleaning',
+        serviceCatName: 'Basic Cleaning',
         description: 'Describe your service',
         ratePerHr: 30.00
       },
@@ -307,7 +307,14 @@ class CleanerUI extends Component {
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      this.setState({ listingDetails: data });
+      this.setState({ 
+        listingDetails: {
+          ...data.listing,
+          serviceCatName: data.listing.serviceCatName,
+          description: data.listing.description,
+          ratePerHr: data.listing.ratePerHr
+        }
+      });
     } catch (error) {
       console.error(`Error fetching details for listing ${listingId}:`, error);
       this.setState({
@@ -326,8 +333,7 @@ class CleanerUI extends Component {
       editingListingId: listing.id,
       editFormData: {
         id: listing.id,
-        serviceType: listing.serviceType || 'Basic Cleaning',
-        title: listing.title || '',
+        serviceCatName: listing.serviceCatName || 'Basic Cleaning',
         description: listing.description || '',
         ratePerHr: listing.ratePerHr ? listing.ratePerHr.toString() : '0',
         status: listing.status || 'ACTIVE'
@@ -356,7 +362,8 @@ class CleanerUI extends Component {
     }));
   };
 
-  handleSaveListingChanges = async () => {
+  handleSaveListingChanges = async (e) => {
+    e.preventDefault();
     if (!this.state.editingListingId) return;
 
     this.setState({
@@ -364,7 +371,9 @@ class CleanerUI extends Component {
       editError: null
     });
 
-    if (!this.state.editFormData.title || !this.state.editFormData.description || !this.state.editFormData.ratePerHr) {
+    const { serviceCatName, description, ratePerHr } = this.state.editFormData;
+    
+    if (!serviceCatName || !description || !ratePerHr) {
       this.setState({
         editError: "Please fill in all required fields.",
         isSavingChanges: false
@@ -379,10 +388,9 @@ class CleanerUI extends Component {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            serviceType: this.state.editFormData.serviceType,
-            title: this.state.editFormData.title,
-            description: this.state.editFormData.description,
-            ratePerHr: this.state.editFormData.ratePerHr
+            serviceCatName,
+            description,
+            ratePerHr
         }),
       });
 
