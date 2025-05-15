@@ -83,8 +83,35 @@ class SearchServiceCatController {
     }
 }
 
+class ViewServiceCatController {
+    constructor() {
+        this.serviceCategoryEntity = new ServiceCategoryEntity();
+    }
+
+    /**
+     * Handles HTTP request to view details of a specific service category.
+     * @param {import('express').Request} req - Express request object, with req.params.id for categoryId.
+     * @param {import('express').Response} res - Express response object.
+     */
+    async getCategoryDetails(req, res) {
+        const { id: categoryId } = req.params; // Get categoryId from URL parameters (e.g., /service-categories/:id)
+        const result = await this.serviceCategoryEntity.getCategoryDetailsById(categoryId);
+
+        if (result.error) {
+            // Alternate flow: 2a. System fails to retrieve category details
+            if (result.error.status === 404) {
+                 return res.status(404).json({ error: "Service category not found." });
+            }
+            return res.status(result.error.status || 500).json({ error: "Unable to retrieve category details. Please try again!" });
+        }
+
+        return res.status(200).json(result);
+    }
+}
+
 module.exports = {
     CreateServiceCatController,
     ViewServiceCategoriesController,
-    SearchServiceCatController
+    SearchServiceCatController,
+    ViewServiceCatController
 };

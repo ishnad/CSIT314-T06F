@@ -9,15 +9,16 @@ class ServiceCategoryEntity {
      * Creates a new service category.
      * @param {string} serviceCatName - The name of the service category.
      * @param {string} [serviceCatDescription] - An optional description for the service category.
-     * @returns {Promise<object|{error: {status: number, message: string}}>} The created service category object or an error object.
+     * @param {ServiceCategoryStatus} [status] - Optional status, defaults to ACTIVE if not provided by Prisma schema.
+     * @returns {Promise true|{error: {status: number, message: string}}>} The created service category object or an error object.
      */
-    async createServiceCategory(serviceCatName, serviceCatDescription) {
+    async createServiceCategory(serviceCatName, serviceCatDescription, status = ServiceCategoryStatus.ACTIVE) {
         try {
             const existingCategory = await this.prisma.serviceCategory.findFirst({
                 where: {
                     serviceCatName: {
-                        equals: serviceCatName,
-                        mode: 'insensitive' // Ensures "window cleaning" and "Window Cleaning" are treated as the same
+                        equals: serviceCatName.trim(),
+                        mode: 'insensitive'
                     }
                 },
             });
@@ -30,14 +31,13 @@ class ServiceCategoryEntity {
                 data: {
                     serviceCatName: serviceCatName.trim(),
                     serviceCatDescription: serviceCatDescription ? serviceCatDescription.trim() : null,
+                    status: status, // Explicitly set status
                 },
             });
-
             return true;
         } catch (error) {
             console.error("Error creating service category in entity:", error);
-            // Check for specific Prisma errors if needed, e.g., unique constraint violation if not caught above
-            return { error: { status: 500, message: 'Failed to create service category due to a server error.' } };
+            return { error: { status: 500, message: 'Failed to create service category.' } };
         }
     }
 
@@ -113,6 +113,44 @@ class ServiceCategoryEntity {
         }
     }
 
+    /**
+     * Retrieves details of a specific service category by its ID, including the number of service listings.
+     * @param {string} categoryId - The ID of the service category to retrieve.
+     * @returns {Promise<object|{error: {status: number, message: string}}>} The service category object with details and listings count, or an error object.
+     */
+    async getCategoryDetailsById(categoryId) {
+        try {
+            const category = await this.prisma.serviceCategory.findUnique({
+                where: { id: categoryId },
+                include: {
+                    _count: { // Include the count of related service listings
+                        select: { serviceListings: true },
+                    },
+                },
+            });
+
+            if (!category) {
+                return { error: { status: 404, message: 'Service category not found.' } };
+            }
+
+            // Transform the Prisma result to match the BCE's expected structure
+            // where numOfServiceListings is a direct attribute.
+            const categoryDetails = {
+                serviceCatID: category.id, // Matches BCE's serviceCatID (though it's a string)
+                serviceCatName: category.serviceCatName,
+                serviceCatDescription: category.serviceCatDescription,
+                status: category.status, // Include status as it's part of the model
+                createdAt: category.createdAt,
+                updatedAt: category.updatedAt,
+                numOfServiceListings: category._count?.serviceListings || 0,
+            };
+
+            return categoryDetails;
+        } catch (error) {
+            console.error(`Error retrieving category details for ID ${categoryId}:`, error);
+            return { error: { status: 500, message: 'System error while retrieving category details.' } };
+        }
+    }
 
 }
 
