@@ -131,6 +131,14 @@ exports.Prisma.UserAccountScalarFieldEnum = {
   userProfileId: 'userProfileId'
 };
 
+exports.Prisma.UserLoginLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  loginTime: 'loginTime',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent'
+};
+
 exports.Prisma.UserProfileScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -241,6 +249,7 @@ exports.BookingStatus = exports.$Enums.BookingStatus = {
 
 exports.Prisma.ModelName = {
   UserAccount: 'UserAccount',
+  UserLoginLog: 'UserLoginLog',
   UserProfile: 'UserProfile',
   ServiceCategory: 'ServiceCategory',
   ServiceListing: 'ServiceListing',

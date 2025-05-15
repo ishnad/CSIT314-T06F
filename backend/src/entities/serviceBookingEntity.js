@@ -144,6 +144,71 @@ class ServiceBookingEntity {
             };
         }
     }
+
+    /**
+     * Gets the total number of confirmed bookings within a specified period.
+     * This counts bookings that were created with CONFIRMED status during the period.
+     * @param {Date} startDate - The start of the period.
+     * @param {Date} endDate - The end of the period.
+     * @returns {Promise<number|{error: {status: number, message: string}}>} The total count or an error object.
+     */
+    async getConfirmedBookingsInPeriod(startDate, endDate) {
+        try {
+            const count = await this.prisma.serviceBooking.count({
+                where: {
+                    status: BookingStatus.CONFIRMED,
+                    createdAt: {
+                        gte: startDate,
+                        lt: endDate,
+                    },
+                },
+            });
+            return count;
+        } catch (error) {
+            console.error("Error getting confirmed bookings in entity:", error);
+            return { error: { status: 500, message: 'Failed to retrieve confirmed bookings count.' } };
+        }
+    }
+
+    /**
+     * Creates a new service booking and confirms it.
+     * @param {object} bookingData - Data for the new booking.
+     * @param {string} bookingData.bookingId - Unique business ID for the booking.
+     * @param {string} bookingData.cleanerId - ID of the cleaner.
+     * @param {string} bookingData.homeownerId - ID of the homeowner.
+     * @param {Date} bookingData.serviceDate - Date of the service.
+     * @param {string} bookingData.serviceType - Type of service.
+     * @param {number} bookingData.ratePerHr - Rate per hour.
+     * @param {number} bookingData.hours - Number of hours.
+     * @param {number} bookingData.totalAmount - Total amount for the booking.
+     * @returns {Promise<object|{error: {status: number, message: string}}>} The created booking object or an error object.
+     */
+    async createAndConfirmBooking({ bookingId, cleanerId, homeownerId, serviceDate, serviceType, ratePerHr, hours, totalAmount }) {
+        try {
+            const newBooking = await this.prisma.serviceBooking.create({
+                data: {
+                    bookingId,
+                    cleanerId,
+                    homeownerId,
+                    serviceDate,
+                    serviceType,
+                    ratePerHr,
+                    hours,
+                    totalAmount,
+                    status: BookingStatus.CONFIRMED, // Set status to CONFIRMED on creation
+                    createdAt: new Date(),
+                }
+            });
+            return newBooking;
+        } catch (error) {
+            console.error("Error creating and confirming booking:", error);
+            // Handle potential errors, e.g., unique constraint on bookingId
+            if (error.code === 'P2002' && error.meta?.target?.includes('bookingId')) {
+                return { error: { status: 409, message: `Booking with ID '${bookingId}' already exists.` } };
+            }
+            return { error: { status: 500, message: 'Failed to create service booking.' } };
+        }
+    }
 }
 
 module.exports = ServiceBookingEntity;

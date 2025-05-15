@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -21,54 +18,53 @@ model UserAccount {
   email     String     @unique
   password  String
   status    UserStatus @default(ACTIVE)
-  createdAt DateTime   @default(now())
+  createdAt DateTime   @default(now()) // Used for registration tracking
   updatedAt DateTime   @updatedAt
 
-  // Relation to UserProfile model
-  userProfileId String? // Foreign key
+  userProfileId String?
   userProfile   UserProfile? @relation(fields: [userProfileId], references: [id])
 
-  // Relation to ServiceListings created by this user (if they are a Cleaner)
-  serviceListings ServiceListing[]
+  serviceListings             ServiceListing[]
+  profileViews                ProfileView[]    @relation("ViewedProfile")
+  viewedOthers                ProfileView[]    @relation("ProfileViewer")
+  createdShortlists           Shortlist[]      @relation("HomeownerShortlists")
+  shortlistedIn               Shortlist[]      @relation("CleanerShortlistedIn")
+  confirmedMatchesAsHomeowner ConfirmedMatch[] @relation("HomeownerMatches")
+  serviceBookingsAsHomeowner  ServiceBooking[] @relation("HomeownerBookings") // Renamed for clarity
+  serviceBookingsAsCleaner    ServiceBooking[] @relation("CleanerBookings") // Renamed for clarity
 
-  // Relations for ProfileView
-  profileViews ProfileView[] @relation("ViewedProfile") // Profiles views this user received
-  viewedOthers ProfileView[] @relation("ProfileViewer") // Profiles this user viewed
-
-  // Relations for Shortlist
-  createdShortlists Shortlist[] @relation("HomeownerShortlists") // Shortlists created by this user (if Homeowner)
-  shortlistedIn     Shortlist[] @relation("CleanerShortlistedIn") // Instances where this user (if Cleaner) was shortlisted
-
-  // Relations for ConfirmedMatch
-  confirmedMatchesAsHomeowner ConfirmedMatch[] @relation("HomeownerMatches") // Matches this user (as Homeowner) has confirmed
-  // Cleaners are linked to ConfirmedMatch via their ServiceListings
-
-  // Relations for ServiceBooking
-  serviceBookings ServiceBooking[] @relation("HomeownerBookings") // Past service bookings
-  ServiceBooking  ServiceBooking[]
+  // Relation to UserLoginLog
+  loginLogs UserLoginLog[] // A user can have many login logs
 }
 
-// Define standard permissions
+model UserLoginLog {
+  id        String      @id @default(cuid())
+  userId    String
+  user      UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  loginTime DateTime    @default(now())
+  ipAddress String? // Optional: store IP address
+  userAgent String? // Optional: store user agent
+
+  @@index([userId])
+  @@index([loginTime])
+}
+
 enum Permission {
-  MANAGE_SERVICES // e.g., Cleaners creating/managing their listings
-  ADMIN_PRIVILEGES // e.g., UserAdmins managing users, profiles, etc.
-  SEARCH_CLEANERS // e.g., Homeowners searching for cleaners/listings
-  VIEW_REPORTS // e.g., Platform Management viewing reports
-  MANAGE_CATEGORIES // Permission for managing service categories
+  MANAGE_SERVICES
+  ADMIN_PRIVILEGES
+  SEARCH_CLEANERS
+  VIEW_REPORTS
+  MANAGE_CATEGORIES
 }
 
-// New UserProfile model to allow dynamic creation
 model UserProfile {
-  id          String       @id @default(cuid())
-  name        String       @unique // e.g., "HomeOwner", "Cleaner", "UserAdmin", "PlatformManager"
-  permissions Permission[] // List of permissions granted to this profile
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  // Relation back to UserAccount
+  id           String            @id @default(cuid())
+  name         String            @unique
+  permissions  Permission[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
   userAccounts UserAccount[]
-
-  status UserProfileStatus @default(ACTIVE) // Status of the user profile
+  status       UserProfileStatus @default(ACTIVE)
 }
 
 enum UserProfileStatus {
@@ -77,43 +73,35 @@ enum UserProfileStatus {
 }
 
 model ServiceCategory {
-  id                    String   @id @default(cuid())
-  serviceCatName        String   @unique // e.g., "Window Cleaning", "Deep Cleaning"
-  serviceCatDescription String? // Optional description for the category
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  serviceListings ServiceListing[]
+  id                    String           @id @default(cuid())
+  serviceCatName        String           @unique
+  serviceCatDescription String?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  serviceListings       ServiceListing[]
 }
 
-// Relation from UserAccount to ServiceListing
 model ServiceListing {
-  id          String   @id @default(cuid())
-  description String
-  ratePerHr   Float // Rate per hour
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String               @id @default(cuid())
+  description       String
+  ratePerHr         Float
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  cleanerId         String
+  cleaner           UserAccount          @relation(fields: [cleanerId], references: [id])
+  serviceCategoryId String?
+  serviceCategory   ServiceCategory?     @relation(fields: [serviceCategoryId], references: [id])
+  confirmedMatches  ConfirmedMatch[]
+  status            ServiceListingStatus @default(ACTIVE)
 
-  // Relation to the Cleaner (UserAccount) who created the listing
-  cleanerId String
-  cleaner   UserAccount @relation(fields: [cleanerId], references: [id])
-
-  serviceCategoryId String? // Foreign key for ServiceCategory
-  serviceCategory   ServiceCategory? @relation(fields: [serviceCategoryId], references: [id])
-
-  confirmedMatches ConfirmedMatch[]
-
-  status ServiceListingStatus @default(ACTIVE) // Status of the listing
-
-  @@index([cleanerId]) // Index for faster lookups by cleaner
-  @@index([cleanerId, status]) // For cleaners to view their listings by status
-  @@index([serviceCategoryId]) // Index for faster lookups by category
+  @@index([cleanerId])
+  @@index([cleanerId, status])
+  @@index([serviceCategoryId])
 }
 
 enum ServiceListingStatus {
   ACTIVE
   SUSPENDED
-  // ARCHIVED // Future potential status
 }
 
 enum UserStatus {
@@ -123,68 +111,64 @@ enum UserStatus {
   BANNED
 }
 
-// Model to track profile views
 model ProfileView {
   id              String       @id @default(cuid())
-  viewedProfileId String // ID of the UserAccount (Cleaner) whose profile was viewed
-  viewedProfile   UserAccount  @relation("ViewedProfile", fields: [viewedProfileId], references: [id], onDelete: Cascade) // If cleaner account is deleted, views are removed
-  viewerId        String? // ID of the UserAccount who viewed the profile (optional, if logged in)
-  viewer          UserAccount? @relation("ProfileViewer", fields: [viewerId], references: [id], onDelete: SetNull) // If viewer account is deleted, viewerId becomes null
+  viewedProfileId String
+  viewedProfile   UserAccount  @relation("ViewedProfile", fields: [viewedProfileId], references: [id], onDelete: Cascade)
+  viewerId        String?
+  viewer          UserAccount? @relation("ProfileViewer", fields: [viewerId], references: [id], onDelete: SetNull)
   viewedAt        DateTime     @default(now())
 
   @@index([viewedProfileId, viewedAt])
   @@index([viewerId])
 }
 
-// Model to track when a Homeowner shortlists a Cleaner
 model Shortlist {
   id          String      @id @default(cuid())
-  homeownerId String // ID of the UserAccount (Homeowner) who created the shortlist
+  homeownerId String
   homeowner   UserAccount @relation("HomeownerShortlists", fields: [homeownerId], references: [id], onDelete: Cascade)
-  cleanerId   String // ID of the UserAccount (Cleaner) who was shortlisted
+  cleanerId   String
   cleaner     UserAccount @relation("CleanerShortlistedIn", fields: [cleanerId], references: [id], onDelete: Cascade)
   createdAt   DateTime    @default(now())
 
-  @@unique([homeownerId, cleanerId]) // A homeowner can shortlist a cleaner only once
+  @@unique([homeownerId, cleanerId])
   @@index([homeownerId])
   @@index([cleanerId])
 }
 
-// Model to track confirmed matches between a Homeowner and a Cleaner's ServiceListing
 model ConfirmedMatch {
   id               String         @id @default(cuid())
   serviceListingId String
-  serviceListing   ServiceListing @relation(fields: [serviceListingId], references: [id], onDelete: Cascade) // If listing deleted, match is removed
+  serviceListing   ServiceListing @relation(fields: [serviceListingId], references: [id], onDelete: Cascade)
   homeownerId      String
-  homeowner        UserAccount    @relation("HomeownerMatches", fields: [homeownerId], references: [id], onDelete: Cascade) // If homeowner deleted, match is removed
-  confirmationDate DateTime       @default(now()) // Date the match was confirmed
-  // status        MatchStatus @default(CONFIRMED) // Optional: For future expansion (e.g., COMPLETED, CANCELLED_BY_HOMEOWNER, CANCELLED_BY_CLEANER)
+  homeowner        UserAccount    @relation("HomeownerMatches", fields: [homeownerId], references: [id], onDelete: Cascade)
+  confirmationDate DateTime       @default(now())
 
   @@index([serviceListingId])
   @@index([homeownerId])
   @@index([confirmationDate])
-  @@index([serviceListingId, confirmationDate]) // For cleaner's view, filtering by date
+  @@index([serviceListingId, confirmationDate])
 }
 
-// Service Booking model for tracking completed services
 model ServiceBooking {
   id          String        @id @default(cuid())
-  bookingId   String        @unique
+  bookingId   String        @unique // Assuming this is a business identifier
   cleanerId   String
-  cleaner     UserAccount   @relation(fields: [cleanerId], references: [id])
+  cleaner     UserAccount   @relation("CleanerBookings", fields: [cleanerId], references: [id]) // Specify relation name
   homeownerId String
-  homeowner   UserAccount   @relation("HomeownerBookings", fields: [homeownerId], references: [id])
+  homeowner   UserAccount   @relation("HomeownerBookings", fields: [homeownerId], references: [id]) // Specify relation name
   serviceDate DateTime
-  status      BookingStatus
+  status      BookingStatus // Used for confirmed bookings tracking
   serviceType String
   ratePerHr   Float
   hours       Float
   totalAmount Float
-  createdAt   DateTime      @default(now())
+  createdAt   DateTime      @default(now()) // Can be used to track when booking was confirmed if status is set on creation
 
   @@index([homeownerId])
   @@index([cleanerId])
   @@index([serviceDate])
+  @@index([status, createdAt]) // Index for querying confirmed bookings in a period
 }
 
 enum BookingStatus {

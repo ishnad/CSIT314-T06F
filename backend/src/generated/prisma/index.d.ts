@@ -19,6 +19,11 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type UserAccount = $Result.DefaultSelection<Prisma.$UserAccountPayload>
 /**
+ * Model UserLoginLog
+ * 
+ */
+export type UserLoginLog = $Result.DefaultSelection<Prisma.$UserLoginLogPayload>
+/**
  * Model UserProfile
  * 
  */
@@ -259,6 +264,16 @@ export class PrismaClient<
     * ```
     */
   get userAccount(): Prisma.UserAccountDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.userLoginLog`: Exposes CRUD operations for the **UserLoginLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more UserLoginLogs
+    * const userLoginLogs = await prisma.userLoginLog.findMany()
+    * ```
+    */
+  get userLoginLog(): Prisma.UserLoginLogDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.userProfile`: Exposes CRUD operations for the **UserProfile** model.
@@ -770,6 +785,7 @@ export namespace Prisma {
 
   export const ModelName: {
     UserAccount: 'UserAccount',
+    UserLoginLog: 'UserLoginLog',
     UserProfile: 'UserProfile',
     ServiceCategory: 'ServiceCategory',
     ServiceListing: 'ServiceListing',
@@ -795,7 +811,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "userAccount" | "userProfile" | "serviceCategory" | "serviceListing" | "profileView" | "shortlist" | "confirmedMatch" | "serviceBooking"
+      modelProps: "userAccount" | "userLoginLog" | "userProfile" | "serviceCategory" | "serviceListing" | "profileView" | "shortlist" | "confirmedMatch" | "serviceBooking"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -870,6 +886,80 @@ export namespace Prisma {
           count: {
             args: Prisma.UserAccountCountArgs<ExtArgs>
             result: $Utils.Optional<UserAccountCountAggregateOutputType> | number
+          }
+        }
+      }
+      UserLoginLog: {
+        payload: Prisma.$UserLoginLogPayload<ExtArgs>
+        fields: Prisma.UserLoginLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UserLoginLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UserLoginLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginLogPayload>
+          }
+          findFirst: {
+            args: Prisma.UserLoginLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UserLoginLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginLogPayload>
+          }
+          findMany: {
+            args: Prisma.UserLoginLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginLogPayload>[]
+          }
+          create: {
+            args: Prisma.UserLoginLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginLogPayload>
+          }
+          createMany: {
+            args: Prisma.UserLoginLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UserLoginLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginLogPayload>[]
+          }
+          delete: {
+            args: Prisma.UserLoginLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginLogPayload>
+          }
+          update: {
+            args: Prisma.UserLoginLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.UserLoginLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UserLoginLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.UserLoginLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.UserLoginLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginLogPayload>
+          }
+          aggregate: {
+            args: Prisma.UserLoginLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUserLoginLog>
+          }
+          groupBy: {
+            args: Prisma.UserLoginLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserLoginLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UserLoginLogCountArgs<ExtArgs>
+            result: $Utils.Optional<UserLoginLogCountAggregateOutputType> | number
           }
         }
       }
@@ -1476,6 +1566,7 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     userAccount?: UserAccountOmit
+    userLoginLog?: UserLoginLogOmit
     userProfile?: UserProfileOmit
     serviceCategory?: ServiceCategoryOmit
     serviceListing?: ServiceListingOmit
@@ -1583,8 +1674,9 @@ export namespace Prisma {
     createdShortlists: number
     shortlistedIn: number
     confirmedMatchesAsHomeowner: number
-    serviceBookings: number
-    ServiceBooking: number
+    serviceBookingsAsHomeowner: number
+    serviceBookingsAsCleaner: number
+    loginLogs: number
   }
 
   export type UserAccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1594,8 +1686,9 @@ export namespace Prisma {
     createdShortlists?: boolean | UserAccountCountOutputTypeCountCreatedShortlistsArgs
     shortlistedIn?: boolean | UserAccountCountOutputTypeCountShortlistedInArgs
     confirmedMatchesAsHomeowner?: boolean | UserAccountCountOutputTypeCountConfirmedMatchesAsHomeownerArgs
-    serviceBookings?: boolean | UserAccountCountOutputTypeCountServiceBookingsArgs
-    ServiceBooking?: boolean | UserAccountCountOutputTypeCountServiceBookingArgs
+    serviceBookingsAsHomeowner?: boolean | UserAccountCountOutputTypeCountServiceBookingsAsHomeownerArgs
+    serviceBookingsAsCleaner?: boolean | UserAccountCountOutputTypeCountServiceBookingsAsCleanerArgs
+    loginLogs?: boolean | UserAccountCountOutputTypeCountLoginLogsArgs
   }
 
   // Custom InputTypes
@@ -1654,15 +1747,22 @@ export namespace Prisma {
   /**
    * UserAccountCountOutputType without action
    */
-  export type UserAccountCountOutputTypeCountServiceBookingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserAccountCountOutputTypeCountServiceBookingsAsHomeownerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ServiceBookingWhereInput
   }
 
   /**
    * UserAccountCountOutputType without action
    */
-  export type UserAccountCountOutputTypeCountServiceBookingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserAccountCountOutputTypeCountServiceBookingsAsCleanerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ServiceBookingWhereInput
+  }
+
+  /**
+   * UserAccountCountOutputType without action
+   */
+  export type UserAccountCountOutputTypeCountLoginLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserLoginLogWhereInput
   }
 
 
@@ -1958,8 +2058,9 @@ export namespace Prisma {
     createdShortlists?: boolean | UserAccount$createdShortlistsArgs<ExtArgs>
     shortlistedIn?: boolean | UserAccount$shortlistedInArgs<ExtArgs>
     confirmedMatchesAsHomeowner?: boolean | UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs>
-    serviceBookings?: boolean | UserAccount$serviceBookingsArgs<ExtArgs>
-    ServiceBooking?: boolean | UserAccount$ServiceBookingArgs<ExtArgs>
+    serviceBookingsAsHomeowner?: boolean | UserAccount$serviceBookingsAsHomeownerArgs<ExtArgs>
+    serviceBookingsAsCleaner?: boolean | UserAccount$serviceBookingsAsCleanerArgs<ExtArgs>
+    loginLogs?: boolean | UserAccount$loginLogsArgs<ExtArgs>
     _count?: boolean | UserAccountCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["userAccount"]>
 
@@ -2007,8 +2108,9 @@ export namespace Prisma {
     createdShortlists?: boolean | UserAccount$createdShortlistsArgs<ExtArgs>
     shortlistedIn?: boolean | UserAccount$shortlistedInArgs<ExtArgs>
     confirmedMatchesAsHomeowner?: boolean | UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs>
-    serviceBookings?: boolean | UserAccount$serviceBookingsArgs<ExtArgs>
-    ServiceBooking?: boolean | UserAccount$ServiceBookingArgs<ExtArgs>
+    serviceBookingsAsHomeowner?: boolean | UserAccount$serviceBookingsAsHomeownerArgs<ExtArgs>
+    serviceBookingsAsCleaner?: boolean | UserAccount$serviceBookingsAsCleanerArgs<ExtArgs>
+    loginLogs?: boolean | UserAccount$loginLogsArgs<ExtArgs>
     _count?: boolean | UserAccountCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserAccountIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2028,8 +2130,9 @@ export namespace Prisma {
       createdShortlists: Prisma.$ShortlistPayload<ExtArgs>[]
       shortlistedIn: Prisma.$ShortlistPayload<ExtArgs>[]
       confirmedMatchesAsHomeowner: Prisma.$ConfirmedMatchPayload<ExtArgs>[]
-      serviceBookings: Prisma.$ServiceBookingPayload<ExtArgs>[]
-      ServiceBooking: Prisma.$ServiceBookingPayload<ExtArgs>[]
+      serviceBookingsAsHomeowner: Prisma.$ServiceBookingPayload<ExtArgs>[]
+      serviceBookingsAsCleaner: Prisma.$ServiceBookingPayload<ExtArgs>[]
+      loginLogs: Prisma.$UserLoginLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2441,8 +2544,9 @@ export namespace Prisma {
     createdShortlists<T extends UserAccount$createdShortlistsArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$createdShortlistsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     shortlistedIn<T extends UserAccount$shortlistedInArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$shortlistedInArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     confirmedMatchesAsHomeowner<T extends UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    serviceBookings<T extends UserAccount$serviceBookingsArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$serviceBookingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    ServiceBooking<T extends UserAccount$ServiceBookingArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$ServiceBookingArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    serviceBookingsAsHomeowner<T extends UserAccount$serviceBookingsAsHomeownerArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$serviceBookingsAsHomeownerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    serviceBookingsAsCleaner<T extends UserAccount$serviceBookingsAsCleanerArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$serviceBookingsAsCleanerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    loginLogs<T extends UserAccount$loginLogsArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$loginLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3039,9 +3143,9 @@ export namespace Prisma {
   }
 
   /**
-   * UserAccount.serviceBookings
+   * UserAccount.serviceBookingsAsHomeowner
    */
-  export type UserAccount$serviceBookingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserAccount$serviceBookingsAsHomeownerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the ServiceBooking
      */
@@ -3063,9 +3167,9 @@ export namespace Prisma {
   }
 
   /**
-   * UserAccount.ServiceBooking
+   * UserAccount.serviceBookingsAsCleaner
    */
-  export type UserAccount$ServiceBookingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserAccount$serviceBookingsAsCleanerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the ServiceBooking
      */
@@ -3084,6 +3188,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ServiceBookingScalarFieldEnum | ServiceBookingScalarFieldEnum[]
+  }
+
+  /**
+   * UserAccount.loginLogs
+   */
+  export type UserAccount$loginLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogInclude<ExtArgs> | null
+    where?: UserLoginLogWhereInput
+    orderBy?: UserLoginLogOrderByWithRelationInput | UserLoginLogOrderByWithRelationInput[]
+    cursor?: UserLoginLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserLoginLogScalarFieldEnum | UserLoginLogScalarFieldEnum[]
   }
 
   /**
@@ -3102,6 +3230,1064 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: UserAccountInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model UserLoginLog
+   */
+
+  export type AggregateUserLoginLog = {
+    _count: UserLoginLogCountAggregateOutputType | null
+    _min: UserLoginLogMinAggregateOutputType | null
+    _max: UserLoginLogMaxAggregateOutputType | null
+  }
+
+  export type UserLoginLogMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    loginTime: Date | null
+    ipAddress: string | null
+    userAgent: string | null
+  }
+
+  export type UserLoginLogMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    loginTime: Date | null
+    ipAddress: string | null
+    userAgent: string | null
+  }
+
+  export type UserLoginLogCountAggregateOutputType = {
+    id: number
+    userId: number
+    loginTime: number
+    ipAddress: number
+    userAgent: number
+    _all: number
+  }
+
+
+  export type UserLoginLogMinAggregateInputType = {
+    id?: true
+    userId?: true
+    loginTime?: true
+    ipAddress?: true
+    userAgent?: true
+  }
+
+  export type UserLoginLogMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    loginTime?: true
+    ipAddress?: true
+    userAgent?: true
+  }
+
+  export type UserLoginLogCountAggregateInputType = {
+    id?: true
+    userId?: true
+    loginTime?: true
+    ipAddress?: true
+    userAgent?: true
+    _all?: true
+  }
+
+  export type UserLoginLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserLoginLog to aggregate.
+     */
+    where?: UserLoginLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserLoginLogs to fetch.
+     */
+    orderBy?: UserLoginLogOrderByWithRelationInput | UserLoginLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UserLoginLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserLoginLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserLoginLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned UserLoginLogs
+    **/
+    _count?: true | UserLoginLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserLoginLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserLoginLogMaxAggregateInputType
+  }
+
+  export type GetUserLoginLogAggregateType<T extends UserLoginLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateUserLoginLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUserLoginLog[P]>
+      : GetScalarType<T[P], AggregateUserLoginLog[P]>
+  }
+
+
+
+
+  export type UserLoginLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserLoginLogWhereInput
+    orderBy?: UserLoginLogOrderByWithAggregationInput | UserLoginLogOrderByWithAggregationInput[]
+    by: UserLoginLogScalarFieldEnum[] | UserLoginLogScalarFieldEnum
+    having?: UserLoginLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserLoginLogCountAggregateInputType | true
+    _min?: UserLoginLogMinAggregateInputType
+    _max?: UserLoginLogMaxAggregateInputType
+  }
+
+  export type UserLoginLogGroupByOutputType = {
+    id: string
+    userId: string
+    loginTime: Date
+    ipAddress: string | null
+    userAgent: string | null
+    _count: UserLoginLogCountAggregateOutputType | null
+    _min: UserLoginLogMinAggregateOutputType | null
+    _max: UserLoginLogMaxAggregateOutputType | null
+  }
+
+  type GetUserLoginLogGroupByPayload<T extends UserLoginLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserLoginLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserLoginLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserLoginLogGroupByOutputType[P]>
+            : GetScalarType<T[P], UserLoginLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UserLoginLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    loginTime?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    user?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userLoginLog"]>
+
+  export type UserLoginLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    loginTime?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    user?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userLoginLog"]>
+
+  export type UserLoginLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    loginTime?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    user?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userLoginLog"]>
+
+  export type UserLoginLogSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    loginTime?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+  }
+
+  export type UserLoginLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "loginTime" | "ipAddress" | "userAgent", ExtArgs["result"]["userLoginLog"]>
+  export type UserLoginLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }
+  export type UserLoginLogIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }
+  export type UserLoginLogIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserAccountDefaultArgs<ExtArgs>
+  }
+
+  export type $UserLoginLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "UserLoginLog"
+    objects: {
+      user: Prisma.$UserAccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      loginTime: Date
+      ipAddress: string | null
+      userAgent: string | null
+    }, ExtArgs["result"]["userLoginLog"]>
+    composites: {}
+  }
+
+  type UserLoginLogGetPayload<S extends boolean | null | undefined | UserLoginLogDefaultArgs> = $Result.GetResult<Prisma.$UserLoginLogPayload, S>
+
+  type UserLoginLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<UserLoginLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: UserLoginLogCountAggregateInputType | true
+    }
+
+  export interface UserLoginLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserLoginLog'], meta: { name: 'UserLoginLog' } }
+    /**
+     * Find zero or one UserLoginLog that matches the filter.
+     * @param {UserLoginLogFindUniqueArgs} args - Arguments to find a UserLoginLog
+     * @example
+     * // Get one UserLoginLog
+     * const userLoginLog = await prisma.userLoginLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UserLoginLogFindUniqueArgs>(args: SelectSubset<T, UserLoginLogFindUniqueArgs<ExtArgs>>): Prisma__UserLoginLogClient<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one UserLoginLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {UserLoginLogFindUniqueOrThrowArgs} args - Arguments to find a UserLoginLog
+     * @example
+     * // Get one UserLoginLog
+     * const userLoginLog = await prisma.userLoginLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UserLoginLogFindUniqueOrThrowArgs>(args: SelectSubset<T, UserLoginLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserLoginLogClient<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserLoginLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginLogFindFirstArgs} args - Arguments to find a UserLoginLog
+     * @example
+     * // Get one UserLoginLog
+     * const userLoginLog = await prisma.userLoginLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UserLoginLogFindFirstArgs>(args?: SelectSubset<T, UserLoginLogFindFirstArgs<ExtArgs>>): Prisma__UserLoginLogClient<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserLoginLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginLogFindFirstOrThrowArgs} args - Arguments to find a UserLoginLog
+     * @example
+     * // Get one UserLoginLog
+     * const userLoginLog = await prisma.userLoginLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UserLoginLogFindFirstOrThrowArgs>(args?: SelectSubset<T, UserLoginLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserLoginLogClient<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more UserLoginLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all UserLoginLogs
+     * const userLoginLogs = await prisma.userLoginLog.findMany()
+     * 
+     * // Get first 10 UserLoginLogs
+     * const userLoginLogs = await prisma.userLoginLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const userLoginLogWithIdOnly = await prisma.userLoginLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends UserLoginLogFindManyArgs>(args?: SelectSubset<T, UserLoginLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a UserLoginLog.
+     * @param {UserLoginLogCreateArgs} args - Arguments to create a UserLoginLog.
+     * @example
+     * // Create one UserLoginLog
+     * const UserLoginLog = await prisma.userLoginLog.create({
+     *   data: {
+     *     // ... data to create a UserLoginLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends UserLoginLogCreateArgs>(args: SelectSubset<T, UserLoginLogCreateArgs<ExtArgs>>): Prisma__UserLoginLogClient<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many UserLoginLogs.
+     * @param {UserLoginLogCreateManyArgs} args - Arguments to create many UserLoginLogs.
+     * @example
+     * // Create many UserLoginLogs
+     * const userLoginLog = await prisma.userLoginLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UserLoginLogCreateManyArgs>(args?: SelectSubset<T, UserLoginLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many UserLoginLogs and returns the data saved in the database.
+     * @param {UserLoginLogCreateManyAndReturnArgs} args - Arguments to create many UserLoginLogs.
+     * @example
+     * // Create many UserLoginLogs
+     * const userLoginLog = await prisma.userLoginLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many UserLoginLogs and only return the `id`
+     * const userLoginLogWithIdOnly = await prisma.userLoginLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UserLoginLogCreateManyAndReturnArgs>(args?: SelectSubset<T, UserLoginLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a UserLoginLog.
+     * @param {UserLoginLogDeleteArgs} args - Arguments to delete one UserLoginLog.
+     * @example
+     * // Delete one UserLoginLog
+     * const UserLoginLog = await prisma.userLoginLog.delete({
+     *   where: {
+     *     // ... filter to delete one UserLoginLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UserLoginLogDeleteArgs>(args: SelectSubset<T, UserLoginLogDeleteArgs<ExtArgs>>): Prisma__UserLoginLogClient<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one UserLoginLog.
+     * @param {UserLoginLogUpdateArgs} args - Arguments to update one UserLoginLog.
+     * @example
+     * // Update one UserLoginLog
+     * const userLoginLog = await prisma.userLoginLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UserLoginLogUpdateArgs>(args: SelectSubset<T, UserLoginLogUpdateArgs<ExtArgs>>): Prisma__UserLoginLogClient<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more UserLoginLogs.
+     * @param {UserLoginLogDeleteManyArgs} args - Arguments to filter UserLoginLogs to delete.
+     * @example
+     * // Delete a few UserLoginLogs
+     * const { count } = await prisma.userLoginLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UserLoginLogDeleteManyArgs>(args?: SelectSubset<T, UserLoginLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserLoginLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many UserLoginLogs
+     * const userLoginLog = await prisma.userLoginLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UserLoginLogUpdateManyArgs>(args: SelectSubset<T, UserLoginLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserLoginLogs and returns the data updated in the database.
+     * @param {UserLoginLogUpdateManyAndReturnArgs} args - Arguments to update many UserLoginLogs.
+     * @example
+     * // Update many UserLoginLogs
+     * const userLoginLog = await prisma.userLoginLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more UserLoginLogs and only return the `id`
+     * const userLoginLogWithIdOnly = await prisma.userLoginLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends UserLoginLogUpdateManyAndReturnArgs>(args: SelectSubset<T, UserLoginLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one UserLoginLog.
+     * @param {UserLoginLogUpsertArgs} args - Arguments to update or create a UserLoginLog.
+     * @example
+     * // Update or create a UserLoginLog
+     * const userLoginLog = await prisma.userLoginLog.upsert({
+     *   create: {
+     *     // ... data to create a UserLoginLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the UserLoginLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UserLoginLogUpsertArgs>(args: SelectSubset<T, UserLoginLogUpsertArgs<ExtArgs>>): Prisma__UserLoginLogClient<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of UserLoginLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginLogCountArgs} args - Arguments to filter UserLoginLogs to count.
+     * @example
+     * // Count the number of UserLoginLogs
+     * const count = await prisma.userLoginLog.count({
+     *   where: {
+     *     // ... the filter for the UserLoginLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends UserLoginLogCountArgs>(
+      args?: Subset<T, UserLoginLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserLoginLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a UserLoginLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserLoginLogAggregateArgs>(args: Subset<T, UserLoginLogAggregateArgs>): Prisma.PrismaPromise<GetUserLoginLogAggregateType<T>>
+
+    /**
+     * Group by UserLoginLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UserLoginLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UserLoginLogGroupByArgs['orderBy'] }
+        : { orderBy?: UserLoginLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UserLoginLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserLoginLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the UserLoginLog model
+   */
+  readonly fields: UserLoginLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for UserLoginLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UserLoginLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserAccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserAccountDefaultArgs<ExtArgs>>): Prisma__UserAccountClient<$Result.GetResult<Prisma.$UserAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the UserLoginLog model
+   */
+  interface UserLoginLogFieldRefs {
+    readonly id: FieldRef<"UserLoginLog", 'String'>
+    readonly userId: FieldRef<"UserLoginLog", 'String'>
+    readonly loginTime: FieldRef<"UserLoginLog", 'DateTime'>
+    readonly ipAddress: FieldRef<"UserLoginLog", 'String'>
+    readonly userAgent: FieldRef<"UserLoginLog", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * UserLoginLog findUnique
+   */
+  export type UserLoginLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogInclude<ExtArgs> | null
+    /**
+     * Filter, which UserLoginLog to fetch.
+     */
+    where: UserLoginLogWhereUniqueInput
+  }
+
+  /**
+   * UserLoginLog findUniqueOrThrow
+   */
+  export type UserLoginLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogInclude<ExtArgs> | null
+    /**
+     * Filter, which UserLoginLog to fetch.
+     */
+    where: UserLoginLogWhereUniqueInput
+  }
+
+  /**
+   * UserLoginLog findFirst
+   */
+  export type UserLoginLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogInclude<ExtArgs> | null
+    /**
+     * Filter, which UserLoginLog to fetch.
+     */
+    where?: UserLoginLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserLoginLogs to fetch.
+     */
+    orderBy?: UserLoginLogOrderByWithRelationInput | UserLoginLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserLoginLogs.
+     */
+    cursor?: UserLoginLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserLoginLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserLoginLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserLoginLogs.
+     */
+    distinct?: UserLoginLogScalarFieldEnum | UserLoginLogScalarFieldEnum[]
+  }
+
+  /**
+   * UserLoginLog findFirstOrThrow
+   */
+  export type UserLoginLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogInclude<ExtArgs> | null
+    /**
+     * Filter, which UserLoginLog to fetch.
+     */
+    where?: UserLoginLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserLoginLogs to fetch.
+     */
+    orderBy?: UserLoginLogOrderByWithRelationInput | UserLoginLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserLoginLogs.
+     */
+    cursor?: UserLoginLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserLoginLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserLoginLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserLoginLogs.
+     */
+    distinct?: UserLoginLogScalarFieldEnum | UserLoginLogScalarFieldEnum[]
+  }
+
+  /**
+   * UserLoginLog findMany
+   */
+  export type UserLoginLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogInclude<ExtArgs> | null
+    /**
+     * Filter, which UserLoginLogs to fetch.
+     */
+    where?: UserLoginLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserLoginLogs to fetch.
+     */
+    orderBy?: UserLoginLogOrderByWithRelationInput | UserLoginLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing UserLoginLogs.
+     */
+    cursor?: UserLoginLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserLoginLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserLoginLogs.
+     */
+    skip?: number
+    distinct?: UserLoginLogScalarFieldEnum | UserLoginLogScalarFieldEnum[]
+  }
+
+  /**
+   * UserLoginLog create
+   */
+  export type UserLoginLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogInclude<ExtArgs> | null
+    /**
+     * The data needed to create a UserLoginLog.
+     */
+    data: XOR<UserLoginLogCreateInput, UserLoginLogUncheckedCreateInput>
+  }
+
+  /**
+   * UserLoginLog createMany
+   */
+  export type UserLoginLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many UserLoginLogs.
+     */
+    data: UserLoginLogCreateManyInput | UserLoginLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UserLoginLog createManyAndReturn
+   */
+  export type UserLoginLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many UserLoginLogs.
+     */
+    data: UserLoginLogCreateManyInput | UserLoginLogCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UserLoginLog update
+   */
+  export type UserLoginLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogInclude<ExtArgs> | null
+    /**
+     * The data needed to update a UserLoginLog.
+     */
+    data: XOR<UserLoginLogUpdateInput, UserLoginLogUncheckedUpdateInput>
+    /**
+     * Choose, which UserLoginLog to update.
+     */
+    where: UserLoginLogWhereUniqueInput
+  }
+
+  /**
+   * UserLoginLog updateMany
+   */
+  export type UserLoginLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update UserLoginLogs.
+     */
+    data: XOR<UserLoginLogUpdateManyMutationInput, UserLoginLogUncheckedUpdateManyInput>
+    /**
+     * Filter which UserLoginLogs to update
+     */
+    where?: UserLoginLogWhereInput
+    /**
+     * Limit how many UserLoginLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserLoginLog updateManyAndReturn
+   */
+  export type UserLoginLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * The data used to update UserLoginLogs.
+     */
+    data: XOR<UserLoginLogUpdateManyMutationInput, UserLoginLogUncheckedUpdateManyInput>
+    /**
+     * Filter which UserLoginLogs to update
+     */
+    where?: UserLoginLogWhereInput
+    /**
+     * Limit how many UserLoginLogs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UserLoginLog upsert
+   */
+  export type UserLoginLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogInclude<ExtArgs> | null
+    /**
+     * The filter to search for the UserLoginLog to update in case it exists.
+     */
+    where: UserLoginLogWhereUniqueInput
+    /**
+     * In case the UserLoginLog found by the `where` argument doesn't exist, create a new UserLoginLog with this data.
+     */
+    create: XOR<UserLoginLogCreateInput, UserLoginLogUncheckedCreateInput>
+    /**
+     * In case the UserLoginLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UserLoginLogUpdateInput, UserLoginLogUncheckedUpdateInput>
+  }
+
+  /**
+   * UserLoginLog delete
+   */
+  export type UserLoginLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogInclude<ExtArgs> | null
+    /**
+     * Filter which UserLoginLog to delete.
+     */
+    where: UserLoginLogWhereUniqueInput
+  }
+
+  /**
+   * UserLoginLog deleteMany
+   */
+  export type UserLoginLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserLoginLogs to delete
+     */
+    where?: UserLoginLogWhereInput
+    /**
+     * Limit how many UserLoginLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserLoginLog without action
+   */
+  export type UserLoginLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginLog
+     */
+    select?: UserLoginLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginLog
+     */
+    omit?: UserLoginLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginLogInclude<ExtArgs> | null
   }
 
 
@@ -10834,6 +12020,17 @@ export namespace Prisma {
   export type UserAccountScalarFieldEnum = (typeof UserAccountScalarFieldEnum)[keyof typeof UserAccountScalarFieldEnum]
 
 
+  export const UserLoginLogScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    loginTime: 'loginTime',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent'
+  };
+
+  export type UserLoginLogScalarFieldEnum = (typeof UserLoginLogScalarFieldEnum)[keyof typeof UserLoginLogScalarFieldEnum]
+
+
   export const UserProfileScalarFieldEnum: {
     id: 'id',
     name: 'name',
@@ -11095,8 +12292,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistListRelationFilter
     shortlistedIn?: ShortlistListRelationFilter
     confirmedMatchesAsHomeowner?: ConfirmedMatchListRelationFilter
-    serviceBookings?: ServiceBookingListRelationFilter
-    ServiceBooking?: ServiceBookingListRelationFilter
+    serviceBookingsAsHomeowner?: ServiceBookingListRelationFilter
+    serviceBookingsAsCleaner?: ServiceBookingListRelationFilter
+    loginLogs?: UserLoginLogListRelationFilter
   }
 
   export type UserAccountOrderByWithRelationInput = {
@@ -11115,8 +12313,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistOrderByRelationAggregateInput
     shortlistedIn?: ShortlistOrderByRelationAggregateInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchOrderByRelationAggregateInput
-    serviceBookings?: ServiceBookingOrderByRelationAggregateInput
-    ServiceBooking?: ServiceBookingOrderByRelationAggregateInput
+    serviceBookingsAsHomeowner?: ServiceBookingOrderByRelationAggregateInput
+    serviceBookingsAsCleaner?: ServiceBookingOrderByRelationAggregateInput
+    loginLogs?: UserLoginLogOrderByRelationAggregateInput
   }
 
   export type UserAccountWhereUniqueInput = Prisma.AtLeast<{
@@ -11138,8 +12337,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistListRelationFilter
     shortlistedIn?: ShortlistListRelationFilter
     confirmedMatchesAsHomeowner?: ConfirmedMatchListRelationFilter
-    serviceBookings?: ServiceBookingListRelationFilter
-    ServiceBooking?: ServiceBookingListRelationFilter
+    serviceBookingsAsHomeowner?: ServiceBookingListRelationFilter
+    serviceBookingsAsCleaner?: ServiceBookingListRelationFilter
+    loginLogs?: UserLoginLogListRelationFilter
   }, "id" | "username" | "email">
 
   export type UserAccountOrderByWithAggregationInput = {
@@ -11168,6 +12368,61 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"UserAccount"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"UserAccount"> | Date | string
     userProfileId?: StringNullableWithAggregatesFilter<"UserAccount"> | string | null
+  }
+
+  export type UserLoginLogWhereInput = {
+    AND?: UserLoginLogWhereInput | UserLoginLogWhereInput[]
+    OR?: UserLoginLogWhereInput[]
+    NOT?: UserLoginLogWhereInput | UserLoginLogWhereInput[]
+    id?: StringFilter<"UserLoginLog"> | string
+    userId?: StringFilter<"UserLoginLog"> | string
+    loginTime?: DateTimeFilter<"UserLoginLog"> | Date | string
+    ipAddress?: StringNullableFilter<"UserLoginLog"> | string | null
+    userAgent?: StringNullableFilter<"UserLoginLog"> | string | null
+    user?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
+  }
+
+  export type UserLoginLogOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    loginTime?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    user?: UserAccountOrderByWithRelationInput
+  }
+
+  export type UserLoginLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: UserLoginLogWhereInput | UserLoginLogWhereInput[]
+    OR?: UserLoginLogWhereInput[]
+    NOT?: UserLoginLogWhereInput | UserLoginLogWhereInput[]
+    userId?: StringFilter<"UserLoginLog"> | string
+    loginTime?: DateTimeFilter<"UserLoginLog"> | Date | string
+    ipAddress?: StringNullableFilter<"UserLoginLog"> | string | null
+    userAgent?: StringNullableFilter<"UserLoginLog"> | string | null
+    user?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
+  }, "id">
+
+  export type UserLoginLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    loginTime?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    _count?: UserLoginLogCountOrderByAggregateInput
+    _max?: UserLoginLogMaxOrderByAggregateInput
+    _min?: UserLoginLogMinOrderByAggregateInput
+  }
+
+  export type UserLoginLogScalarWhereWithAggregatesInput = {
+    AND?: UserLoginLogScalarWhereWithAggregatesInput | UserLoginLogScalarWhereWithAggregatesInput[]
+    OR?: UserLoginLogScalarWhereWithAggregatesInput[]
+    NOT?: UserLoginLogScalarWhereWithAggregatesInput | UserLoginLogScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"UserLoginLog"> | string
+    userId?: StringWithAggregatesFilter<"UserLoginLog"> | string
+    loginTime?: DateTimeWithAggregatesFilter<"UserLoginLog"> | Date | string
+    ipAddress?: StringNullableWithAggregatesFilter<"UserLoginLog"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"UserLoginLog"> | string | null
   }
 
   export type UserProfileWhereInput = {
@@ -11628,8 +12883,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountUncheckedCreateInput = {
@@ -11647,8 +12903,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountUpdateInput = {
@@ -11666,8 +12923,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountUncheckedUpdateInput = {
@@ -11685,8 +12943,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountCreateManyInput = {
@@ -11719,6 +12978,61 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type UserLoginLogCreateInput = {
+    id?: string
+    loginTime?: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+    user: UserAccountCreateNestedOneWithoutLoginLogsInput
+  }
+
+  export type UserLoginLogUncheckedCreateInput = {
+    id?: string
+    userId: string
+    loginTime?: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+  }
+
+  export type UserLoginLogUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    loginTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserAccountUpdateOneRequiredWithoutLoginLogsNestedInput
+  }
+
+  export type UserLoginLogUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    loginTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type UserLoginLogCreateManyInput = {
+    id?: string
+    userId: string
+    loginTime?: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+  }
+
+  export type UserLoginLogUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    loginTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type UserLoginLogUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    loginTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserProfileCreateInput = {
@@ -12078,8 +13392,8 @@ export namespace Prisma {
     hours: number
     totalAmount: number
     createdAt?: Date | string
-    cleaner: UserAccountCreateNestedOneWithoutServiceBookingInput
-    homeowner: UserAccountCreateNestedOneWithoutServiceBookingsInput
+    cleaner: UserAccountCreateNestedOneWithoutServiceBookingsAsCleanerInput
+    homeowner: UserAccountCreateNestedOneWithoutServiceBookingsAsHomeownerInput
   }
 
   export type ServiceBookingUncheckedCreateInput = {
@@ -12106,8 +13420,8 @@ export namespace Prisma {
     hours?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    cleaner?: UserAccountUpdateOneRequiredWithoutServiceBookingNestedInput
-    homeowner?: UserAccountUpdateOneRequiredWithoutServiceBookingsNestedInput
+    cleaner?: UserAccountUpdateOneRequiredWithoutServiceBookingsAsCleanerNestedInput
+    homeowner?: UserAccountUpdateOneRequiredWithoutServiceBookingsAsHomeownerNestedInput
   }
 
   export type ServiceBookingUncheckedUpdateInput = {
@@ -12247,6 +13561,12 @@ export namespace Prisma {
     none?: ServiceBookingWhereInput
   }
 
+  export type UserLoginLogListRelationFilter = {
+    every?: UserLoginLogWhereInput
+    some?: UserLoginLogWhereInput
+    none?: UserLoginLogWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -12269,6 +13589,10 @@ export namespace Prisma {
   }
 
   export type ServiceBookingOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type UserLoginLogOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -12363,6 +13687,35 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type UserAccountScalarRelationFilter = {
+    is?: UserAccountWhereInput
+    isNot?: UserAccountWhereInput
+  }
+
+  export type UserLoginLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    loginTime?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+  }
+
+  export type UserLoginLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    loginTime?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+  }
+
+  export type UserLoginLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    loginTime?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
   }
 
   export type EnumPermissionNullableListFilter<$PrismaModel = never> = {
@@ -12465,11 +13818,6 @@ export namespace Prisma {
     in?: $Enums.ServiceListingStatus[] | ListEnumServiceListingStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.ServiceListingStatus[] | ListEnumServiceListingStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumServiceListingStatusFilter<$PrismaModel> | $Enums.ServiceListingStatus
-  }
-
-  export type UserAccountScalarRelationFilter = {
-    is?: UserAccountWhereInput
-    isNot?: UserAccountWhereInput
   }
 
   export type ServiceCategoryNullableScalarRelationFilter = {
@@ -12755,6 +14103,13 @@ export namespace Prisma {
     connect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
   }
 
+  export type UserLoginLogCreateNestedManyWithoutUserInput = {
+    create?: XOR<UserLoginLogCreateWithoutUserInput, UserLoginLogUncheckedCreateWithoutUserInput> | UserLoginLogCreateWithoutUserInput[] | UserLoginLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserLoginLogCreateOrConnectWithoutUserInput | UserLoginLogCreateOrConnectWithoutUserInput[]
+    createMany?: UserLoginLogCreateManyUserInputEnvelope
+    connect?: UserLoginLogWhereUniqueInput | UserLoginLogWhereUniqueInput[]
+  }
+
   export type ServiceListingUncheckedCreateNestedManyWithoutCleanerInput = {
     create?: XOR<ServiceListingCreateWithoutCleanerInput, ServiceListingUncheckedCreateWithoutCleanerInput> | ServiceListingCreateWithoutCleanerInput[] | ServiceListingUncheckedCreateWithoutCleanerInput[]
     connectOrCreate?: ServiceListingCreateOrConnectWithoutCleanerInput | ServiceListingCreateOrConnectWithoutCleanerInput[]
@@ -12809,6 +14164,13 @@ export namespace Prisma {
     connectOrCreate?: ServiceBookingCreateOrConnectWithoutCleanerInput | ServiceBookingCreateOrConnectWithoutCleanerInput[]
     createMany?: ServiceBookingCreateManyCleanerInputEnvelope
     connect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
+  }
+
+  export type UserLoginLogUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<UserLoginLogCreateWithoutUserInput, UserLoginLogUncheckedCreateWithoutUserInput> | UserLoginLogCreateWithoutUserInput[] | UserLoginLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserLoginLogCreateOrConnectWithoutUserInput | UserLoginLogCreateOrConnectWithoutUserInput[]
+    createMany?: UserLoginLogCreateManyUserInputEnvelope
+    connect?: UserLoginLogWhereUniqueInput | UserLoginLogWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -12945,6 +14307,20 @@ export namespace Prisma {
     deleteMany?: ServiceBookingScalarWhereInput | ServiceBookingScalarWhereInput[]
   }
 
+  export type UserLoginLogUpdateManyWithoutUserNestedInput = {
+    create?: XOR<UserLoginLogCreateWithoutUserInput, UserLoginLogUncheckedCreateWithoutUserInput> | UserLoginLogCreateWithoutUserInput[] | UserLoginLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserLoginLogCreateOrConnectWithoutUserInput | UserLoginLogCreateOrConnectWithoutUserInput[]
+    upsert?: UserLoginLogUpsertWithWhereUniqueWithoutUserInput | UserLoginLogUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: UserLoginLogCreateManyUserInputEnvelope
+    set?: UserLoginLogWhereUniqueInput | UserLoginLogWhereUniqueInput[]
+    disconnect?: UserLoginLogWhereUniqueInput | UserLoginLogWhereUniqueInput[]
+    delete?: UserLoginLogWhereUniqueInput | UserLoginLogWhereUniqueInput[]
+    connect?: UserLoginLogWhereUniqueInput | UserLoginLogWhereUniqueInput[]
+    update?: UserLoginLogUpdateWithWhereUniqueWithoutUserInput | UserLoginLogUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: UserLoginLogUpdateManyWithWhereWithoutUserInput | UserLoginLogUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: UserLoginLogScalarWhereInput | UserLoginLogScalarWhereInput[]
+  }
+
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
   }
@@ -13059,6 +14435,34 @@ export namespace Prisma {
     update?: ServiceBookingUpdateWithWhereUniqueWithoutCleanerInput | ServiceBookingUpdateWithWhereUniqueWithoutCleanerInput[]
     updateMany?: ServiceBookingUpdateManyWithWhereWithoutCleanerInput | ServiceBookingUpdateManyWithWhereWithoutCleanerInput[]
     deleteMany?: ServiceBookingScalarWhereInput | ServiceBookingScalarWhereInput[]
+  }
+
+  export type UserLoginLogUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<UserLoginLogCreateWithoutUserInput, UserLoginLogUncheckedCreateWithoutUserInput> | UserLoginLogCreateWithoutUserInput[] | UserLoginLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserLoginLogCreateOrConnectWithoutUserInput | UserLoginLogCreateOrConnectWithoutUserInput[]
+    upsert?: UserLoginLogUpsertWithWhereUniqueWithoutUserInput | UserLoginLogUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: UserLoginLogCreateManyUserInputEnvelope
+    set?: UserLoginLogWhereUniqueInput | UserLoginLogWhereUniqueInput[]
+    disconnect?: UserLoginLogWhereUniqueInput | UserLoginLogWhereUniqueInput[]
+    delete?: UserLoginLogWhereUniqueInput | UserLoginLogWhereUniqueInput[]
+    connect?: UserLoginLogWhereUniqueInput | UserLoginLogWhereUniqueInput[]
+    update?: UserLoginLogUpdateWithWhereUniqueWithoutUserInput | UserLoginLogUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: UserLoginLogUpdateManyWithWhereWithoutUserInput | UserLoginLogUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: UserLoginLogScalarWhereInput | UserLoginLogScalarWhereInput[]
+  }
+
+  export type UserAccountCreateNestedOneWithoutLoginLogsInput = {
+    create?: XOR<UserAccountCreateWithoutLoginLogsInput, UserAccountUncheckedCreateWithoutLoginLogsInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutLoginLogsInput
+    connect?: UserAccountWhereUniqueInput
+  }
+
+  export type UserAccountUpdateOneRequiredWithoutLoginLogsNestedInput = {
+    create?: XOR<UserAccountCreateWithoutLoginLogsInput, UserAccountUncheckedCreateWithoutLoginLogsInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutLoginLogsInput
+    upsert?: UserAccountUpsertWithoutLoginLogsInput
+    connect?: UserAccountWhereUniqueInput
+    update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutLoginLogsInput, UserAccountUpdateWithoutLoginLogsInput>, UserAccountUncheckedUpdateWithoutLoginLogsInput>
   }
 
   export type UserProfileCreatepermissionsInput = {
@@ -13328,15 +14732,15 @@ export namespace Prisma {
     update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutConfirmedMatchesAsHomeownerInput, UserAccountUpdateWithoutConfirmedMatchesAsHomeownerInput>, UserAccountUncheckedUpdateWithoutConfirmedMatchesAsHomeownerInput>
   }
 
-  export type UserAccountCreateNestedOneWithoutServiceBookingInput = {
-    create?: XOR<UserAccountCreateWithoutServiceBookingInput, UserAccountUncheckedCreateWithoutServiceBookingInput>
-    connectOrCreate?: UserAccountCreateOrConnectWithoutServiceBookingInput
+  export type UserAccountCreateNestedOneWithoutServiceBookingsAsCleanerInput = {
+    create?: XOR<UserAccountCreateWithoutServiceBookingsAsCleanerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsCleanerInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutServiceBookingsAsCleanerInput
     connect?: UserAccountWhereUniqueInput
   }
 
-  export type UserAccountCreateNestedOneWithoutServiceBookingsInput = {
-    create?: XOR<UserAccountCreateWithoutServiceBookingsInput, UserAccountUncheckedCreateWithoutServiceBookingsInput>
-    connectOrCreate?: UserAccountCreateOrConnectWithoutServiceBookingsInput
+  export type UserAccountCreateNestedOneWithoutServiceBookingsAsHomeownerInput = {
+    create?: XOR<UserAccountCreateWithoutServiceBookingsAsHomeownerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsHomeownerInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutServiceBookingsAsHomeownerInput
     connect?: UserAccountWhereUniqueInput
   }
 
@@ -13344,20 +14748,20 @@ export namespace Prisma {
     set?: $Enums.BookingStatus
   }
 
-  export type UserAccountUpdateOneRequiredWithoutServiceBookingNestedInput = {
-    create?: XOR<UserAccountCreateWithoutServiceBookingInput, UserAccountUncheckedCreateWithoutServiceBookingInput>
-    connectOrCreate?: UserAccountCreateOrConnectWithoutServiceBookingInput
-    upsert?: UserAccountUpsertWithoutServiceBookingInput
+  export type UserAccountUpdateOneRequiredWithoutServiceBookingsAsCleanerNestedInput = {
+    create?: XOR<UserAccountCreateWithoutServiceBookingsAsCleanerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsCleanerInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutServiceBookingsAsCleanerInput
+    upsert?: UserAccountUpsertWithoutServiceBookingsAsCleanerInput
     connect?: UserAccountWhereUniqueInput
-    update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutServiceBookingInput, UserAccountUpdateWithoutServiceBookingInput>, UserAccountUncheckedUpdateWithoutServiceBookingInput>
+    update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutServiceBookingsAsCleanerInput, UserAccountUpdateWithoutServiceBookingsAsCleanerInput>, UserAccountUncheckedUpdateWithoutServiceBookingsAsCleanerInput>
   }
 
-  export type UserAccountUpdateOneRequiredWithoutServiceBookingsNestedInput = {
-    create?: XOR<UserAccountCreateWithoutServiceBookingsInput, UserAccountUncheckedCreateWithoutServiceBookingsInput>
-    connectOrCreate?: UserAccountCreateOrConnectWithoutServiceBookingsInput
-    upsert?: UserAccountUpsertWithoutServiceBookingsInput
+  export type UserAccountUpdateOneRequiredWithoutServiceBookingsAsHomeownerNestedInput = {
+    create?: XOR<UserAccountCreateWithoutServiceBookingsAsHomeownerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsHomeownerInput>
+    connectOrCreate?: UserAccountCreateOrConnectWithoutServiceBookingsAsHomeownerInput
+    upsert?: UserAccountUpsertWithoutServiceBookingsAsHomeownerInput
     connect?: UserAccountWhereUniqueInput
-    update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutServiceBookingsInput, UserAccountUpdateWithoutServiceBookingsInput>, UserAccountUncheckedUpdateWithoutServiceBookingsInput>
+    update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutServiceBookingsAsHomeownerInput, UserAccountUpdateWithoutServiceBookingsAsHomeownerInput>, UserAccountUncheckedUpdateWithoutServiceBookingsAsHomeownerInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -13739,7 +15143,7 @@ export namespace Prisma {
     hours: number
     totalAmount: number
     createdAt?: Date | string
-    cleaner: UserAccountCreateNestedOneWithoutServiceBookingInput
+    cleaner: UserAccountCreateNestedOneWithoutServiceBookingsAsCleanerInput
   }
 
   export type ServiceBookingUncheckedCreateWithoutHomeownerInput = {
@@ -13775,7 +15179,7 @@ export namespace Prisma {
     hours: number
     totalAmount: number
     createdAt?: Date | string
-    homeowner: UserAccountCreateNestedOneWithoutServiceBookingsInput
+    homeowner: UserAccountCreateNestedOneWithoutServiceBookingsAsHomeownerInput
   }
 
   export type ServiceBookingUncheckedCreateWithoutCleanerInput = {
@@ -13798,6 +15202,30 @@ export namespace Prisma {
 
   export type ServiceBookingCreateManyCleanerInputEnvelope = {
     data: ServiceBookingCreateManyCleanerInput | ServiceBookingCreateManyCleanerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserLoginLogCreateWithoutUserInput = {
+    id?: string
+    loginTime?: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+  }
+
+  export type UserLoginLogUncheckedCreateWithoutUserInput = {
+    id?: string
+    loginTime?: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+  }
+
+  export type UserLoginLogCreateOrConnectWithoutUserInput = {
+    where: UserLoginLogWhereUniqueInput
+    create: XOR<UserLoginLogCreateWithoutUserInput, UserLoginLogUncheckedCreateWithoutUserInput>
+  }
+
+  export type UserLoginLogCreateManyUserInputEnvelope = {
+    data: UserLoginLogCreateManyUserInput | UserLoginLogCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -14019,6 +15447,125 @@ export namespace Prisma {
     data: XOR<ServiceBookingUpdateManyMutationInput, ServiceBookingUncheckedUpdateManyWithoutCleanerInput>
   }
 
+  export type UserLoginLogUpsertWithWhereUniqueWithoutUserInput = {
+    where: UserLoginLogWhereUniqueInput
+    update: XOR<UserLoginLogUpdateWithoutUserInput, UserLoginLogUncheckedUpdateWithoutUserInput>
+    create: XOR<UserLoginLogCreateWithoutUserInput, UserLoginLogUncheckedCreateWithoutUserInput>
+  }
+
+  export type UserLoginLogUpdateWithWhereUniqueWithoutUserInput = {
+    where: UserLoginLogWhereUniqueInput
+    data: XOR<UserLoginLogUpdateWithoutUserInput, UserLoginLogUncheckedUpdateWithoutUserInput>
+  }
+
+  export type UserLoginLogUpdateManyWithWhereWithoutUserInput = {
+    where: UserLoginLogScalarWhereInput
+    data: XOR<UserLoginLogUpdateManyMutationInput, UserLoginLogUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type UserLoginLogScalarWhereInput = {
+    AND?: UserLoginLogScalarWhereInput | UserLoginLogScalarWhereInput[]
+    OR?: UserLoginLogScalarWhereInput[]
+    NOT?: UserLoginLogScalarWhereInput | UserLoginLogScalarWhereInput[]
+    id?: StringFilter<"UserLoginLog"> | string
+    userId?: StringFilter<"UserLoginLog"> | string
+    loginTime?: DateTimeFilter<"UserLoginLog"> | Date | string
+    ipAddress?: StringNullableFilter<"UserLoginLog"> | string | null
+    userAgent?: StringNullableFilter<"UserLoginLog"> | string | null
+  }
+
+  export type UserAccountCreateWithoutLoginLogsInput = {
+    id?: string
+    username: string
+    email: string
+    password: string
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
+    serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
+  }
+
+  export type UserAccountUncheckedCreateWithoutLoginLogsInput = {
+    id?: string
+    username: string
+    email: string
+    password: string
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userProfileId?: string | null
+    serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
+    profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
+    viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
+    createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
+    shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+  }
+
+  export type UserAccountCreateOrConnectWithoutLoginLogsInput = {
+    where: UserAccountWhereUniqueInput
+    create: XOR<UserAccountCreateWithoutLoginLogsInput, UserAccountUncheckedCreateWithoutLoginLogsInput>
+  }
+
+  export type UserAccountUpsertWithoutLoginLogsInput = {
+    update: XOR<UserAccountUpdateWithoutLoginLogsInput, UserAccountUncheckedUpdateWithoutLoginLogsInput>
+    create: XOR<UserAccountCreateWithoutLoginLogsInput, UserAccountUncheckedCreateWithoutLoginLogsInput>
+    where?: UserAccountWhereInput
+  }
+
+  export type UserAccountUpdateToOneWithWhereWithoutLoginLogsInput = {
+    where?: UserAccountWhereInput
+    data: XOR<UserAccountUpdateWithoutLoginLogsInput, UserAccountUncheckedUpdateWithoutLoginLogsInput>
+  }
+
+  export type UserAccountUpdateWithoutLoginLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
+    serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+  }
+
+  export type UserAccountUncheckedUpdateWithoutLoginLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
+    profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
+    viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
+    createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
+    shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
+    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+  }
+
   export type UserAccountCreateWithoutUserProfileInput = {
     id?: string
     username: string
@@ -14033,8 +15580,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountUncheckedCreateWithoutUserProfileInput = {
@@ -14051,8 +15599,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountCreateOrConnectWithoutUserProfileInput = {
@@ -14157,8 +15706,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountUncheckedCreateWithoutServiceListingsInput = {
@@ -14175,8 +15725,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountCreateOrConnectWithoutServiceListingsInput = {
@@ -14252,8 +15803,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutServiceListingsInput = {
@@ -14270,8 +15822,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ServiceCategoryUpsertWithoutServiceListingsInput = {
@@ -14331,8 +15884,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountUncheckedCreateWithoutProfileViewsInput = {
@@ -14349,8 +15903,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountCreateOrConnectWithoutProfileViewsInput = {
@@ -14372,8 +15927,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountUncheckedCreateWithoutViewedOthersInput = {
@@ -14390,8 +15946,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountCreateOrConnectWithoutViewedOthersInput = {
@@ -14424,8 +15981,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutProfileViewsInput = {
@@ -14442,8 +16000,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountUpsertWithoutViewedOthersInput = {
@@ -14471,8 +16030,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutViewedOthersInput = {
@@ -14489,8 +16049,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountCreateWithoutCreatedShortlistsInput = {
@@ -14507,8 +16068,9 @@ export namespace Prisma {
     viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountUncheckedCreateWithoutCreatedShortlistsInput = {
@@ -14525,8 +16087,9 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountCreateOrConnectWithoutCreatedShortlistsInput = {
@@ -14548,8 +16111,9 @@ export namespace Prisma {
     viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountUncheckedCreateWithoutShortlistedInInput = {
@@ -14566,8 +16130,9 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountCreateOrConnectWithoutShortlistedInInput = {
@@ -14600,8 +16165,9 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutCreatedShortlistsInput = {
@@ -14618,8 +16184,9 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountUpsertWithoutShortlistedInInput = {
@@ -14647,8 +16214,9 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutShortlistedInInput = {
@@ -14665,8 +16233,9 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ServiceListingCreateWithoutConfirmedMatchesInput = {
@@ -14710,8 +16279,9 @@ export namespace Prisma {
     viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
-    serviceBookings?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountUncheckedCreateWithoutConfirmedMatchesAsHomeownerInput = {
@@ -14728,8 +16298,9 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
-    serviceBookings?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserAccountCreateOrConnectWithoutConfirmedMatchesAsHomeownerInput = {
@@ -14795,8 +16366,9 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
-    serviceBookings?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutConfirmedMatchesAsHomeownerInput = {
@@ -14813,11 +16385,12 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
-    serviceBookings?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
-  export type UserAccountCreateWithoutServiceBookingInput = {
+  export type UserAccountCreateWithoutServiceBookingsAsCleanerInput = {
     id?: string
     username: string
     email: string
@@ -14832,10 +16405,11 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
+    loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
-  export type UserAccountUncheckedCreateWithoutServiceBookingInput = {
+  export type UserAccountUncheckedCreateWithoutServiceBookingsAsCleanerInput = {
     id?: string
     username: string
     email: string
@@ -14850,15 +16424,16 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookings?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
+    loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
-  export type UserAccountCreateOrConnectWithoutServiceBookingInput = {
+  export type UserAccountCreateOrConnectWithoutServiceBookingsAsCleanerInput = {
     where: UserAccountWhereUniqueInput
-    create: XOR<UserAccountCreateWithoutServiceBookingInput, UserAccountUncheckedCreateWithoutServiceBookingInput>
+    create: XOR<UserAccountCreateWithoutServiceBookingsAsCleanerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsCleanerInput>
   }
 
-  export type UserAccountCreateWithoutServiceBookingsInput = {
+  export type UserAccountCreateWithoutServiceBookingsAsHomeownerInput = {
     id?: string
     username: string
     email: string
@@ -14873,10 +16448,11 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
-  export type UserAccountUncheckedCreateWithoutServiceBookingsInput = {
+  export type UserAccountUncheckedCreateWithoutServiceBookingsAsHomeownerInput = {
     id?: string
     username: string
     email: string
@@ -14891,26 +16467,27 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    ServiceBooking?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
+    loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
-  export type UserAccountCreateOrConnectWithoutServiceBookingsInput = {
+  export type UserAccountCreateOrConnectWithoutServiceBookingsAsHomeownerInput = {
     where: UserAccountWhereUniqueInput
-    create: XOR<UserAccountCreateWithoutServiceBookingsInput, UserAccountUncheckedCreateWithoutServiceBookingsInput>
+    create: XOR<UserAccountCreateWithoutServiceBookingsAsHomeownerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsHomeownerInput>
   }
 
-  export type UserAccountUpsertWithoutServiceBookingInput = {
-    update: XOR<UserAccountUpdateWithoutServiceBookingInput, UserAccountUncheckedUpdateWithoutServiceBookingInput>
-    create: XOR<UserAccountCreateWithoutServiceBookingInput, UserAccountUncheckedCreateWithoutServiceBookingInput>
+  export type UserAccountUpsertWithoutServiceBookingsAsCleanerInput = {
+    update: XOR<UserAccountUpdateWithoutServiceBookingsAsCleanerInput, UserAccountUncheckedUpdateWithoutServiceBookingsAsCleanerInput>
+    create: XOR<UserAccountCreateWithoutServiceBookingsAsCleanerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsCleanerInput>
     where?: UserAccountWhereInput
   }
 
-  export type UserAccountUpdateToOneWithWhereWithoutServiceBookingInput = {
+  export type UserAccountUpdateToOneWithWhereWithoutServiceBookingsAsCleanerInput = {
     where?: UserAccountWhereInput
-    data: XOR<UserAccountUpdateWithoutServiceBookingInput, UserAccountUncheckedUpdateWithoutServiceBookingInput>
+    data: XOR<UserAccountUpdateWithoutServiceBookingsAsCleanerInput, UserAccountUncheckedUpdateWithoutServiceBookingsAsCleanerInput>
   }
 
-  export type UserAccountUpdateWithoutServiceBookingInput = {
+  export type UserAccountUpdateWithoutServiceBookingsAsCleanerInput = {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
@@ -14925,10 +16502,11 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
+    loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
-  export type UserAccountUncheckedUpdateWithoutServiceBookingInput = {
+  export type UserAccountUncheckedUpdateWithoutServiceBookingsAsCleanerInput = {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
@@ -14943,21 +16521,22 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
+    loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
-  export type UserAccountUpsertWithoutServiceBookingsInput = {
-    update: XOR<UserAccountUpdateWithoutServiceBookingsInput, UserAccountUncheckedUpdateWithoutServiceBookingsInput>
-    create: XOR<UserAccountCreateWithoutServiceBookingsInput, UserAccountUncheckedCreateWithoutServiceBookingsInput>
+  export type UserAccountUpsertWithoutServiceBookingsAsHomeownerInput = {
+    update: XOR<UserAccountUpdateWithoutServiceBookingsAsHomeownerInput, UserAccountUncheckedUpdateWithoutServiceBookingsAsHomeownerInput>
+    create: XOR<UserAccountCreateWithoutServiceBookingsAsHomeownerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsHomeownerInput>
     where?: UserAccountWhereInput
   }
 
-  export type UserAccountUpdateToOneWithWhereWithoutServiceBookingsInput = {
+  export type UserAccountUpdateToOneWithWhereWithoutServiceBookingsAsHomeownerInput = {
     where?: UserAccountWhereInput
-    data: XOR<UserAccountUpdateWithoutServiceBookingsInput, UserAccountUncheckedUpdateWithoutServiceBookingsInput>
+    data: XOR<UserAccountUpdateWithoutServiceBookingsAsHomeownerInput, UserAccountUncheckedUpdateWithoutServiceBookingsAsHomeownerInput>
   }
 
-  export type UserAccountUpdateWithoutServiceBookingsInput = {
+  export type UserAccountUpdateWithoutServiceBookingsAsHomeownerInput = {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
@@ -14972,10 +16551,11 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
-  export type UserAccountUncheckedUpdateWithoutServiceBookingsInput = {
+  export type UserAccountUncheckedUpdateWithoutServiceBookingsAsHomeownerInput = {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
@@ -14990,7 +16570,8 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ServiceListingCreateManyCleanerInput = {
@@ -15057,6 +16638,13 @@ export namespace Prisma {
     hours: number
     totalAmount: number
     createdAt?: Date | string
+  }
+
+  export type UserLoginLogCreateManyUserInput = {
+    id?: string
+    loginTime?: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
   }
 
   export type ServiceListingUpdateWithoutCleanerInput = {
@@ -15191,7 +16779,7 @@ export namespace Prisma {
     hours?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    cleaner?: UserAccountUpdateOneRequiredWithoutServiceBookingNestedInput
+    cleaner?: UserAccountUpdateOneRequiredWithoutServiceBookingsAsCleanerNestedInput
   }
 
   export type ServiceBookingUncheckedUpdateWithoutHomeownerInput = {
@@ -15230,7 +16818,7 @@ export namespace Prisma {
     hours?: FloatFieldUpdateOperationsInput | number
     totalAmount?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    homeowner?: UserAccountUpdateOneRequiredWithoutServiceBookingsNestedInput
+    homeowner?: UserAccountUpdateOneRequiredWithoutServiceBookingsAsHomeownerNestedInput
   }
 
   export type ServiceBookingUncheckedUpdateWithoutCleanerInput = {
@@ -15259,6 +16847,27 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UserLoginLogUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    loginTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type UserLoginLogUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    loginTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type UserLoginLogUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    loginTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type UserAccountCreateManyUserProfileInput = {
     id?: string
     username: string
@@ -15283,8 +16892,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutUserProfileInput = {
@@ -15301,8 +16911,9 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookings?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    ServiceBooking?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
+    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
+    loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserAccountUncheckedUpdateManyWithoutUserProfileInput = {

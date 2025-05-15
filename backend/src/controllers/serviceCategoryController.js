@@ -1,4 +1,3 @@
-// ../controllers/serviceCategoryController.js
 const ServiceCategoryEntity = require('../entities/serviceCategoryEntity');
 
 class CreateServiceCatController {

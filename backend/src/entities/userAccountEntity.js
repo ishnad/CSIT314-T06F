@@ -480,6 +480,29 @@ async createUserAccount({ username, password, email, userProfileName }) {
             };
         }
     }
+
+    /**
+     * Gets the total number of new user registrations within a specified period.
+     * @param {Date} startDate - The start of the period.
+     * @param {Date} endDate - The end of the period.
+     * @returns {Promise<number|{error: {status: number, message: string}}>} The total count or an error object.
+     */
+    async getTotalRegistrations(startDate, endDate) {
+        try {
+            const count = await this.prisma.userAccount.count({
+                where: {
+                    createdAt: {
+                        gte: startDate, // Greater than or equal to start date
+                        lt: endDate,    // Less than end date
+                    },
+                },
+            });
+            return count;
+        } catch (error) {
+            console.error("Error getting total registrations in entity:", error);
+            return { error: { status: 500, message: 'Failed to retrieve total registrations.' } };
+        }
+    }
 }
 
 module.exports = UserAccountEntity;
