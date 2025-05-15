@@ -54,20 +54,19 @@ enum Permission {
   ADMIN_PRIVILEGES // e.g., UserAdmins managing users, profiles, etc.
   SEARCH_CLEANERS // e.g., Homeowners searching for cleaners/listings
   VIEW_REPORTS // e.g., Platform Management viewing reports
+  MANAGE_CATEGORIES // Permission for managing service categories
 }
 
 // New UserProfile model to allow dynamic creation
 model UserProfile {
   id          String       @id @default(cuid())
-  name        String       @unique // e.g., "HomeOwner", "Cleaner", "UserAdmin"
+  name        String       @unique // e.g., "HomeOwner", "Cleaner", "UserAdmin", "PlatformManager"
   permissions Permission[] // List of permissions granted to this profile
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
   // Relation back to UserAccount
   userAccounts UserAccount[]
-  // Relation to ServiceListing (if a profile can be associated with listings, e.g., category management)
-  // serviceListings ServiceListing[] // Optional: Add if profiles manage listings directly
 
   status UserProfileStatus @default(ACTIVE) // Status of the user profile
 }
@@ -77,11 +76,19 @@ enum UserProfileStatus {
   SUSPENDED
 }
 
+model ServiceCategory {
+  id                    String   @id @default(cuid())
+  serviceCatName        String   @unique // e.g., "Window Cleaning", "Deep Cleaning"
+  serviceCatDescription String? // Optional description for the category
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  serviceListings ServiceListing[]
+}
+
 // Relation from UserAccount to ServiceListing
 model ServiceListing {
   id          String   @id @default(cuid())
-  serviceType String // e.g., "Deep Cleaning", "Basic Cleaning", "Window Cleaning"
-  title       String
   description String
   ratePerHr   Float // Rate per hour
   createdAt   DateTime @default(now())
@@ -91,13 +98,16 @@ model ServiceListing {
   cleanerId String
   cleaner   UserAccount @relation(fields: [cleanerId], references: [id])
 
-  // Relation to ConfirmedMatches
+  serviceCategoryId String? // Foreign key for ServiceCategory
+  serviceCategory   ServiceCategory? @relation(fields: [serviceCategoryId], references: [id])
+
   confirmedMatches ConfirmedMatch[]
 
   status ServiceListingStatus @default(ACTIVE) // Status of the listing
 
   @@index([cleanerId]) // Index for faster lookups by cleaner
   @@index([cleanerId, status]) // For cleaners to view their listings by status
+  @@index([serviceCategoryId]) // Index for faster lookups by category
 }
 
 enum ServiceListingStatus {
