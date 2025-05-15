@@ -314,6 +314,47 @@ class ServiceListingEntity {
             return { error: { status: 500, error: 'Failed to search service listings due to a server error.' } };
         }
     }
+
+    /**
+     * Retrieves new service listings created within a specified period.
+     * Includes cleaner's username and service category name for context.
+     * @param {Date} startDate - The start of the period (inclusive).
+     * @param {Date} endDate - The end of the period (exclusive).
+     * @returns {Promise<Array<object>|{error: {status: number, message: string}}>} A list of service listings or an error object.
+     */
+    async getNewListingsInPeriod(startDate, endDate) {
+        try {
+            const listings = await this.prisma.serviceListing.findMany({
+                where: {
+                    createdAt: {
+                        gte: startDate, // Greater than or equal to start date
+                        lt: endDate,    // Less than end date
+                    },
+                },
+                include: {
+                    cleaner: { // Include the cleaner's details
+                        select: {
+                            id: true,
+                            username: true,
+                        }
+                    },
+                    serviceCategory: { // Include the service category details
+                        select: {
+                            id: true,
+                            serviceCatName: true,
+                        }
+                    }
+                },
+                orderBy: {
+                    createdAt: 'desc', // Show newest first
+                }
+            });
+            return listings;
+        } catch (error) {
+            console.error("Error retrieving new service listings in entity:", error);
+            return { error: { status: 500, message: 'Failed to retrieve new service listings.' } };
+        }
+    }
 }
 
 module.exports = ServiceListingEntity;
