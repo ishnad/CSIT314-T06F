@@ -82,6 +82,14 @@ export const UserProfileStatus: {
 export type UserProfileStatus = (typeof UserProfileStatus)[keyof typeof UserProfileStatus]
 
 
+export const ServiceCategoryStatus: {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE'
+};
+
+export type ServiceCategoryStatus = (typeof ServiceCategoryStatus)[keyof typeof ServiceCategoryStatus]
+
+
 export const ServiceListingStatus: {
   ACTIVE: 'ACTIVE',
   SUSPENDED: 'SUSPENDED'
@@ -117,6 +125,10 @@ export const Permission: typeof $Enums.Permission
 export type UserProfileStatus = $Enums.UserProfileStatus
 
 export const UserProfileStatus: typeof $Enums.UserProfileStatus
+
+export type ServiceCategoryStatus = $Enums.ServiceCategoryStatus
+
+export const ServiceCategoryStatus: typeof $Enums.ServiceCategoryStatus
 
 export type ServiceListingStatus = $Enums.ServiceListingStatus
 
@@ -5386,6 +5398,7 @@ export namespace Prisma {
     serviceCatDescription: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    status: $Enums.ServiceCategoryStatus | null
   }
 
   export type ServiceCategoryMaxAggregateOutputType = {
@@ -5394,6 +5407,7 @@ export namespace Prisma {
     serviceCatDescription: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    status: $Enums.ServiceCategoryStatus | null
   }
 
   export type ServiceCategoryCountAggregateOutputType = {
@@ -5402,6 +5416,7 @@ export namespace Prisma {
     serviceCatDescription: number
     createdAt: number
     updatedAt: number
+    status: number
     _all: number
   }
 
@@ -5412,6 +5427,7 @@ export namespace Prisma {
     serviceCatDescription?: true
     createdAt?: true
     updatedAt?: true
+    status?: true
   }
 
   export type ServiceCategoryMaxAggregateInputType = {
@@ -5420,6 +5436,7 @@ export namespace Prisma {
     serviceCatDescription?: true
     createdAt?: true
     updatedAt?: true
+    status?: true
   }
 
   export type ServiceCategoryCountAggregateInputType = {
@@ -5428,6 +5445,7 @@ export namespace Prisma {
     serviceCatDescription?: true
     createdAt?: true
     updatedAt?: true
+    status?: true
     _all?: true
   }
 
@@ -5509,6 +5527,7 @@ export namespace Prisma {
     serviceCatDescription: string | null
     createdAt: Date
     updatedAt: Date
+    status: $Enums.ServiceCategoryStatus
     _count: ServiceCategoryCountAggregateOutputType | null
     _min: ServiceCategoryMinAggregateOutputType | null
     _max: ServiceCategoryMaxAggregateOutputType | null
@@ -5534,6 +5553,7 @@ export namespace Prisma {
     serviceCatDescription?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    status?: boolean
     serviceListings?: boolean | ServiceCategory$serviceListingsArgs<ExtArgs>
     _count?: boolean | ServiceCategoryCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["serviceCategory"]>
@@ -5544,6 +5564,7 @@ export namespace Prisma {
     serviceCatDescription?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    status?: boolean
   }, ExtArgs["result"]["serviceCategory"]>
 
   export type ServiceCategorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5552,6 +5573,7 @@ export namespace Prisma {
     serviceCatDescription?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    status?: boolean
   }, ExtArgs["result"]["serviceCategory"]>
 
   export type ServiceCategorySelectScalar = {
@@ -5560,9 +5582,10 @@ export namespace Prisma {
     serviceCatDescription?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    status?: boolean
   }
 
-  export type ServiceCategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "serviceCatName" | "serviceCatDescription" | "createdAt" | "updatedAt", ExtArgs["result"]["serviceCategory"]>
+  export type ServiceCategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "serviceCatName" | "serviceCatDescription" | "createdAt" | "updatedAt" | "status", ExtArgs["result"]["serviceCategory"]>
   export type ServiceCategoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     serviceListings?: boolean | ServiceCategory$serviceListingsArgs<ExtArgs>
     _count?: boolean | ServiceCategoryCountOutputTypeDefaultArgs<ExtArgs>
@@ -5581,6 +5604,7 @@ export namespace Prisma {
       serviceCatDescription: string | null
       createdAt: Date
       updatedAt: Date
+      status: $Enums.ServiceCategoryStatus
     }, ExtArgs["result"]["serviceCategory"]>
     composites: {}
   }
@@ -6010,6 +6034,7 @@ export namespace Prisma {
     readonly serviceCatDescription: FieldRef<"ServiceCategory", 'String'>
     readonly createdAt: FieldRef<"ServiceCategory", 'DateTime'>
     readonly updatedAt: FieldRef<"ServiceCategory", 'DateTime'>
+    readonly status: FieldRef<"ServiceCategory", 'ServiceCategoryStatus'>
   }
     
 
@@ -12048,7 +12073,8 @@ export namespace Prisma {
     serviceCatName: 'serviceCatName',
     serviceCatDescription: 'serviceCatDescription',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    status: 'status'
   };
 
   export type ServiceCategoryScalarFieldEnum = (typeof ServiceCategoryScalarFieldEnum)[keyof typeof ServiceCategoryScalarFieldEnum]
@@ -12211,6 +12237,20 @@ export namespace Prisma {
    * Reference to a field of type 'UserProfileStatus[]'
    */
   export type ListEnumUserProfileStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserProfileStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ServiceCategoryStatus'
+   */
+  export type EnumServiceCategoryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceCategoryStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'ServiceCategoryStatus[]'
+   */
+  export type ListEnumServiceCategoryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceCategoryStatus[]'>
     
 
 
@@ -12494,6 +12534,7 @@ export namespace Prisma {
     serviceCatDescription?: StringNullableFilter<"ServiceCategory"> | string | null
     createdAt?: DateTimeFilter<"ServiceCategory"> | Date | string
     updatedAt?: DateTimeFilter<"ServiceCategory"> | Date | string
+    status?: EnumServiceCategoryStatusFilter<"ServiceCategory"> | $Enums.ServiceCategoryStatus
     serviceListings?: ServiceListingListRelationFilter
   }
 
@@ -12503,6 +12544,7 @@ export namespace Prisma {
     serviceCatDescription?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    status?: SortOrder
     serviceListings?: ServiceListingOrderByRelationAggregateInput
   }
 
@@ -12515,6 +12557,7 @@ export namespace Prisma {
     serviceCatDescription?: StringNullableFilter<"ServiceCategory"> | string | null
     createdAt?: DateTimeFilter<"ServiceCategory"> | Date | string
     updatedAt?: DateTimeFilter<"ServiceCategory"> | Date | string
+    status?: EnumServiceCategoryStatusFilter<"ServiceCategory"> | $Enums.ServiceCategoryStatus
     serviceListings?: ServiceListingListRelationFilter
   }, "id" | "serviceCatName">
 
@@ -12524,6 +12567,7 @@ export namespace Prisma {
     serviceCatDescription?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    status?: SortOrder
     _count?: ServiceCategoryCountOrderByAggregateInput
     _max?: ServiceCategoryMaxOrderByAggregateInput
     _min?: ServiceCategoryMinOrderByAggregateInput
@@ -12538,6 +12582,7 @@ export namespace Prisma {
     serviceCatDescription?: StringNullableWithAggregatesFilter<"ServiceCategory"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ServiceCategory"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ServiceCategory"> | Date | string
+    status?: EnumServiceCategoryStatusWithAggregatesFilter<"ServiceCategory"> | $Enums.ServiceCategoryStatus
   }
 
   export type ServiceListingWhereInput = {
@@ -13108,6 +13153,7 @@ export namespace Prisma {
     serviceCatDescription?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.ServiceCategoryStatus
     serviceListings?: ServiceListingCreateNestedManyWithoutServiceCategoryInput
   }
 
@@ -13117,6 +13163,7 @@ export namespace Prisma {
     serviceCatDescription?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.ServiceCategoryStatus
     serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutServiceCategoryInput
   }
 
@@ -13126,6 +13173,7 @@ export namespace Prisma {
     serviceCatDescription?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumServiceCategoryStatusFieldUpdateOperationsInput | $Enums.ServiceCategoryStatus
     serviceListings?: ServiceListingUpdateManyWithoutServiceCategoryNestedInput
   }
 
@@ -13135,6 +13183,7 @@ export namespace Prisma {
     serviceCatDescription?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumServiceCategoryStatusFieldUpdateOperationsInput | $Enums.ServiceCategoryStatus
     serviceListings?: ServiceListingUncheckedUpdateManyWithoutServiceCategoryNestedInput
   }
 
@@ -13144,6 +13193,7 @@ export namespace Prisma {
     serviceCatDescription?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.ServiceCategoryStatus
   }
 
   export type ServiceCategoryUpdateManyMutationInput = {
@@ -13152,6 +13202,7 @@ export namespace Prisma {
     serviceCatDescription?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumServiceCategoryStatusFieldUpdateOperationsInput | $Enums.ServiceCategoryStatus
   }
 
   export type ServiceCategoryUncheckedUpdateManyInput = {
@@ -13160,6 +13211,7 @@ export namespace Prisma {
     serviceCatDescription?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumServiceCategoryStatusFieldUpdateOperationsInput | $Enums.ServiceCategoryStatus
   }
 
   export type ServiceListingCreateInput = {
@@ -13778,12 +13830,20 @@ export namespace Prisma {
     _max?: NestedEnumUserProfileStatusFilter<$PrismaModel>
   }
 
+  export type EnumServiceCategoryStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceCategoryStatus | EnumServiceCategoryStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceCategoryStatus[] | ListEnumServiceCategoryStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceCategoryStatus[] | ListEnumServiceCategoryStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceCategoryStatusFilter<$PrismaModel> | $Enums.ServiceCategoryStatus
+  }
+
   export type ServiceCategoryCountOrderByAggregateInput = {
     id?: SortOrder
     serviceCatName?: SortOrder
     serviceCatDescription?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    status?: SortOrder
   }
 
   export type ServiceCategoryMaxOrderByAggregateInput = {
@@ -13792,6 +13852,7 @@ export namespace Prisma {
     serviceCatDescription?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    status?: SortOrder
   }
 
   export type ServiceCategoryMinOrderByAggregateInput = {
@@ -13800,6 +13861,17 @@ export namespace Prisma {
     serviceCatDescription?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    status?: SortOrder
+  }
+
+  export type EnumServiceCategoryStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceCategoryStatus | EnumServiceCategoryStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceCategoryStatus[] | ListEnumServiceCategoryStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceCategoryStatus[] | ListEnumServiceCategoryStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceCategoryStatusWithAggregatesFilter<$PrismaModel> | $Enums.ServiceCategoryStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumServiceCategoryStatusFilter<$PrismaModel>
+    _max?: NestedEnumServiceCategoryStatusFilter<$PrismaModel>
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -14534,6 +14606,10 @@ export namespace Prisma {
     connect?: ServiceListingWhereUniqueInput | ServiceListingWhereUniqueInput[]
   }
 
+  export type EnumServiceCategoryStatusFieldUpdateOperationsInput = {
+    set?: $Enums.ServiceCategoryStatus
+  }
+
   export type ServiceListingUpdateManyWithoutServiceCategoryNestedInput = {
     create?: XOR<ServiceListingCreateWithoutServiceCategoryInput, ServiceListingUncheckedCreateWithoutServiceCategoryInput> | ServiceListingCreateWithoutServiceCategoryInput[] | ServiceListingUncheckedCreateWithoutServiceCategoryInput[]
     connectOrCreate?: ServiceListingCreateOrConnectWithoutServiceCategoryInput | ServiceListingCreateOrConnectWithoutServiceCategoryInput[]
@@ -14905,6 +14981,23 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumUserProfileStatusFilter<$PrismaModel>
     _max?: NestedEnumUserProfileStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumServiceCategoryStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceCategoryStatus | EnumServiceCategoryStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceCategoryStatus[] | ListEnumServiceCategoryStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceCategoryStatus[] | ListEnumServiceCategoryStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceCategoryStatusFilter<$PrismaModel> | $Enums.ServiceCategoryStatus
+  }
+
+  export type NestedEnumServiceCategoryStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceCategoryStatus | EnumServiceCategoryStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceCategoryStatus[] | ListEnumServiceCategoryStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceCategoryStatus[] | ListEnumServiceCategoryStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceCategoryStatusWithAggregatesFilter<$PrismaModel> | $Enums.ServiceCategoryStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumServiceCategoryStatusFilter<$PrismaModel>
+    _max?: NestedEnumServiceCategoryStatusFilter<$PrismaModel>
   }
 
   export type NestedFloatFilter<$PrismaModel = never> = {
@@ -15741,6 +15834,7 @@ export namespace Prisma {
     serviceCatDescription?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.ServiceCategoryStatus
   }
 
   export type ServiceCategoryUncheckedCreateWithoutServiceListingsInput = {
@@ -15749,6 +15843,7 @@ export namespace Prisma {
     serviceCatDescription?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    status?: $Enums.ServiceCategoryStatus
   }
 
   export type ServiceCategoryCreateOrConnectWithoutServiceListingsInput = {
@@ -15844,6 +15939,7 @@ export namespace Prisma {
     serviceCatDescription?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumServiceCategoryStatusFieldUpdateOperationsInput | $Enums.ServiceCategoryStatus
   }
 
   export type ServiceCategoryUncheckedUpdateWithoutServiceListingsInput = {
@@ -15852,6 +15948,7 @@ export namespace Prisma {
     serviceCatDescription?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumServiceCategoryStatusFieldUpdateOperationsInput | $Enums.ServiceCategoryStatus
   }
 
   export type ConfirmedMatchUpsertWithWhereUniqueWithoutServiceListingInput = {

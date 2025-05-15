@@ -148,7 +148,90 @@ class GenerateWeeklyReportController {
     }
 }
 
+/**
+ * Data structure for the Monthly Revenue Report.
+ */
+class MonthlyRevenueReportData {
+    constructor(periodName, periodStartDate, periodEndDate, totalRevenue, totalBookingsCompleted) {
+        this.reportTitle = "Monthly Revenue Report";
+        this.periodCovered = periodName; // e.g., "April 2025"
+        this.reportGeneratedAt = new Date();
+        this.dataFromDate = periodStartDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        this.dataToDate = new Date(periodEndDate.getTime() - 1).toISOString().split('T')[0]; // YYYY-MM-DD (last day of month)
+        this.totalRevenue = totalRevenue;
+        this.totalBookingsCompleted = totalBookingsCompleted;
+    }
+}
+
+
+class GenerateMonthlyReportController {
+    constructor() {
+        // Instantiate other entities if this controller handles multiple report types
+        this.serviceBookingEntity = new ServiceBookingEntity();
+    }
+
+    /**
+     * Handles the HTTP request to generate a monthly revenue report for the previous full calendar month.
+     * The controller calculates startDate and endDate.
+     */
+    async generateMonthlyRevenueReport(req, res) {
+        try {
+            // Calculate dates for the "previous full month"
+            const today = new Date();
+            const currentYear = today.getUTCFullYear();
+            const currentMonth = today.getUTCMonth(); // 0-indexed
+
+            // endDateForQuery is the first day of the current month (exclusive)
+            const endDateForQuery = new Date(Date.UTC(currentYear, currentMonth, 1));
+
+            // startDateForQuery is the first day of the previous month (inclusive)
+            let prevMonthYear = currentYear;
+            let prevMonth = currentMonth - 1;
+            if (prevMonth < 0) { // If current month is January, previous month is December of previous year
+                prevMonth = 11; // December (0-indexed)
+                prevMonthYear -= 1;
+            }
+            const startDateForQuery = new Date(Date.UTC(prevMonthYear, prevMonth, 1));
+
+            const periodName = `${startDateForQuery.toLocaleString('default', { month: 'long', timeZone: 'UTC' })} ${prevMonthYear}`;
+
+            // 2. System retrieves the booking and revenue data
+            const revenueDetailsResult = await this.serviceBookingEntity.getRevenueInPeriod(startDateForQuery, endDateForQuery);
+
+            if (revenueDetailsResult.error) {
+                return res.status(revenueDetailsResult.error.status).json({ error: revenueDetailsResult.error.message });
+            }
+
+            const { totalRevenue, totalBookingsCompleted } = revenueDetailsResult;
+
+            // Alternate flow: 2a. No booking or revenue records found
+            if (totalBookingsCompleted === 0 && totalRevenue === 0) {
+                return res.status(200).json({
+                    message: `No completed bookings or revenue found for ${periodName}. No Monthly Report to be generated.`,
+                    report: new MonthlyRevenueReportData(periodName, startDateForQuery, endDateForQuery, 0, 0) // Still provide a structured empty report
+                });
+            }
+
+            // 3. System compiles revenues gained and displays it as report
+            const report = new MonthlyRevenueReportData(
+                periodName,
+                startDateForQuery,
+                endDateForQuery, // This is the exclusive end date for the query (e.g., May 1st for April report)
+                totalRevenue,
+                totalBookingsCompleted
+            );
+
+            return res.status(200).json(report);
+
+        } catch (error) {
+            console.error("Error generating monthly revenue report in controller:", error);
+            return res.status(500).json({ error: 'An unexpected error occurred while generating the monthly revenue report.' });
+        }
+    }
+}
+
 module.exports = {
     GenerateDailyReportController,
     GenerateWeeklyReportController,
+    GenerateMonthlyReportController
 };

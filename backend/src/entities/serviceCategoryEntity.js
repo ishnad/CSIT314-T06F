@@ -42,6 +42,60 @@ class ServiceCategoryEntity {
     }
 
     /**
+     * Searches for service categories based on a keyword and/or status.
+     * @param {string} [keyword] - The keyword to search in name and description (case-insensitive).
+     * @param {ServiceCategoryStatus} [status] - The status to filter by (e.g., ACTIVE, INACTIVE).
+     * @returns {Promise<Array<object>|{error: {status: number, message: string}}>} A list of matching service categories or an error object.
+     */
+    async searchServiceCategories({ keyword, status }) {
+        try {
+            const whereConditions = {};
+            const orConditions = [];
+
+            if (keyword && keyword.trim() !== "") {
+                const trimmedKeyword = keyword.trim();
+                orConditions.push({
+                    serviceCatName: {
+                        contains: trimmedKeyword,
+                        mode: 'insensitive', // Case-insensitive search
+                    }
+                });
+                orConditions.push({
+                    serviceCatDescription: {
+                        contains: trimmedKeyword,
+                        mode: 'insensitive',
+                    }
+                });
+            }
+
+            if (orConditions.length > 0) {
+                whereConditions.OR = orConditions;
+            }
+
+            if (status) {
+                // Validate if the provided status is a valid enum value
+                if (Object.values(ServiceCategoryStatus).includes(status)) {
+                    whereConditions.status = status;
+                } else {
+                    console.warn(`Invalid status value provided for search: ${status}. Ignoring status filter.`);
+                }
+            }
+
+            const categories = await this.prisma.serviceCategory.findMany({
+                where: whereConditions,
+                orderBy: {
+                    serviceCatName: 'asc', // Optional: order results
+                }
+            });
+
+            return categories;
+        } catch (error) {
+            console.error("Error searching service categories in entity:", error);
+            return { error: { status: 500, message: 'Failed to search service categories.' } };
+        }
+    }
+
+    /**
      * Retrieves all service categories.
      * @returns {Promise<Array<object>|{error: {status: number, message: string}}>} A list of service categories or an error object.
      */

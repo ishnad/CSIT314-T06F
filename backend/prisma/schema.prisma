@@ -72,13 +72,23 @@ enum UserProfileStatus {
   SUSPENDED
 }
 
+enum ServiceCategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model ServiceCategory {
-  id                    String           @id @default(cuid())
-  serviceCatName        String           @unique
-  serviceCatDescription String?
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt
+  id                    String    @id @default(cuid())
+  serviceCatName        String    @unique // e.g., "Window Cleaning", "Deep Cleaning"
+  serviceCatDescription String?   // Optional description for the category
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  status                ServiceCategoryStatus @default(ACTIVE) // Default to ACTIVE when created
+
   serviceListings       ServiceListing[]
+
+  @@index([status]) // Add index for status for faster filtering
+  @@index([serviceCatName]) // Index for searching by name
 }
 
 model ServiceListing {

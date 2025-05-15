@@ -153,7 +153,8 @@ exports.Prisma.ServiceCategoryScalarFieldEnum = {
   serviceCatName: 'serviceCatName',
   serviceCatDescription: 'serviceCatDescription',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  status: 'status'
 };
 
 exports.Prisma.ServiceListingScalarFieldEnum = {
@@ -234,6 +235,11 @@ exports.Permission = exports.$Enums.Permission = {
   SEARCH_CLEANERS: 'SEARCH_CLEANERS',
   VIEW_REPORTS: 'VIEW_REPORTS',
   MANAGE_CATEGORIES: 'MANAGE_CATEGORIES'
+};
+
+exports.ServiceCategoryStatus = exports.$Enums.ServiceCategoryStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE'
 };
 
 exports.ServiceListingStatus = exports.$Enums.ServiceListingStatus = {

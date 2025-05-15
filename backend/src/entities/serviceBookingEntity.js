@@ -1,5 +1,17 @@
 const { PrismaClient } = require('../generated/prisma');
 
+/**
+ * Represents the data structure for revenue details fetched from the entity.
+ */
+class MonthlyRevenueDetails {
+    constructor(totalRevenue, totalBookingsCompleted, periodStartDate, periodEndDate) {
+        this.totalRevenue = totalRevenue;
+        this.totalBookingsCompleted = totalBookingsCompleted;
+        this.periodStartDate = periodStartDate;
+        this.periodEndDate = periodEndDate;
+    }
+}
+
 class ServiceBookingEntity {
     constructor() {
         this.prisma = new PrismaClient();
@@ -207,6 +219,45 @@ class ServiceBookingEntity {
                 return { error: { status: 409, message: `Booking with ID '${bookingId}' already exists.` } };
             }
             return { error: { status: 500, message: 'Failed to create service booking.' } };
+        }
+    }
+
+    /**
+     * Calculates the total revenue from completed service bookings within a specified period.
+     * Revenue is based on the 'totalAmount' of bookings with 'COMPLETED' status
+     * and 'serviceDate' within the given range.
+     * This method will return the core data; the controller can format it into the final RevenueReport.
+     * @param {Date} startDate - The start of the period (inclusive).
+     * @param {Date} endDate - The end of the period (exclusive).
+     * @returns {Promise<MonthlyRevenueDetails|{error: {status: number, message: string}}>} An object with revenue details or an error object.
+     */
+    async getRevenueInPeriod(startDate, endDate) {
+        try {
+            // Aggregate sum of totalAmount and count of completed bookings
+            const aggregation = await this.prisma.serviceBooking.aggregate({
+                _sum: {
+                    totalAmount: true,
+                },
+                _count: {
+                    id: true, // Count all records matching the where clause
+                },
+                where: {
+                    status: BookingStatus.COMPLETED,
+                    serviceDate: { // Assuming serviceDate is when the service was rendered and revenue recognized
+                        gte: startDate, // Greater than or equal to start date
+                        lt: endDate,    // Less than end date
+                    },
+                },
+            });
+
+            const totalRevenue = aggregation._sum.totalAmount || 0;
+            const totalBookingsCompleted = aggregation._count.id || 0;
+
+            return new MonthlyRevenueDetails(totalRevenue, totalBookingsCompleted, startDate, endDate);
+
+        } catch (error) {
+            console.error("Error calculating monthly revenue in entity:", error);
+            return { error: { status: 500, message: 'Failed to calculate monthly revenue.' } };
         }
     }
 }
