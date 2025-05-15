@@ -109,9 +109,46 @@ class ViewServiceCatController {
     }
 }
 
+class EditServiceCatController {
+    constructor() {
+        this.serviceCategoryEntity = new ServiceCategoryEntity();
+    }
+
+    /**
+     * Handles HTTP request to edit an existing service category.
+     * @param {import('express').Request} req - Express request object (req.params.id, req.body for data).
+     * @param {import('express').Response} res - Express response object.
+     */
+    async updateServiceCategory(req, res) {
+        const { id: categoryId } = req.params;
+        const { serviceCatName, serviceCatDescription, status } = req.body;
+
+        const result = await this.serviceCategoryEntity.updateServiceCategory(
+            categoryId,
+            { serviceCatName, serviceCatDescription, status }
+        );
+
+        if (result.error) {
+            // Handle specific errors from entity based on status codes
+            if (result.error.status === 409) { // Duplicate name
+                return res.status(409).json({ error: result.error.message }); // "Service Category Already Exists!"
+            }
+            if (result.error.status === 404) { // Category not found to update
+                // The BCE has "4c. System fails to retrieve category details..." which might fit here
+                return res.status(404).json({ error: "Unable to retrieve category details. Please try again!" });
+            }
+            return res.status(result.error.status || 500).json({ error: result.error.message });
+        }
+
+        // Normal flow: 6. System displays updated details in "View Service Category" section
+        return res.status(200).json(result); // result is the updated ServiceCategory object
+    }
+}
+
 module.exports = {
     CreateServiceCatController,
     ViewServiceCategoriesController,
     SearchServiceCatController,
-    ViewServiceCatController
+    ViewServiceCatController,
+    EditServiceCatController
 };

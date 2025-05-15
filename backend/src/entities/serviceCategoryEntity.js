@@ -152,6 +152,78 @@ class ServiceCategoryEntity {
         }
     }
 
+    /**
+     * Updates an existing service category.
+     * @param {string} categoryId - The ID of the service category to update.
+     * @param {object} updateData - An object containing the data to update.
+     * @param {string} [updateData.serviceCatName] - The new name for the service category.
+     * @param {string} [updateData.serviceCatDescription] - The new description.
+     * @param {ServiceCategoryStatus} [updateData.status] - The new status.
+     * @returns {Promise<object|{error: {status: number, message: string}}>} The updated service category object or an error object.
+     */
+    async updateServiceCategory(categoryId, { serviceCatName, serviceCatDescription, status }) {
+        try {
+            // Fetch the current category to check if it exists
+            const currentCategory = await this.prisma.serviceCategory.findUnique({
+                where: { id: categoryId },
+            });
+            if (!currentCategory) {
+                return { error: { status: 404, message: 'Service category not found.' } }; // Corresponds to 4c if ID is for retrieval
+            }
+
+            // If serviceCatName is being updated, check for uniqueness
+            if (serviceCatName && serviceCatName.trim().toLowerCase() !== currentCategory.serviceCatName.toLowerCase()) {
+                const trimmedNewName = serviceCatName.trim();
+                const existingCategoryWithNewName = await this.prisma.serviceCategory.findFirst({
+                    where: {
+                        serviceCatName: {
+                            equals: trimmedNewName,
+                            mode: 'insensitive',
+                        },
+                        NOT: {
+                            id: categoryId, // Exclude the current category from the check
+                        },
+                    },
+                });
+
+                if (existingCategoryWithNewName) {
+                    return { error: { status: 409, message: 'Service Category Already Exists!' } }; // 4b
+                }
+            }
+
+            // Prepare data for update, only including fields that are actually provided
+            const dataToUpdate = {};
+            if (serviceCatName !== undefined) {
+                dataToUpdate.serviceCatName = serviceCatName.trim();
+            }
+            if (serviceCatDescription !== undefined) { // Allow setting description to null or empty
+                dataToUpdate.serviceCatDescription = serviceCatDescription === null ? null : serviceCatDescription.trim();
+            }
+            if (status !== undefined) {
+                if (!Object.values(ServiceCategoryStatus).includes(status)) {
+                     return { error: { status: 400, message: `Invalid status value: ${status}.` }}; // 4a
+                }
+                dataToUpdate.status = status;
+            }
+
+            const updatedCategory = await this.prisma.serviceCategory.update({
+                where: { id: categoryId },
+                data: dataToUpdate,
+            });
+            
+            return {
+                serviceCatID: updatedCategory.id,
+                serviceCatName: updatedCategory.serviceCatName,
+                serviceCatDescription: updatedCategory.serviceCatDescription,
+                status: updatedCategory.status,
+            };
+
+        } catch (error) {
+            console.error(`Error updating service category ${categoryId}:`, error);
+            return { error: { status: 500, message: 'System error while updating service category.' } };
+        }
+    }
+
 }
 
 module.exports = ServiceCategoryEntity;
