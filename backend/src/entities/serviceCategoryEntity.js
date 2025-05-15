@@ -224,6 +224,50 @@ class ServiceCategoryEntity {
         }
     }
 
+    /**
+     * Suspends a service category if all preconditions are met.
+     * @param {string} categoryId - The ID of the service category to suspend.
+     * @returns {Promise true|{error: {status: number, message: string}}>}
+     * An object indicating success or failure with a message, or the updated category.
+     * The controller will translate this to a boolean if strictly required by BCE API response.
+     */
+    async suspendServiceCategory(categoryId) {
+        try {
+            // 1. Fetch the category
+            const category = await this.prisma.serviceCategory.findUnique({
+                where: { id: categoryId },
+            });
+
+            // 2. Precondition: The chosen Service Category must be "Active"
+            if (category.status !== ServiceCategoryStatus.ACTIVE) {
+                return { error: { status: 400, message: `Service category is not ACTIVE. Current status: ${category.status}.` } };
+            }
+
+            // 3. Precondition: Category must not be in use by any *active* service listings.
+            const activeListingsCount = await this.prisma.serviceListing.count({
+                where: {
+                    serviceCategoryId: categoryId,
+                    status: ServiceListingStatus.ACTIVE,
+                },
+            });
+
+            if (activeListingsCount > 0) {
+                return { error: { status: 400, message: `Cannot suspend category: It is currently used by ${activeListingsCount} active service listing(s).` } };
+            }
+
+            // All preconditions met, proceed to suspend (set status to INACTIVE)
+            await this.prisma.serviceCategory.update({
+                where: { id: categoryId },
+                data: { status: ServiceCategoryStatus.INACTIVE },
+            });
+
+            return true;
+
+        } catch (error) {
+            console.error(`Error suspending service category ${categoryId}:`, error);
+            return { error: { status: 500, message: 'System error while suspending service category.' } };
+        }
+    }
 }
 
 module.exports = ServiceCategoryEntity;

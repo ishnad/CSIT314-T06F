@@ -145,10 +145,33 @@ class EditServiceCatController {
     }
 }
 
+class SuspendServiceCatController {
+    constructor() {
+        this.serviceCategoryEntity = new ServiceCategoryEntity();
+    }
+
+    /**
+     * Handles HTTP request to suspend a service category.
+     * @param {import('express').Request} req - Express request object (req.params.id for categoryId).
+     * @param {import('express').Response} res - Express response object.
+     */
+    async suspendServiceCategory(req, res) {
+        const { id: categoryId } = req.params;
+
+        const result = await this.serviceCategoryEntity.suspendServiceCategory(categoryId);
+
+        if (result.error) {
+            return res.status(result.error.status || 500).json({ success: false, message: result.error.message });
+        }
+        return res.status(200).json(result);
+    }
+}
+
 module.exports = {
     CreateServiceCatController,
     ViewServiceCategoriesController,
     SearchServiceCatController,
     ViewServiceCatController,
-    EditServiceCatController
+    EditServiceCatController,
+    SuspendServiceCatController
 };
