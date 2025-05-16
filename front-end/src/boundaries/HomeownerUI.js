@@ -435,8 +435,8 @@ class HomeownerUI extends Component {
     try {
       this.setState({ loading: true, error: null });
 
-      // Call the search endpoint
-      const response = await fetch(`http://localhost:3001/api/users/search?keyword=${encodeURIComponent(searchTerm)}`, {
+      // Call the cleaner-specific search endpoint
+      const response = await fetch(`http://localhost:3000/api/users/cleaners/search?keyword=${encodeURIComponent(searchTerm)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

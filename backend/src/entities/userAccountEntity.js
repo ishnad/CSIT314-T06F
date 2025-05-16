@@ -426,9 +426,13 @@ async createUserAccount({ username, password, email, userProfileName }) {
     async searchCleaners(keyword) {
         try {
             const cleanerProfile = await this.prisma.userProfile.findUnique({
-                where: { name: 'CLEANER' },
+                where: { name: 'Cleaner' },
                 select: { id: true }
             });
+
+            if (!cleanerProfile) {
+                throw new Error("Cleaner profile not found in database");
+            }
 
             const cleaners = await this.prisma.userAccount.findMany({
                 where: {
@@ -442,8 +446,7 @@ async createUserAccount({ username, password, email, userProfileName }) {
                                 some: { // Check if any service listing matches
                                     status: 'ACTIVE', // Only consider active service listings
                                     OR: [
-                                        { serviceType: { contains: keyword, mode: 'insensitive' } },
-                                        { title: { contains: keyword, mode: 'insensitive' } },
+                                        { serviceCategory: { serviceCatName: { contains: keyword, mode: 'insensitive' } } },
                                         { description: { contains: keyword, mode: 'insensitive' } },
                                     ],
                                 },
@@ -461,10 +464,13 @@ async createUserAccount({ username, password, email, userProfileName }) {
                         },
                         select: {
                             id: true,
-                            serviceType: true,
-                            title: true,
                             description: true,
                             ratePerHr: true,
+                            serviceCategory: {
+                                select: {
+                                    serviceCatName: true
+                                }
+                            }
                         }
                     },
                 }
