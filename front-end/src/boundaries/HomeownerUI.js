@@ -54,12 +54,19 @@ class HomeownerUI extends Component {
     this.loadCleaningHistory();
   }
 
-  // Method to fetch cleaners from API
+  // Method to fetch all active cleaners from API
   fetchCleaners = async () => {
     try {
       this.setState({ loading: true, error: null });
 
-      const response = await fetch('http://localhost:3000/api/cleaners');
+      // Call the endpoint to get all active cleaners
+      const response = await fetch('http://localhost:3001/api/users/cleaners/active', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch cleaners: ${response.statusText}`);
@@ -67,9 +74,21 @@ class HomeownerUI extends Component {
 
       const data = await response.json();
 
+      // Transform the API response to match what the UI expects
+      const cleaners = data.map(cleaner => ({
+        id: cleaner.id,
+        username: cleaner.username,
+        name: cleaner.username, // Using username as name if no name field exists
+        email: cleaner.email,
+        description: cleaner.serviceListings?.[0]?.description || 'Professional cleaning services',
+        services: cleaner.serviceListings?.map(listing => listing.serviceType) || ['House Cleaning'],
+        availability: 'Available',
+        price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}` // Default to $20 if no rate
+      }));
+
       this.setState({
-        cleaners: data,
-        filteredCleaners: data,
+        cleaners: cleaners,
+        filteredCleaners: cleaners,
         loading: false
       });
     } catch (err) {
@@ -401,7 +420,7 @@ class HomeownerUI extends Component {
     this.searchCleaners();
   };
 
-  // Method to search cleaners
+  // Method to search cleaners using backend API
   searchCleaners = async () => {
     const { searchTerm } = this.state;
 
@@ -414,7 +433,14 @@ class HomeownerUI extends Component {
     try {
       this.setState({ loading: true, error: null });
 
-      const response = await fetch(`http://localhost:3000/api/cleaners/search?query=${encodeURIComponent(searchTerm)}`);
+      // Call the search endpoint
+      const response = await fetch(`http://localhost:3001/api/users/search?keyword=${encodeURIComponent(searchTerm)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
 
       if (!response.ok) {
         throw new Error(`Search failed: ${response.statusText}`);
@@ -422,8 +448,20 @@ class HomeownerUI extends Component {
 
       const data = await response.json();
 
+      // Transform the API response
+      const filteredCleaners = data.map(cleaner => ({
+        id: cleaner.id,
+        username: cleaner.username,
+        name: cleaner.username,
+        email: cleaner.email,
+        description: cleaner.serviceListings?.[0]?.description || 'Professional cleaning services',
+        services: cleaner.serviceListings?.map(listing => listing.serviceType) || ['House Cleaning'],
+        availability: 'Available',
+        price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}` // Default to $20 if no rate
+      }));
+
       this.setState({
-        filteredCleaners: data,
+        filteredCleaners: filteredCleaners,
         loading: false
       });
     } catch (err) {

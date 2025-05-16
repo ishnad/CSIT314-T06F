@@ -173,8 +173,42 @@
 
 .cleaner-actions {
   display: flex;
+  flex-direction: column;
   gap: 10px;
   padding: 0 15px 15px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.view-profile-button {
+  width: 100%;
+  padding: 8px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.view-profile-button:hover {
+  background-color: #e0e0e0;
+}
+
+/* Dark mode adjustments for view profile button */
+@media (prefers-color-scheme: dark) {
+  .view-profile-button {
+    background-color: var(--gray-700);
+    color: var(--gray-100);
+    border-color: var(--gray-600);
+  }
+  
+  .view-profile-button:hover {
+    background-color: var(--gray-600);
+  }
 }
 
 .book-button {

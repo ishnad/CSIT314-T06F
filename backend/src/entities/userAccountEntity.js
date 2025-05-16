@@ -482,6 +482,71 @@ async createUserAccount({ username, password, email, userProfileName }) {
     }
 
     /**
+     * Fetches all active cleaners with their service listings.
+     * @returns {Promise<Array<object>|{error: {status: number, message: string}}>}
+     */
+    async fetchAllActiveCleaners() {
+        try {
+            // Get the cleaner profile ID
+            const cleanerProfile = await this.prisma.userProfile.findUnique({
+                where: { name: 'Cleaner' },
+                select: { id: true }
+            });
+
+            if (!cleanerProfile) {
+                throw new Error("Cleaner profile not found in database");
+            }
+
+            // Find all active cleaners with their service listings
+            const cleaners = await this.prisma.userAccount.findMany({
+                where: {
+                    userProfileId: cleanerProfile.id,
+                    status: UserStatus.ACTIVE
+                },
+                select: {
+                    id: true,
+                    username: true,
+                    email: true,
+                    status: true,
+                    serviceListings: {
+                        where: { status: 'ACTIVE' },
+                        select: {
+                            id: true,
+                            description: true,
+                            ratePerHr: true,
+                            serviceCategory: {
+                                select: {
+                                    serviceCatName: true
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            return cleaners.map(cleaner => ({
+                id: cleaner.id,
+                username: cleaner.username,
+                email: cleaner.email,
+                status: cleaner.status,
+                serviceListings: cleaner.serviceListings.map(listing => ({
+                    ...listing,
+                    serviceType: listing.serviceCategory?.serviceCatName || 'Cleaning Service'
+                }))
+            }));
+
+        } catch (error) {
+            console.error("Error fetching all active cleaners:", error);
+            return {
+                error: {
+                    status: 500,
+                    message: "Failed to retrieve active cleaners"
+                }
+            };
+        }
+    }
+
+    /**
      * Gets the total number of new user registrations within a specified period.
      * @param {Date} startDate - The start of the period.
      * @param {Date} endDate - The end of the period.

@@ -3,16 +3,17 @@ import './App.css';
 import Navbar from './boundaries/Navbar';
 import UserAdminUi from './boundaries/UserAdminUI';
 import CleanerUi from './boundaries/CleanerUI';
+import HomeownerUi from './boundaries/HomeownerUI';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('create');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState('');
   
-  // Create a ref to the UserAdminUi component
+  // Create refs for the UI components
   const userAdminRef = useRef(null);
-
   const cleanerUiRef = useRef(null);
+  const homeownerUiRef = useRef(null);
   
   // Check if user is already logged in (from localStorage)
   useEffect(() => {
@@ -42,6 +43,9 @@ function App() {
       }
       if (cleanerUiRef.current && typeof cleanerUiRef.current.refreshActiveTabData === 'function') {
         cleanerUiRef.current.refreshActiveTabData();
+      }
+      if (homeownerUiRef.current && typeof homeownerUiRef.current.refreshActiveTabData === 'function') {
+        homeownerUiRef.current.refreshActiveTabData();
       }
     };
     
@@ -93,7 +97,11 @@ function App() {
         // Show the main app when authenticated
         <>
           <header className="app-header">
-            <h1>User Administration System</h1>
+            <h1>
+              {user?.profile?.name === 'UserAdmin' ? 'User Administration System' : 
+               user?.profile?.name === 'Cleaner' ? 'Cleaner Dashboard' : 
+               'Homeowner Dashboard'}
+            </h1>
           </header>
           
           <Navbar 
@@ -111,17 +119,30 @@ function App() {
                 isAuthenticated={true}
                 onNavigate={navigateTo}
               />
-            ) : (
+            ) : user?.profile?.name === 'Cleaner' ? (
               <CleanerUi 
                 ref={cleanerUiRef}
                 isAuthenticated={true}
                 onNavigate={navigateTo}
                 currentPage={currentPage}
                 user={user ? { 
-                  ...user, // Spread all user properties
-                  id: user.id, // Ensure id is included
-                  profile: user.profile || null // Ensure profile exists
+                  ...user,
+                  id: user.id,
+                  profile: user.profile || null
                 } : null}
+              />
+            ) : (
+              <HomeownerUi 
+                ref={homeownerUiRef}
+                isAuthenticated={true}
+                onNavigate={navigateTo}
+                currentPage={currentPage}
+                user={user ? {
+                  ...user,
+                  id: user.id,
+                  profile: user.profile || null
+                } : null}
+                onLogout={handleLogout}
               />
             )}
           </main>

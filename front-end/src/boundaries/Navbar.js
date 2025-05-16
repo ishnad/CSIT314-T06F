@@ -58,7 +58,7 @@ function Navbar({ currentPage, navigateTo, user, onLogout }) {
               </button>
             </li>
           </>
-        ) : (
+        ) : user?.profile?.name === 'UserAdmin' ? (
           <>
             <li className={`nav-item ${currentPage === 'create' ? 'active' : ''}`}>
               <button 
@@ -90,6 +90,41 @@ function Navbar({ currentPage, navigateTo, user, onLogout }) {
                 onClick={() => handleTabClick('manageProfiles')}
               >
                 Manage Profiles
+              </button>
+            </li>
+          </>
+        ) : (
+          <>
+            <li className={`nav-item ${currentPage === 'browseCleaners' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('browseCleaners')}
+              >
+                Browse Cleaners
+              </button>
+            </li>
+            <li className={`nav-item ${currentPage === 'saved' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('saved')}
+              >
+                Saved Cleaners
+              </button>
+            </li>
+            <li className={`nav-item ${currentPage === 'booked' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('booked')}
+              >
+                My Bookings
+              </button>
+            </li>
+            <li className={`nav-item ${currentPage === 'history' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('history')}
+              >
+                Cleaning History
               </button>
             </li>
           </>

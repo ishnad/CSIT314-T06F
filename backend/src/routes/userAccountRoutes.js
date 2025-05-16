@@ -16,6 +16,7 @@ router.get('/', (req, res) => viewUserAccountController.viewUserAccount(req, res
 router.put('/', (req, res) => editUserAccountController.editUserAccount(req, res));
 router.post('/suspend', (req, res) => suspendUserAccountController.suspendUserAccount(req, res));
 router.get('/search', (req, res) => searchUserAccountController.searchUserAccount(req, res));
+router.get('/cleaners/active', (req, res) => viewCleanerProfileController.getAllActiveCleaners(req, res));
 router.get('/:cleanerId/profile', (req, res) => viewCleanerProfileController.viewCleanerProfile(req, res));
 
 module.exports = router;

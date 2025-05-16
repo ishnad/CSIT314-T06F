@@ -122,6 +122,19 @@ class ViewCleanerProfileController {
      * @param {import('express').Request} req - Express request object.
      * @param {import('express').Response} res - Express response object.
      */
+    async getAllActiveCleaners(req, res) {
+        try {
+            const result = await this.userEntity.fetchAllActiveCleaners();
+            if (result.error) {
+                res.status(result.error.status).json({ error: result.error.message });
+            } else {
+                res.status(200).json(result);
+            }
+        } catch (error) {
+            res.status(500).json({ error: "Failed to fetch active cleaners" });
+        }
+    }
+
     async viewCleanerProfile(req, res) {
         const { cleanerId } = req.params;
 

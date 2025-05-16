@@ -2,57 +2,6 @@ import React from 'react';
 
 // This object holds all the rendering methods for HomeownerUI.
 const renderingMethods = {
-  // Render the homeowner navbar with your requested tabs
-  renderHomeownerNavbar() {
-    const { activeTab } = this.state;
-    const { username } = this.props;
-
-    return (
-      <nav className="navbar homeowner-navbar">
-        <ul className="navbar-nav">
-          <li className={`nav-item ${activeTab === 'browseCleaners' ? 'active' : ''}`}>
-            <button
-              className="nav-link"
-              onClick={() => this.navigateTo('browseCleaners')}
-            >
-              Browse Cleaners
-            </button>
-          </li>
-          <li className={`nav-item ${activeTab === 'saved' ? 'active' : ''}`}>
-            <button
-              className="nav-link"
-              onClick={() => this.navigateTo('saved')}
-            >
-              Saved
-            </button>
-          </li>
-          <li className={`nav-item ${activeTab === 'booked' ? 'active' : ''}`}>
-            <button
-              className="nav-link"
-              onClick={() => this.navigateTo('booked')}
-            >
-              Booked
-            </button>
-          </li>
-          <li className={`nav-item ${activeTab === 'history' ? 'active' : ''}`}>
-            <button
-              className="nav-link"
-              onClick={() => this.navigateTo('history')}
-            >
-              My History
-            </button>
-          </li>
-        </ul>
-
-        <div className="navbar-user">
-          <span className="user-greeting">Welcome, {username}</span>
-          <button className="logout-button" onClick={this.props.onLogout}>
-            Logout
-          </button>
-        </div>
-      </nav>
-    );
-  },
 
   // Render browse cleaners tab
   renderBrowseCleaners() {
@@ -94,9 +43,9 @@ const renderingMethods = {
 
                   <div className="cleaner-details">
                     <p><strong>Rate/hour:</strong> {cleaner.price}</p>
+                    <p><strong>Email:</strong> {cleaner.email}</p>
                     <p><strong>Description:</strong> {cleaner.description}</p>
                     <p><strong>Services:</strong> {cleaner.services.join(', ')}</p>
-                    <p><strong>Status:</strong> {cleaner.availability}</p>
                   </div>
 
                   <div className="cleaner-actions">
@@ -379,13 +328,6 @@ const renderingMethods = {
 
     return (
       <div className="app-container">
-        <header className="app-header">
-          <h1>Homeowner Dashboard</h1>
-        </header>
-
-        {/* Homeowner navbar */}
-        {this.renderHomeownerNavbar()}
-
         <main className="app-content">
           <div className="homeowner-ui-container">
             {message && (
