@@ -6,11 +6,6 @@ class ConfirmedMatchesController {
     }
 
     /**
-     * Handles the HTTP request to fetch confirmed matches for the authenticated cleaner.
-     * @param {object} req - Express request object.
-     * @param {object} res - Express response object.
-     */
-    /**
      * Fetches all confirmed matches for the authenticated cleaner
      * @param {object} req - Express request object
      * @param {object} res - Express response object

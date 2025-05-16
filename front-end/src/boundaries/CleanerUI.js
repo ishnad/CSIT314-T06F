@@ -5,6 +5,8 @@ class CleanerUI extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      // Set default page to 'search'
+      currentPage: 'search',
       // Search Filters
       searchFilters: {
         serviceType: '',
@@ -81,7 +83,7 @@ class CleanerUI extends Component {
         this[methodName] = renderingMethods[methodName].bind(this);
       }
     }
-  } // End of constructor
+  }
 
   componentDidMount() {
     // Ensure user and user.id are available before fetching
@@ -165,16 +167,6 @@ class CleanerUI extends Component {
       }
 
       const data = await response.json();
-      
-      // Validate that totalViews matches sum of daily views
-      if (data.dailyViewsLastWeek) {
-        const calculatedTotal = data.dailyViewsLastWeek.reduce((sum, day) => sum + day.views, 0);
-        if (data.totalViews !== calculatedTotal) {
-          console.warn(`Total views (${data.totalViews}) doesn't match sum of daily views (${calculatedTotal})`);
-          // Use the calculated total if they don't match
-          data.totalViews = calculatedTotal;
-        }
-      }
 
       this.setState({ profileInsights: data });
     } catch (error) {
@@ -674,13 +666,29 @@ class CleanerUI extends Component {
 
     try {
       const { serviceType, startDate, endDate } = this.state.filters;
-      const params = new URLSearchParams();
+      const queryParams = {};
       
-      if (serviceType) params.append('serviceType', serviceType);
-      if (startDate) params.append('startDate', startDate);
-      if (endDate) params.append('endDate', endDate);
+      if (serviceType) queryParams.serviceType = serviceType;
+      if (startDate) queryParams.startDate = startDate;
+      if (endDate) queryParams.endDate = endDate;
+      
+      const cleanerId = this.props.user?.id;
+      if (!cleanerId) {
+        this.setState({
+          matchesError: "Please login to view matches",
+          loadingMatches: false
+        });
+        return;
+      }
+      queryParams.cleanerId = cleanerId;
 
-      const response = await fetch(`http://localhost:3001/api/matches/cleaner/confirmed?${params.toString()}`, {
+      // Build URL with query params
+      const url = new URL('http://localhost:3001/api/matches/cleaner/confirmed/search');
+      Object.entries(queryParams).forEach(([key, value]) => {
+        url.searchParams.append(key, value);
+      });
+
+      const response = await fetch(url.toString(), {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
@@ -733,7 +741,7 @@ class CleanerUI extends Component {
             }
           `}
         </style>
-        {currentPage === 'search' && this.renderSearchListings()}
+        {(!currentPage || currentPage === 'search') && this.renderSearchListings()}
         {currentPage === 'myListings' && this.renderUserListings()}
         {currentPage === 'insights' && this.renderInsights()}
         {currentPage === 'matches' && (

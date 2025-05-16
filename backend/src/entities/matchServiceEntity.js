@@ -74,11 +74,13 @@ class MatchServiceEntity {
         const dateFilter = {};
         if (startDate) {
             const parsedStartDate = new Date(startDate);
+            // Set to start of day to include all matches on this date
+            parsedStartDate.setUTCHours(0, 0, 0, 0);
             dateFilter.gte = parsedStartDate;
         }
         if (endDate) {
             const parsedEndDate = new Date(endDate);
-            // To include the whole end day, set time to end of day using UTC hours
+            // Set to end of day to include all matches on this date
             parsedEndDate.setUTCHours(23, 59, 59, 999);
             dateFilter.lte = parsedEndDate;
         }
@@ -96,9 +98,13 @@ class MatchServiceEntity {
                     serviceListing: {
                         select: {
                             id: true,
-                            title: true,
-                            serviceType: true,
+                            description: true,
                             ratePerHr: true,
+                            serviceCategory: {
+                                select: {
+                                    serviceCatName: true
+                                }
+                            },
                             // duration: true,
                         }
                     },
@@ -122,8 +128,8 @@ class MatchServiceEntity {
             return matches.map(match => ({
                 matchId: match.id,
                 confirmationDate: match.confirmationDate,
-                serviceTitle: match.serviceListing.title,
-                serviceType: match.serviceListing.serviceType,
+                serviceTitle: match.serviceListing.description,
+                serviceType: match.serviceListing.serviceCategory?.serviceCatName || 'Cleaning Service',
                 serviceRatePerHr: match.serviceListing.ratePerHr,
                 // serviceDuration: match.serviceListing.duration,
                 homeownerUsername: match.homeowner.username,
@@ -159,11 +165,22 @@ class MatchServiceEntity {
             },
         };
 
+        // Build optional filters - each is applied only if provided
+        const filtersToApply = [];
+
         if (serviceType && typeof serviceType === 'string' && serviceType.trim() !== '') {
-            whereConditions.serviceListing.serviceType = {
-                equals: serviceType.trim(),
-                mode: 'insensitive',
-            };
+            filtersToApply.push({
+                serviceListing: {
+                    serviceCategory: {
+                        is: {
+                            serviceCatName: {
+                                equals: serviceType.trim(),
+                                mode: 'insensitive'
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         if (status && typeof status === 'string' && status.trim() !== '') {
@@ -174,23 +191,31 @@ class MatchServiceEntity {
                 // Filtering by other statuses would require schema changes.
                 return { message: `Filtering by status '${status.trim()}' is not currently supported or no matches found for this status.` };
             }
-            // If status is 'CONFIRMED', it doesn't add an explicit DB filter condition for ConfirmedMatch.status,
-            // as all records in this table are considered confirmed.
         }
 
-        const dateFilter = {};
-        if (startDate) {
-            const parsedStartDate = new Date(startDate);
-            dateFilter.gte = parsedStartDate;
-        }
-        if (endDate) {
-            const parsedEndDate = new Date(endDate);
-            parsedEndDate.setUTCHours(23, 59, 59, 999);
-            dateFilter.lte = parsedEndDate;
+        if (startDate || endDate) {
+            const dateFilter = {};
+            if (startDate) {
+                const parsedStartDate = new Date(startDate);
+                parsedStartDate.setUTCHours(0, 0, 0, 0); // Include whole start day
+                dateFilter.gte = parsedStartDate;
+            }
+            if (endDate) {
+                const parsedEndDate = new Date(endDate);
+                parsedEndDate.setUTCHours(23, 59, 59, 999); // Include whole end day
+                dateFilter.lte = parsedEndDate;
+            }
+            // Only add date filter if we have at least one condition
+            if (Object.keys(dateFilter).length > 0) {
+                filtersToApply.push({
+                    confirmationDate: dateFilter
+                });
+            }
         }
 
-        if (Object.keys(dateFilter).length > 0) {
-            whereConditions.confirmationDate = dateFilter;
+        // Combine all filters with AND if any exist
+        if (filtersToApply.length > 0) {
+            whereConditions.AND = filtersToApply;
         }
 
         try {
@@ -202,10 +227,13 @@ class MatchServiceEntity {
                     serviceListing: {
                         select: {
                             id: true,
-                            title: true,
-                            serviceType: true,
+                            description: true,
                             ratePerHr: true,
-                            // duration
+                            serviceCategory: {
+                                select: {
+                                    serviceCatName: true
+                                }
+                            }
                         }
                     },
                     homeowner: {
@@ -227,8 +255,8 @@ class MatchServiceEntity {
             return matches.map(match => ({
                 matchId: match.id,
                 confirmationDate: match.confirmationDate,
-                serviceTitle: match.serviceListing.title,
-                serviceType: match.serviceListing.serviceType,
+                serviceTitle: match.serviceListing.description,
+                serviceType: match.serviceListing.serviceCategory?.serviceCatName || 'Cleaning Service',
                 serviceRatePerHr: match.serviceListing.ratePerHr,
                 homeownerUsername: match.homeowner.username,
                 homeownerId: match.homeowner.id,
