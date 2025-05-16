@@ -40,7 +40,7 @@ const renderingMethods = {
                     <h3>{cleaner.name}</h3>
                   </div>
 
-                  <div className="cleaner-details">=
+                  <div className="cleaner-details">
                     <p><strong>Services:</strong> {cleaner.services.join(', ')}</p>
                   </div>
 
@@ -87,7 +87,7 @@ const renderingMethods = {
 
     return (
       <div className="saved-cleaners-container">
-        <h2 className="page-title">Saved Cleaners</h2>
+        <h2 className="page-title">Shortlisted Cleaners</h2>
 
         {/* Add search form for saved cleaners */}
         <form onSubmit={this.handleSavedSearchSubmit} className="search-form">
@@ -113,7 +113,7 @@ const renderingMethods = {
                   <h3>{cleaner.name || cleaner.username}</h3>
                 </div>
 
-                <div className="cleaner-details">=
+                <div className="cleaner-details">
                   <p><strong>Services:</strong> {cleaner.services.join(', ')}</p>
                 </div>
 
@@ -129,99 +129,14 @@ const renderingMethods = {
             ))}
           </div>
         ) : savedCleaners && savedCleaners.length > 0 ? (
-          <div className="no-results">No saved cleaners match your search</div>
+          <div className="no-results">No shortlisted cleaners match your search</div>
         ) : (
-          <div className="no-results">You haven't saved any cleaners yet</div>
+          <div className="no-results">You haven't shortlisted any cleaners yet</div>
         )}
       </div>
     );
   },
 
-  // Render booked cleanings tab
-  renderBookedCleanings() {
-    const { bookings, filteredBookings, bookingSearchTerm, bookingsLoading } = this.state;
-    
-    // Filter for only upcoming bookings (Confirmed or Pending)
-    const upcomingBookings = filteredBookings && filteredBookings.filter(b => {
-      const status = b.status || b.matchStatus || '';
-      return status === 'Confirmed' || status === 'Pending';
-    });
-
-    return (
-      <div className="booked-cleanings-container">
-        <h2 className="page-title">Booked Cleanings</h2>
-
-        {/* Add search form for bookings */}
-        <form onSubmit={this.handleBookingSearchSubmit} className="search-form">
-          <div className="search-group">
-            <input
-              type="text"
-              value={bookingSearchTerm || ''}
-              onChange={this.handleBookingSearchChange}
-              placeholder="Search by cleaner or service..."
-              className="search-input"
-            />
-            <button type="submit" className="search-button">Search</button>
-          </div>
-        </form>
-
-        {bookingsLoading ? (
-          <div className="loading">Loading your bookings...</div>
-        ) : upcomingBookings && upcomingBookings.length > 0 ? (
-          <div className="bookings-list">
-            {upcomingBookings.map(booking => {
-              // Extract data handling differences in API response format
-              const id = booking.id || booking.matchId;
-              const cleanerName = booking.cleaner?.name || booking.cleanerName || 'Unknown Cleaner';
-              const service = booking.service || booking.serviceType || 'Standard Service';
-              const date = booking.date || (booking.scheduledTime ? new Date(booking.scheduledTime).toLocaleDateString() : 'Unknown');
-              const time = booking.time || (booking.scheduledTime ? new Date(booking.scheduledTime).toLocaleTimeString() : 'Unknown');
-              const status = booking.status || booking.matchStatus || 'Confirmed';
-              
-              return (
-                <div key={id} className="booking-card">
-                  <div className="booking-header">
-                    <h3>{service}</h3>
-                    <span className={`status-badge ${status.toLowerCase()}`}>
-                      {status}
-                    </span>
-                  </div>
-
-                  <div className="booking-details">
-                    <p><strong>Cleaner:</strong> {cleanerName}</p>
-                    <p><strong>Date:</strong> {date}</p>
-                    <p><strong>Time:</strong> {time}</p>
-                  </div>
-
-                  <div className="booking-actions">
-                    <button
-                      className="view-details-button"
-                      onClick={() => this.viewBookingDetails && this.viewBookingDetails(id)}
-                    >
-                      View Details
-                    </button>
-                    <button
-                      className="cancel-button"
-                      onClick={() => this.cancelBooking && this.cancelBooking(id)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : bookings && bookings.some(b => {
-          const status = b.status || b.matchStatus || '';
-          return status === 'Confirmed' || status === 'Pending';
-        }) ? (
-          <div className="no-results">No bookings match your search</div>
-        ) : (
-          <div className="no-results">You don't have any upcoming bookings</div>
-        )}
-      </div>
-    );
-  },
 
   // Render history tab - UPDATED to remove interactive rating
   renderCleaningHistory() {
@@ -371,8 +286,6 @@ const renderingMethods = {
                   return this.renderBrowseCleaners();
                 case 'saved':
                   return this.renderSavedCleaners();
-                case 'booked':
-                  return this.renderBookedCleanings();
                 case 'history': 
                   return this.renderCleaningHistory();
                 default:

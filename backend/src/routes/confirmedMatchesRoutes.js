@@ -4,8 +4,13 @@ const confirmedMatchesController = require('../controllers/confirmedMatchesContr
 const router = express.Router();
 const viewConfirmedMatchesController = new confirmedMatchesController.ConfirmedMatchesController();
 const searchConfirmedMatchesController = new confirmedMatchesController.SearchConfirmedMatchesController();
+const createMatchController = new confirmedMatchesController.CreateMatchController();
+const fetchPastMatchesController = new confirmedMatchesController.FetchPastMatchesController();
 
+router.get('/cleaner/confirmed/all', (req, res) => viewConfirmedMatchesController.fetchAllConfirmedMatches(req, res));
 router.get('/cleaner/confirmed', (req, res) => viewConfirmedMatchesController.fetchConfirmedMatches(req, res));
 router.get('/cleaner/confirmed/search', (req, res) => searchConfirmedMatchesController.searchConfirmedMatches(req, res));
+router.post('/cleaner/confirmed', (req, res) => createMatchController.createMatch(req, res));
+router.get('/homeowner/past', (req, res) => fetchPastMatchesController.fetchPastMatches(req, res));
 
 module.exports = router;

@@ -20,11 +20,6 @@ class HomeownerUI extends Component {
       savedSearchTerm: '',
       savedCleanersLoading: false,
 
-      // Bookings
-      bookings: [],
-      filteredBookings: [],
-      bookingSearchTerm: '',
-      bookingsLoading: false,
 
       // History
       history: [],
@@ -46,13 +41,15 @@ class HomeownerUI extends Component {
         this[methodName] = renderingMethods[methodName].bind(this);
       }
     }
+    
+    // Bind API call methods
+    this.bookService = this.bookService.bind(this);
   }
 
   componentDidMount() {
     // Load data from the backend
     this.fetchCleaners();
     this.loadSavedCleaners();
-    this.loadBookedCleaners();
     this.loadCleaningHistory();
   }
 
@@ -142,9 +139,6 @@ class HomeownerUI extends Component {
       case 'saved':
         this.loadSavedCleaners();
         break;
-      case 'booked':
-        this.loadBookedCleaners();
-        break;
       case 'history':
         this.loadCleaningHistory();
         break;
@@ -157,14 +151,18 @@ class HomeownerUI extends Component {
   refreshData = () => {
     const { activeTab } = this.state;
 
-    if (activeTab === 'browseCleaners') {
-      this.fetchCleaners();
-    } else if (activeTab === 'saved') {
-      this.loadSavedCleaners();
-    } else if (activeTab === 'booked') {
-      this.loadBookedCleaners();
-    } else if (activeTab === 'history') {
-      this.loadCleaningHistory();
+    switch(activeTab) {
+      case 'browseCleaners':
+        this.fetchCleaners();
+        break;
+      case 'saved':
+        this.loadSavedCleaners();
+        break;
+      case 'history':
+        this.loadCleaningHistory();
+        break;
+      default:
+        this.fetchCleaners();
     }
   };
 
@@ -173,10 +171,11 @@ class HomeownerUI extends Component {
     try {
       this.setState({ historyLoading: true, error: null });
 
-      const response = await fetch('http://localhost:3000/api/history/', {
+      const response = await fetch('http://localhost:3001/api/matches/homeowner/past', {
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -185,9 +184,20 @@ class HomeownerUI extends Component {
 
       const data = await response.json();
 
+      // Transform API response to match history card format
+      const history = data.map(item => ({
+        id: item.matchId,
+        date: new Date(item.confirmationDate).toLocaleDateString(),
+        time: new Date(item.confirmationDate).toLocaleTimeString(),
+        cleanerName: item.cleanerUsername,
+        serviceType: item.serviceType,
+        ratePerHr: item.ratePerHr,
+        status: 'Completed'
+      }));
+
       this.setState({
-        history: data,
-        filteredHistory: data,
+        history: history,
+        filteredHistory: history,
         historyLoading: false
       });
     } catch (err) {
@@ -325,40 +335,6 @@ class HomeownerUI extends Component {
   };
 
   // Load booked cleaners from the backend
-  loadBookedCleaners = async () => {
-    try {
-      this.setState({ bookingsLoading: true, error: null });
-
-      const response = await fetch('http://localhost:3000/api/matches/cleaner/confirmed');
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch booked cleaners: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      this.setState({
-        bookings: data,
-        filteredBookings: data,
-        bookingsLoading: false
-      });
-    } catch (err) {
-      console.error('Error loading booked cleaners:', err);
-
-      this.setState({
-        error: err.message,
-        bookingsLoading: false,
-        message: {
-          text: `Error loading booked cleaners: ${err.message}`,
-          type: 'error'
-        }
-      });
-
-      setTimeout(() => {
-        this.setState({ message: null });
-      }, 3000);
-    }
-  };
 
   // Handler for saved cleaners search input change
   handleSavedSearchChange = (e) => {
@@ -620,6 +596,54 @@ class HomeownerUI extends Component {
     setTimeout(() => {
       this.setState({ message: null });
     }, 3000);
+  };
+
+  // Book a service from cleaner profile
+  bookService = async (cleanerId, serviceListingId) => {
+    try {
+      this.setState({ loading: true });
+      
+      const response = await fetch('http://localhost:3001/api/matches/cleaner/confirmed/all', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          serviceListingId,
+          homeownerId: this.props.user.id
+        }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || response.statusText);
+      }
+
+      const data = await response.json();
+      
+      this.setState({
+        loading: false,
+        showCleanerProfile: false,
+        message: {
+          text: "Service booked successfully!",
+          type: "success"
+        }
+      });
+
+      // Refresh bookings list
+      this.loadBookedCleaners();
+
+    } catch (err) {
+      console.error('Error booking service:', err);
+      this.setState({
+        loading: false,
+        message: {
+          text: `Booking failed: ${err.message}`,
+          type: 'error'
+        }
+      });
+    }
   };
 
   // View cleaner profile

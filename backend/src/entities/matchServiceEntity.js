@@ -6,6 +6,47 @@ class MatchServiceEntity {
     }
 
     /**
+     * Fetches all confirmed matches for a cleaner
+     * @param {string} cleanerId - The ID of the cleaner
+     * @returns {Promise<Array<{matchId: string, confirmationDate: Date, serviceTitle: string, serviceType: string, serviceRatePerHr: number, homeownerUsername: string}>|{error: {status: number, error: string}}>}
+     */
+    async fetchAllConfirmedMatches(cleanerId) {
+        try {
+            const matches = await this.prisma.confirmedMatch.findMany({
+                where: {
+                    serviceListing: {
+                        cleanerId: cleanerId
+                    }
+                },
+                include: {
+                    serviceListing: {
+                        include: {
+                            serviceCategory: true
+                        }
+                    },
+                    homeowner: true
+                },
+                orderBy: {
+                    confirmationDate: 'desc'
+                }
+            });
+
+            return matches.map(match => ({
+                matchId: match.id,
+                confirmationDate: match.confirmationDate,
+                serviceTitle: match.serviceListing.description,
+                serviceType: match.serviceListing.serviceCategory?.serviceCatName || 'Cleaning Service',
+                serviceRatePerHr: match.serviceListing.ratePerHr,
+                homeownerUsername: match.homeowner.username
+            }));
+
+        } catch (error) {
+            console.error('Error fetching confirmed matches:', error);
+            return { error: { status: 500, error: "Failed to fetch confirmed matches" } };
+        }
+    }
+
+    /**
      * Fetches confirmed matches for a cleaner, with optional filters.
      * @param {string} cleanerId - The ID of the cleaner.
      * @param {object} filters - Optional filters.
@@ -200,6 +241,126 @@ class MatchServiceEntity {
                  return { error: { status: 400, error: 'Invalid filter parameters provided for search.' } };
             }
             return { error: { status: 500, error: 'Failed to search confirmed matches due to a server error.' } };
+        }
+    }
+    /**
+     * Creates a new confirmed match between a homeowner and cleaner's service listing
+     * @param {string} homeownerId - The ID of the homeowner
+     * @param {string} serviceListingId - The ID of the service listing being booked
+     * @returns {Promise<{matchId: string, confirmationDate: Date}|{error: {status: number, error: string}}>}
+     */
+    async createMatch(homeownerId, serviceListingId) {
+        try {
+            // First verify the service listing exists and is active
+            const serviceListing = await this.prisma.serviceListing.findUnique({
+                where: { id: serviceListingId, status: 'ACTIVE' }
+            });
+
+            if (!serviceListing) {
+                return { error: { status: 404, error: "Service listing not found or inactive" } };
+            }
+
+            // Create the confirmed match
+            const newMatch = await this.prisma.confirmedMatch.create({
+                data: {
+                    serviceListingId,
+                    homeownerId,
+                    // confirmationDate defaults to now()
+                },
+                select: {
+                    id: true,
+                    confirmationDate: true,
+                    serviceListing: {
+                        select: {
+                            id: true,
+                            ratePerHr: true,
+                            serviceCategory: {
+                                select: {
+                                    serviceCatName: true
+                                }
+                            }
+                        }
+                    },
+                    homeowner: {
+                        select: {
+                            id: true,
+                            username: true
+                        }
+                    }
+                }
+            });
+
+            return {
+                matchId: newMatch.id,
+                confirmationDate: newMatch.confirmationDate,
+                serviceType: newMatch.serviceListing.serviceCategory?.serviceCatName || 'Cleaning Service',
+                ratePerHr: newMatch.serviceListing.ratePerHr,
+                homeownerUsername: newMatch.homeowner.username
+            };
+
+        } catch (error) {
+            console.error('Error creating match:', error);
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === 'P2002') { // Unique constraint violation
+                    return { error: { status: 409, error: "This booking already exists" } };
+                }
+            }
+            return { error: { status: 500, error: "Failed to create booking" } };
+        }
+    }
+    /**
+     * Fetches past matches for a homeowner
+     * @param {string} homeownerId - The ID of the homeowner
+     * @returns {Promise<Array<{matchId: string, confirmationDate: Date, cleanerUsername: string, serviceType: string, ratePerHr: number}>|{error: {status: number, error: string}}>}
+     */
+    async fetchPastMatchesHomeowner(homeownerId) {
+        try {
+            const matches = await this.prisma.confirmedMatch.findMany({
+                where: {
+                    homeownerId: homeownerId,
+                    confirmationDate: {
+                        lt: new Date() // Only past matches
+                    }
+                },
+                select: {
+                    id: true,
+                    confirmationDate: true,
+                    serviceListing: {
+                        select: {
+                            ratePerHr: true,
+                            serviceCategory: {
+                                select: {
+                                    serviceCatName: true
+                                }
+                            },
+                            cleaner: {
+                                select: {
+                                    username: true
+                                }
+                            }
+                        }
+                    }
+                },
+                orderBy: {
+                    confirmationDate: 'desc' // Newest first
+                }
+            });
+
+            if (!matches.length) {
+                return { error: { status: 404, error: "No past matches found" } };
+            }
+
+            return matches.map(match => ({
+                matchId: match.id,
+                confirmationDate: match.confirmationDate,
+                cleanerUsername: match.serviceListing.cleaner.username,
+                serviceType: match.serviceListing.serviceCategory?.serviceCatName || 'Cleaning Service',
+                ratePerHr: match.serviceListing.ratePerHr
+            }));
+
+        } catch (error) {
+            console.error('Error fetching past matches:', error);
+            return { error: { status: 500, error: "Failed to fetch past matches" } };
         }
     }
 }

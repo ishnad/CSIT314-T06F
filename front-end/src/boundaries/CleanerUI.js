@@ -100,10 +100,15 @@ class CleanerUI extends Component {
     }
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     // Check if user.id has changed and is available
     if (this.props.user && this.props.user.id && (prevProps.user?.id !== this.props.user.id)) {
         this.fetchInitialData(this.props.user.id);
+    }
+    
+    // Check if we switched to the matches tab
+    if (this.props.currentPage === 'matches' && prevProps.currentPage !== 'matches') {
+        this.fetchAllConfirmedMatches();
     }
   }
 
@@ -112,11 +117,12 @@ class CleanerUI extends Component {
         this.setState({ listingsError: "Cannot fetch data: Cleaner ID is missing.", loadingListings: false });
         return;
     }
-    this.setState({ loadingListings: true, insightsLoading: true }); // Set loading for all
+    this.setState({ loadingListings: true, insightsLoading: true, loadingMatches: true }); // Set loading for all
     await Promise.all([
         this.fetchProfileInsights(cleanerId),
         this.fetchShortlistCount(cleanerId),
         this.fetchServiceListings(cleanerId),
+        this.handleMatchFilterSubmit(), // Load matches by default
     ]);
   };
 
@@ -618,8 +624,49 @@ class CleanerUI extends Component {
     }));
   };
 
+  fetchAllConfirmedMatches = async () => {
+    this.setState({
+      loadingMatches: true,
+      matchesError: null
+    });
+
+    try {
+      const response = await fetch('http://localhost:3001/api/matches/cleaner/confirmed/all', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Fetching all matches');
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || response.statusText);
+      }
+
+      const data = await response.json();
+      this.setState({ 
+        confirmedMatches: Array.isArray(data) ? data : [],
+        matchesError: null
+      });
+    } catch (error) {
+      console.error('Error fetching confirmed matches:', error);
+      this.setState({
+        matchesError: error.message,
+        message: { 
+          text: `Error loading matches: ${error.message}`,
+          type: 'error' 
+        },
+        confirmedMatches: []
+      });
+    } finally {
+      this.setState({ loadingMatches: false });
+    }
+  };
+      
   handleMatchFilterSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     this.setState({
       loadingMatches: true,
       matchesError: null
@@ -627,31 +674,42 @@ class CleanerUI extends Component {
 
     try {
       const { serviceType, startDate, endDate } = this.state.filters;
-      let url = `/api/matches/cleaner/confirmed?cleanerId=${this.props.user?.id}`;
+      const params = new URLSearchParams();
       
-      if (serviceType) url += `&serviceType=${encodeURIComponent(serviceType)}`;
-      if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
-      if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
+      if (serviceType) params.append('serviceType', serviceType);
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
 
-      const response = await fetch(url);
+      const response = await fetch(`http://localhost:3001/api/matches/cleaner/confirmed?${params.toString()}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      this.setState({ confirmedMatches: data });
-    } catch (error) {
-      console.error('Error fetching confirmed matches:', error);
-      this.setState({
-        matchesError: error.message,
-        message: { text: `Error fetching confirmed matches: ${error.message}`, type: 'error' }
+      console.log('Response data:', data);
+      this.setState({ 
+        confirmedMatches: Array.isArray(data) ? data : [],
+        matchesError: null
       });
-      setTimeout(() => this.setState({ message: null }), 5000);
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMsg = error.message || 'Failed to fetch matches';
+      this.setState({
+        matchesError: errorMsg,
+        message: { text: `Error: ${errorMsg}`, type: 'error' },
+        confirmedMatches: []
+      });
     } finally {
       this.setState({ loadingMatches: false });
+      setTimeout(() => this.setState({ message: null }), 5000);
     }
   };
-  // NOTE: The misplaced loop and extra brace were here. They have been moved to the constructor.
 
   render() {
     const { currentPage } = this.props;
@@ -752,24 +810,58 @@ class CleanerUI extends Component {
               <div className="loading">Loading matches...</div>
             ) : this.state.matchesError ? (
               <div className="error-message">{this.state.matchesError}</div>
-            ) : this.state.confirmedMatches.length > 0 ? (
-              <div className="matches-grid">
+            ) : this.state.confirmedMatches && this.state.confirmedMatches.length > 0 ? (
+              <div className="matches-grid" style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gap: '20px'
+              }}>
                 {this.state.confirmedMatches.map(match => (
-                  <div key={match.matchId} className="match-card">
-                    <div className="match-header">
-                      <h3>{match.serviceTitle}</h3>
-                      <span className="match-type">{match.serviceType}</span>
+                  <div key={match.matchId} className="match-card" style={{
+                    backgroundColor: 'white',
+                    borderRadius: '8px',
+                    padding: '20px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    color: 'black'
+                  }}>
+                    <div className="match-header" style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '15px',
+                      borderBottom: '1px solid #eee',
+                      paddingBottom: '10px'
+                    }}>
+                      <h3 style={{ margin: 0 }}>{match.serviceTitle || 'Cleaning Service'}</h3>
+                      <span className="match-type" style={{
+                        backgroundColor: '#e0e0e0',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem'
+                      }}>{match.serviceType}</span>
                     </div>
-                    <div className="match-details">
-                      <p><strong>Homeowner:</strong> {match.homeownerUsername}</p>
-                      <p><strong>Confirmed:</strong> {new Date(match.confirmationDate).toLocaleDateString()}</p>
-                      <p><strong>Rate:</strong> ${match.serviceRatePerHr}/hr</p>
+                    <div className="match-details" style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}>
+                      <p style={{ margin: 0 }}><strong>Homeowner:</strong> {match.homeownerUsername || 'Unknown'}</p>
+                      <p style={{ margin: 0 }}><strong>Confirmed:</strong> {match.confirmationDate ? new Date(match.confirmationDate).toLocaleDateString() : 'Unknown date'}</p>
+                      <p style={{ margin: 0 }}><strong>Rate:</strong> ${match.serviceRatePerHr || '0'}/hr</p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="no-matches">No confirmed matches found</div>
+              <div className="no-matches" style={{
+                padding: '40px',
+                textAlign: 'center',
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                color: '#666'
+              }}>
+                {this.state.confirmedMatches ? 'No confirmed matches found' : 'Failed to load matches'}
+              </div>
             )}
           </div>
         )}

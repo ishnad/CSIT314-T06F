@@ -108,15 +108,7 @@ function Navbar({ currentPage, navigateTo, user, onLogout, activeTab }) {
                 className="nav-link" 
                 onClick={() => handleTabClick('saved')}
               >
-                Saved Cleaners
-              </button>
-            </li>
-            <li className={`nav-item ${currentPage === 'booked' ? 'active' : ''}`}>
-              <button 
-                className="nav-link" 
-                onClick={() => handleTabClick('booked')}
-              >
-                My Bookings
+                Shortlisted Cleaners
               </button>
             </li>
             <li className={`nav-item ${currentPage === 'history' ? 'active' : ''}`}>
