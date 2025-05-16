@@ -30,8 +30,6 @@ model UserAccount {
   createdShortlists           Shortlist[]      @relation("HomeownerShortlists")
   shortlistedIn               Shortlist[]      @relation("CleanerShortlistedIn")
   confirmedMatchesAsHomeowner ConfirmedMatch[] @relation("HomeownerMatches")
-  serviceBookingsAsHomeowner  ServiceBooking[] @relation("HomeownerBookings") // Renamed for clarity
-  serviceBookingsAsCleaner    ServiceBooking[] @relation("CleanerBookings") // Renamed for clarity
 
   // Relation to UserLoginLog
   loginLogs UserLoginLog[] // A user can have many login logs
@@ -160,29 +158,3 @@ model ConfirmedMatch {
   @@index([serviceListingId, confirmationDate])
 }
 
-model ServiceBooking {
-  id          String        @id @default(cuid())
-  bookingId   String        @unique // Assuming this is a business identifier
-  cleanerId   String
-  cleaner     UserAccount   @relation("CleanerBookings", fields: [cleanerId], references: [id]) // Specify relation name
-  homeownerId String
-  homeowner   UserAccount   @relation("HomeownerBookings", fields: [homeownerId], references: [id]) // Specify relation name
-  serviceDate DateTime
-  status      BookingStatus // Used for confirmed bookings tracking
-  serviceType String
-  ratePerHr   Float
-  hours       Float
-  totalAmount Float
-  createdAt   DateTime      @default(now()) // Can be used to track when booking was confirmed if status is set on creation
-
-  @@index([homeownerId])
-  @@index([cleanerId])
-  @@index([serviceDate])
-  @@index([status, createdAt]) // Index for querying confirmed bookings in a period
-}
-
-enum BookingStatus {
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-}

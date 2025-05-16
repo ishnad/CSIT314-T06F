@@ -53,11 +53,6 @@ export type Shortlist = $Result.DefaultSelection<Prisma.$ShortlistPayload>
  * 
  */
 export type ConfirmedMatch = $Result.DefaultSelection<Prisma.$ConfirmedMatchPayload>
-/**
- * Model ServiceBooking
- * 
- */
-export type ServiceBooking = $Result.DefaultSelection<Prisma.$ServiceBookingPayload>
 
 /**
  * Enums
@@ -107,15 +102,6 @@ export const UserStatus: {
 
 export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus]
 
-
-export const BookingStatus: {
-  CONFIRMED: 'CONFIRMED',
-  COMPLETED: 'COMPLETED',
-  CANCELLED: 'CANCELLED'
-};
-
-export type BookingStatus = (typeof BookingStatus)[keyof typeof BookingStatus]
-
 }
 
 export type Permission = $Enums.Permission
@@ -137,10 +123,6 @@ export const ServiceListingStatus: typeof $Enums.ServiceListingStatus
 export type UserStatus = $Enums.UserStatus
 
 export const UserStatus: typeof $Enums.UserStatus
-
-export type BookingStatus = $Enums.BookingStatus
-
-export const BookingStatus: typeof $Enums.BookingStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -346,16 +328,6 @@ export class PrismaClient<
     * ```
     */
   get confirmedMatch(): Prisma.ConfirmedMatchDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.serviceBooking`: Exposes CRUD operations for the **ServiceBooking** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more ServiceBookings
-    * const serviceBookings = await prisma.serviceBooking.findMany()
-    * ```
-    */
-  get serviceBooking(): Prisma.ServiceBookingDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -803,8 +775,7 @@ export namespace Prisma {
     ServiceListing: 'ServiceListing',
     ProfileView: 'ProfileView',
     Shortlist: 'Shortlist',
-    ConfirmedMatch: 'ConfirmedMatch',
-    ServiceBooking: 'ServiceBooking'
+    ConfirmedMatch: 'ConfirmedMatch'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -823,7 +794,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "userAccount" | "userLoginLog" | "userProfile" | "serviceCategory" | "serviceListing" | "profileView" | "shortlist" | "confirmedMatch" | "serviceBooking"
+      modelProps: "userAccount" | "userLoginLog" | "userProfile" | "serviceCategory" | "serviceListing" | "profileView" | "shortlist" | "confirmedMatch"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1419,80 +1390,6 @@ export namespace Prisma {
           }
         }
       }
-      ServiceBooking: {
-        payload: Prisma.$ServiceBookingPayload<ExtArgs>
-        fields: Prisma.ServiceBookingFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.ServiceBookingFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ServiceBookingPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.ServiceBookingFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ServiceBookingPayload>
-          }
-          findFirst: {
-            args: Prisma.ServiceBookingFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ServiceBookingPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.ServiceBookingFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ServiceBookingPayload>
-          }
-          findMany: {
-            args: Prisma.ServiceBookingFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ServiceBookingPayload>[]
-          }
-          create: {
-            args: Prisma.ServiceBookingCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ServiceBookingPayload>
-          }
-          createMany: {
-            args: Prisma.ServiceBookingCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.ServiceBookingCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ServiceBookingPayload>[]
-          }
-          delete: {
-            args: Prisma.ServiceBookingDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ServiceBookingPayload>
-          }
-          update: {
-            args: Prisma.ServiceBookingUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ServiceBookingPayload>
-          }
-          deleteMany: {
-            args: Prisma.ServiceBookingDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.ServiceBookingUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.ServiceBookingUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ServiceBookingPayload>[]
-          }
-          upsert: {
-            args: Prisma.ServiceBookingUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ServiceBookingPayload>
-          }
-          aggregate: {
-            args: Prisma.ServiceBookingAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateServiceBooking>
-          }
-          groupBy: {
-            args: Prisma.ServiceBookingGroupByArgs<ExtArgs>
-            result: $Utils.Optional<ServiceBookingGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.ServiceBookingCountArgs<ExtArgs>
-            result: $Utils.Optional<ServiceBookingCountAggregateOutputType> | number
-          }
-        }
-      }
     }
   } & {
     other: {
@@ -1585,7 +1482,6 @@ export namespace Prisma {
     profileView?: ProfileViewOmit
     shortlist?: ShortlistOmit
     confirmedMatch?: ConfirmedMatchOmit
-    serviceBooking?: ServiceBookingOmit
   }
 
   /* Types for Logging */
@@ -1686,8 +1582,6 @@ export namespace Prisma {
     createdShortlists: number
     shortlistedIn: number
     confirmedMatchesAsHomeowner: number
-    serviceBookingsAsHomeowner: number
-    serviceBookingsAsCleaner: number
     loginLogs: number
   }
 
@@ -1698,8 +1592,6 @@ export namespace Prisma {
     createdShortlists?: boolean | UserAccountCountOutputTypeCountCreatedShortlistsArgs
     shortlistedIn?: boolean | UserAccountCountOutputTypeCountShortlistedInArgs
     confirmedMatchesAsHomeowner?: boolean | UserAccountCountOutputTypeCountConfirmedMatchesAsHomeownerArgs
-    serviceBookingsAsHomeowner?: boolean | UserAccountCountOutputTypeCountServiceBookingsAsHomeownerArgs
-    serviceBookingsAsCleaner?: boolean | UserAccountCountOutputTypeCountServiceBookingsAsCleanerArgs
     loginLogs?: boolean | UserAccountCountOutputTypeCountLoginLogsArgs
   }
 
@@ -1754,20 +1646,6 @@ export namespace Prisma {
    */
   export type UserAccountCountOutputTypeCountConfirmedMatchesAsHomeownerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ConfirmedMatchWhereInput
-  }
-
-  /**
-   * UserAccountCountOutputType without action
-   */
-  export type UserAccountCountOutputTypeCountServiceBookingsAsHomeownerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ServiceBookingWhereInput
-  }
-
-  /**
-   * UserAccountCountOutputType without action
-   */
-  export type UserAccountCountOutputTypeCountServiceBookingsAsCleanerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ServiceBookingWhereInput
   }
 
   /**
@@ -2070,8 +1948,6 @@ export namespace Prisma {
     createdShortlists?: boolean | UserAccount$createdShortlistsArgs<ExtArgs>
     shortlistedIn?: boolean | UserAccount$shortlistedInArgs<ExtArgs>
     confirmedMatchesAsHomeowner?: boolean | UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs>
-    serviceBookingsAsHomeowner?: boolean | UserAccount$serviceBookingsAsHomeownerArgs<ExtArgs>
-    serviceBookingsAsCleaner?: boolean | UserAccount$serviceBookingsAsCleanerArgs<ExtArgs>
     loginLogs?: boolean | UserAccount$loginLogsArgs<ExtArgs>
     _count?: boolean | UserAccountCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["userAccount"]>
@@ -2120,8 +1996,6 @@ export namespace Prisma {
     createdShortlists?: boolean | UserAccount$createdShortlistsArgs<ExtArgs>
     shortlistedIn?: boolean | UserAccount$shortlistedInArgs<ExtArgs>
     confirmedMatchesAsHomeowner?: boolean | UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs>
-    serviceBookingsAsHomeowner?: boolean | UserAccount$serviceBookingsAsHomeownerArgs<ExtArgs>
-    serviceBookingsAsCleaner?: boolean | UserAccount$serviceBookingsAsCleanerArgs<ExtArgs>
     loginLogs?: boolean | UserAccount$loginLogsArgs<ExtArgs>
     _count?: boolean | UserAccountCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -2142,8 +2016,6 @@ export namespace Prisma {
       createdShortlists: Prisma.$ShortlistPayload<ExtArgs>[]
       shortlistedIn: Prisma.$ShortlistPayload<ExtArgs>[]
       confirmedMatchesAsHomeowner: Prisma.$ConfirmedMatchPayload<ExtArgs>[]
-      serviceBookingsAsHomeowner: Prisma.$ServiceBookingPayload<ExtArgs>[]
-      serviceBookingsAsCleaner: Prisma.$ServiceBookingPayload<ExtArgs>[]
       loginLogs: Prisma.$UserLoginLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -2556,8 +2428,6 @@ export namespace Prisma {
     createdShortlists<T extends UserAccount$createdShortlistsArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$createdShortlistsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     shortlistedIn<T extends UserAccount$shortlistedInArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$shortlistedInArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShortlistPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     confirmedMatchesAsHomeowner<T extends UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$confirmedMatchesAsHomeownerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConfirmedMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    serviceBookingsAsHomeowner<T extends UserAccount$serviceBookingsAsHomeownerArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$serviceBookingsAsHomeownerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    serviceBookingsAsCleaner<T extends UserAccount$serviceBookingsAsCleanerArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$serviceBookingsAsCleanerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     loginLogs<T extends UserAccount$loginLogsArgs<ExtArgs> = {}>(args?: Subset<T, UserAccount$loginLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserLoginLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -3152,54 +3022,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ConfirmedMatchScalarFieldEnum | ConfirmedMatchScalarFieldEnum[]
-  }
-
-  /**
-   * UserAccount.serviceBookingsAsHomeowner
-   */
-  export type UserAccount$serviceBookingsAsHomeownerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingInclude<ExtArgs> | null
-    where?: ServiceBookingWhereInput
-    orderBy?: ServiceBookingOrderByWithRelationInput | ServiceBookingOrderByWithRelationInput[]
-    cursor?: ServiceBookingWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ServiceBookingScalarFieldEnum | ServiceBookingScalarFieldEnum[]
-  }
-
-  /**
-   * UserAccount.serviceBookingsAsCleaner
-   */
-  export type UserAccount$serviceBookingsAsCleanerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingInclude<ExtArgs> | null
-    where?: ServiceBookingWhereInput
-    orderBy?: ServiceBookingOrderByWithRelationInput | ServiceBookingOrderByWithRelationInput[]
-    cursor?: ServiceBookingWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ServiceBookingScalarFieldEnum | ServiceBookingScalarFieldEnum[]
   }
 
   /**
@@ -10832,1192 +10654,6 @@ export namespace Prisma {
 
 
   /**
-   * Model ServiceBooking
-   */
-
-  export type AggregateServiceBooking = {
-    _count: ServiceBookingCountAggregateOutputType | null
-    _avg: ServiceBookingAvgAggregateOutputType | null
-    _sum: ServiceBookingSumAggregateOutputType | null
-    _min: ServiceBookingMinAggregateOutputType | null
-    _max: ServiceBookingMaxAggregateOutputType | null
-  }
-
-  export type ServiceBookingAvgAggregateOutputType = {
-    ratePerHr: number | null
-    hours: number | null
-    totalAmount: number | null
-  }
-
-  export type ServiceBookingSumAggregateOutputType = {
-    ratePerHr: number | null
-    hours: number | null
-    totalAmount: number | null
-  }
-
-  export type ServiceBookingMinAggregateOutputType = {
-    id: string | null
-    bookingId: string | null
-    cleanerId: string | null
-    homeownerId: string | null
-    serviceDate: Date | null
-    status: $Enums.BookingStatus | null
-    serviceType: string | null
-    ratePerHr: number | null
-    hours: number | null
-    totalAmount: number | null
-    createdAt: Date | null
-  }
-
-  export type ServiceBookingMaxAggregateOutputType = {
-    id: string | null
-    bookingId: string | null
-    cleanerId: string | null
-    homeownerId: string | null
-    serviceDate: Date | null
-    status: $Enums.BookingStatus | null
-    serviceType: string | null
-    ratePerHr: number | null
-    hours: number | null
-    totalAmount: number | null
-    createdAt: Date | null
-  }
-
-  export type ServiceBookingCountAggregateOutputType = {
-    id: number
-    bookingId: number
-    cleanerId: number
-    homeownerId: number
-    serviceDate: number
-    status: number
-    serviceType: number
-    ratePerHr: number
-    hours: number
-    totalAmount: number
-    createdAt: number
-    _all: number
-  }
-
-
-  export type ServiceBookingAvgAggregateInputType = {
-    ratePerHr?: true
-    hours?: true
-    totalAmount?: true
-  }
-
-  export type ServiceBookingSumAggregateInputType = {
-    ratePerHr?: true
-    hours?: true
-    totalAmount?: true
-  }
-
-  export type ServiceBookingMinAggregateInputType = {
-    id?: true
-    bookingId?: true
-    cleanerId?: true
-    homeownerId?: true
-    serviceDate?: true
-    status?: true
-    serviceType?: true
-    ratePerHr?: true
-    hours?: true
-    totalAmount?: true
-    createdAt?: true
-  }
-
-  export type ServiceBookingMaxAggregateInputType = {
-    id?: true
-    bookingId?: true
-    cleanerId?: true
-    homeownerId?: true
-    serviceDate?: true
-    status?: true
-    serviceType?: true
-    ratePerHr?: true
-    hours?: true
-    totalAmount?: true
-    createdAt?: true
-  }
-
-  export type ServiceBookingCountAggregateInputType = {
-    id?: true
-    bookingId?: true
-    cleanerId?: true
-    homeownerId?: true
-    serviceDate?: true
-    status?: true
-    serviceType?: true
-    ratePerHr?: true
-    hours?: true
-    totalAmount?: true
-    createdAt?: true
-    _all?: true
-  }
-
-  export type ServiceBookingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ServiceBooking to aggregate.
-     */
-    where?: ServiceBookingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ServiceBookings to fetch.
-     */
-    orderBy?: ServiceBookingOrderByWithRelationInput | ServiceBookingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: ServiceBookingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ServiceBookings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ServiceBookings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned ServiceBookings
-    **/
-    _count?: true | ServiceBookingCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: ServiceBookingAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: ServiceBookingSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: ServiceBookingMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: ServiceBookingMaxAggregateInputType
-  }
-
-  export type GetServiceBookingAggregateType<T extends ServiceBookingAggregateArgs> = {
-        [P in keyof T & keyof AggregateServiceBooking]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateServiceBooking[P]>
-      : GetScalarType<T[P], AggregateServiceBooking[P]>
-  }
-
-
-
-
-  export type ServiceBookingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ServiceBookingWhereInput
-    orderBy?: ServiceBookingOrderByWithAggregationInput | ServiceBookingOrderByWithAggregationInput[]
-    by: ServiceBookingScalarFieldEnum[] | ServiceBookingScalarFieldEnum
-    having?: ServiceBookingScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: ServiceBookingCountAggregateInputType | true
-    _avg?: ServiceBookingAvgAggregateInputType
-    _sum?: ServiceBookingSumAggregateInputType
-    _min?: ServiceBookingMinAggregateInputType
-    _max?: ServiceBookingMaxAggregateInputType
-  }
-
-  export type ServiceBookingGroupByOutputType = {
-    id: string
-    bookingId: string
-    cleanerId: string
-    homeownerId: string
-    serviceDate: Date
-    status: $Enums.BookingStatus
-    serviceType: string
-    ratePerHr: number
-    hours: number
-    totalAmount: number
-    createdAt: Date
-    _count: ServiceBookingCountAggregateOutputType | null
-    _avg: ServiceBookingAvgAggregateOutputType | null
-    _sum: ServiceBookingSumAggregateOutputType | null
-    _min: ServiceBookingMinAggregateOutputType | null
-    _max: ServiceBookingMaxAggregateOutputType | null
-  }
-
-  type GetServiceBookingGroupByPayload<T extends ServiceBookingGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<ServiceBookingGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof ServiceBookingGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], ServiceBookingGroupByOutputType[P]>
-            : GetScalarType<T[P], ServiceBookingGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type ServiceBookingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    bookingId?: boolean
-    cleanerId?: boolean
-    homeownerId?: boolean
-    serviceDate?: boolean
-    status?: boolean
-    serviceType?: boolean
-    ratePerHr?: boolean
-    hours?: boolean
-    totalAmount?: boolean
-    createdAt?: boolean
-    cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
-    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["serviceBooking"]>
-
-  export type ServiceBookingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    bookingId?: boolean
-    cleanerId?: boolean
-    homeownerId?: boolean
-    serviceDate?: boolean
-    status?: boolean
-    serviceType?: boolean
-    ratePerHr?: boolean
-    hours?: boolean
-    totalAmount?: boolean
-    createdAt?: boolean
-    cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
-    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["serviceBooking"]>
-
-  export type ServiceBookingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    bookingId?: boolean
-    cleanerId?: boolean
-    homeownerId?: boolean
-    serviceDate?: boolean
-    status?: boolean
-    serviceType?: boolean
-    ratePerHr?: boolean
-    hours?: boolean
-    totalAmount?: boolean
-    createdAt?: boolean
-    cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
-    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["serviceBooking"]>
-
-  export type ServiceBookingSelectScalar = {
-    id?: boolean
-    bookingId?: boolean
-    cleanerId?: boolean
-    homeownerId?: boolean
-    serviceDate?: boolean
-    status?: boolean
-    serviceType?: boolean
-    ratePerHr?: boolean
-    hours?: boolean
-    totalAmount?: boolean
-    createdAt?: boolean
-  }
-
-  export type ServiceBookingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "bookingId" | "cleanerId" | "homeownerId" | "serviceDate" | "status" | "serviceType" | "ratePerHr" | "hours" | "totalAmount" | "createdAt", ExtArgs["result"]["serviceBooking"]>
-  export type ServiceBookingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
-    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
-  }
-  export type ServiceBookingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
-    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
-  }
-  export type ServiceBookingIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    cleaner?: boolean | UserAccountDefaultArgs<ExtArgs>
-    homeowner?: boolean | UserAccountDefaultArgs<ExtArgs>
-  }
-
-  export type $ServiceBookingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "ServiceBooking"
-    objects: {
-      cleaner: Prisma.$UserAccountPayload<ExtArgs>
-      homeowner: Prisma.$UserAccountPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      bookingId: string
-      cleanerId: string
-      homeownerId: string
-      serviceDate: Date
-      status: $Enums.BookingStatus
-      serviceType: string
-      ratePerHr: number
-      hours: number
-      totalAmount: number
-      createdAt: Date
-    }, ExtArgs["result"]["serviceBooking"]>
-    composites: {}
-  }
-
-  type ServiceBookingGetPayload<S extends boolean | null | undefined | ServiceBookingDefaultArgs> = $Result.GetResult<Prisma.$ServiceBookingPayload, S>
-
-  type ServiceBookingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ServiceBookingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: ServiceBookingCountAggregateInputType | true
-    }
-
-  export interface ServiceBookingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ServiceBooking'], meta: { name: 'ServiceBooking' } }
-    /**
-     * Find zero or one ServiceBooking that matches the filter.
-     * @param {ServiceBookingFindUniqueArgs} args - Arguments to find a ServiceBooking
-     * @example
-     * // Get one ServiceBooking
-     * const serviceBooking = await prisma.serviceBooking.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends ServiceBookingFindUniqueArgs>(args: SelectSubset<T, ServiceBookingFindUniqueArgs<ExtArgs>>): Prisma__ServiceBookingClient<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one ServiceBooking that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {ServiceBookingFindUniqueOrThrowArgs} args - Arguments to find a ServiceBooking
-     * @example
-     * // Get one ServiceBooking
-     * const serviceBooking = await prisma.serviceBooking.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends ServiceBookingFindUniqueOrThrowArgs>(args: SelectSubset<T, ServiceBookingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ServiceBookingClient<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ServiceBooking that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ServiceBookingFindFirstArgs} args - Arguments to find a ServiceBooking
-     * @example
-     * // Get one ServiceBooking
-     * const serviceBooking = await prisma.serviceBooking.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends ServiceBookingFindFirstArgs>(args?: SelectSubset<T, ServiceBookingFindFirstArgs<ExtArgs>>): Prisma__ServiceBookingClient<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ServiceBooking that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ServiceBookingFindFirstOrThrowArgs} args - Arguments to find a ServiceBooking
-     * @example
-     * // Get one ServiceBooking
-     * const serviceBooking = await prisma.serviceBooking.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends ServiceBookingFindFirstOrThrowArgs>(args?: SelectSubset<T, ServiceBookingFindFirstOrThrowArgs<ExtArgs>>): Prisma__ServiceBookingClient<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more ServiceBookings that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ServiceBookingFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all ServiceBookings
-     * const serviceBookings = await prisma.serviceBooking.findMany()
-     * 
-     * // Get first 10 ServiceBookings
-     * const serviceBookings = await prisma.serviceBooking.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const serviceBookingWithIdOnly = await prisma.serviceBooking.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends ServiceBookingFindManyArgs>(args?: SelectSubset<T, ServiceBookingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a ServiceBooking.
-     * @param {ServiceBookingCreateArgs} args - Arguments to create a ServiceBooking.
-     * @example
-     * // Create one ServiceBooking
-     * const ServiceBooking = await prisma.serviceBooking.create({
-     *   data: {
-     *     // ... data to create a ServiceBooking
-     *   }
-     * })
-     * 
-     */
-    create<T extends ServiceBookingCreateArgs>(args: SelectSubset<T, ServiceBookingCreateArgs<ExtArgs>>): Prisma__ServiceBookingClient<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many ServiceBookings.
-     * @param {ServiceBookingCreateManyArgs} args - Arguments to create many ServiceBookings.
-     * @example
-     * // Create many ServiceBookings
-     * const serviceBooking = await prisma.serviceBooking.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends ServiceBookingCreateManyArgs>(args?: SelectSubset<T, ServiceBookingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many ServiceBookings and returns the data saved in the database.
-     * @param {ServiceBookingCreateManyAndReturnArgs} args - Arguments to create many ServiceBookings.
-     * @example
-     * // Create many ServiceBookings
-     * const serviceBooking = await prisma.serviceBooking.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many ServiceBookings and only return the `id`
-     * const serviceBookingWithIdOnly = await prisma.serviceBooking.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends ServiceBookingCreateManyAndReturnArgs>(args?: SelectSubset<T, ServiceBookingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a ServiceBooking.
-     * @param {ServiceBookingDeleteArgs} args - Arguments to delete one ServiceBooking.
-     * @example
-     * // Delete one ServiceBooking
-     * const ServiceBooking = await prisma.serviceBooking.delete({
-     *   where: {
-     *     // ... filter to delete one ServiceBooking
-     *   }
-     * })
-     * 
-     */
-    delete<T extends ServiceBookingDeleteArgs>(args: SelectSubset<T, ServiceBookingDeleteArgs<ExtArgs>>): Prisma__ServiceBookingClient<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one ServiceBooking.
-     * @param {ServiceBookingUpdateArgs} args - Arguments to update one ServiceBooking.
-     * @example
-     * // Update one ServiceBooking
-     * const serviceBooking = await prisma.serviceBooking.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends ServiceBookingUpdateArgs>(args: SelectSubset<T, ServiceBookingUpdateArgs<ExtArgs>>): Prisma__ServiceBookingClient<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more ServiceBookings.
-     * @param {ServiceBookingDeleteManyArgs} args - Arguments to filter ServiceBookings to delete.
-     * @example
-     * // Delete a few ServiceBookings
-     * const { count } = await prisma.serviceBooking.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends ServiceBookingDeleteManyArgs>(args?: SelectSubset<T, ServiceBookingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ServiceBookings.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ServiceBookingUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many ServiceBookings
-     * const serviceBooking = await prisma.serviceBooking.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends ServiceBookingUpdateManyArgs>(args: SelectSubset<T, ServiceBookingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ServiceBookings and returns the data updated in the database.
-     * @param {ServiceBookingUpdateManyAndReturnArgs} args - Arguments to update many ServiceBookings.
-     * @example
-     * // Update many ServiceBookings
-     * const serviceBooking = await prisma.serviceBooking.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more ServiceBookings and only return the `id`
-     * const serviceBookingWithIdOnly = await prisma.serviceBooking.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends ServiceBookingUpdateManyAndReturnArgs>(args: SelectSubset<T, ServiceBookingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one ServiceBooking.
-     * @param {ServiceBookingUpsertArgs} args - Arguments to update or create a ServiceBooking.
-     * @example
-     * // Update or create a ServiceBooking
-     * const serviceBooking = await prisma.serviceBooking.upsert({
-     *   create: {
-     *     // ... data to create a ServiceBooking
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the ServiceBooking we want to update
-     *   }
-     * })
-     */
-    upsert<T extends ServiceBookingUpsertArgs>(args: SelectSubset<T, ServiceBookingUpsertArgs<ExtArgs>>): Prisma__ServiceBookingClient<$Result.GetResult<Prisma.$ServiceBookingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of ServiceBookings.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ServiceBookingCountArgs} args - Arguments to filter ServiceBookings to count.
-     * @example
-     * // Count the number of ServiceBookings
-     * const count = await prisma.serviceBooking.count({
-     *   where: {
-     *     // ... the filter for the ServiceBookings we want to count
-     *   }
-     * })
-    **/
-    count<T extends ServiceBookingCountArgs>(
-      args?: Subset<T, ServiceBookingCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], ServiceBookingCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a ServiceBooking.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ServiceBookingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends ServiceBookingAggregateArgs>(args: Subset<T, ServiceBookingAggregateArgs>): Prisma.PrismaPromise<GetServiceBookingAggregateType<T>>
-
-    /**
-     * Group by ServiceBooking.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ServiceBookingGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends ServiceBookingGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: ServiceBookingGroupByArgs['orderBy'] }
-        : { orderBy?: ServiceBookingGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, ServiceBookingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetServiceBookingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the ServiceBooking model
-   */
-  readonly fields: ServiceBookingFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for ServiceBooking.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__ServiceBookingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    cleaner<T extends UserAccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserAccountDefaultArgs<ExtArgs>>): Prisma__UserAccountClient<$Result.GetResult<Prisma.$UserAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    homeowner<T extends UserAccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserAccountDefaultArgs<ExtArgs>>): Prisma__UserAccountClient<$Result.GetResult<Prisma.$UserAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the ServiceBooking model
-   */
-  interface ServiceBookingFieldRefs {
-    readonly id: FieldRef<"ServiceBooking", 'String'>
-    readonly bookingId: FieldRef<"ServiceBooking", 'String'>
-    readonly cleanerId: FieldRef<"ServiceBooking", 'String'>
-    readonly homeownerId: FieldRef<"ServiceBooking", 'String'>
-    readonly serviceDate: FieldRef<"ServiceBooking", 'DateTime'>
-    readonly status: FieldRef<"ServiceBooking", 'BookingStatus'>
-    readonly serviceType: FieldRef<"ServiceBooking", 'String'>
-    readonly ratePerHr: FieldRef<"ServiceBooking", 'Float'>
-    readonly hours: FieldRef<"ServiceBooking", 'Float'>
-    readonly totalAmount: FieldRef<"ServiceBooking", 'Float'>
-    readonly createdAt: FieldRef<"ServiceBooking", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * ServiceBooking findUnique
-   */
-  export type ServiceBookingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingInclude<ExtArgs> | null
-    /**
-     * Filter, which ServiceBooking to fetch.
-     */
-    where: ServiceBookingWhereUniqueInput
-  }
-
-  /**
-   * ServiceBooking findUniqueOrThrow
-   */
-  export type ServiceBookingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingInclude<ExtArgs> | null
-    /**
-     * Filter, which ServiceBooking to fetch.
-     */
-    where: ServiceBookingWhereUniqueInput
-  }
-
-  /**
-   * ServiceBooking findFirst
-   */
-  export type ServiceBookingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingInclude<ExtArgs> | null
-    /**
-     * Filter, which ServiceBooking to fetch.
-     */
-    where?: ServiceBookingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ServiceBookings to fetch.
-     */
-    orderBy?: ServiceBookingOrderByWithRelationInput | ServiceBookingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for ServiceBookings.
-     */
-    cursor?: ServiceBookingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ServiceBookings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ServiceBookings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of ServiceBookings.
-     */
-    distinct?: ServiceBookingScalarFieldEnum | ServiceBookingScalarFieldEnum[]
-  }
-
-  /**
-   * ServiceBooking findFirstOrThrow
-   */
-  export type ServiceBookingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingInclude<ExtArgs> | null
-    /**
-     * Filter, which ServiceBooking to fetch.
-     */
-    where?: ServiceBookingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ServiceBookings to fetch.
-     */
-    orderBy?: ServiceBookingOrderByWithRelationInput | ServiceBookingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for ServiceBookings.
-     */
-    cursor?: ServiceBookingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ServiceBookings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ServiceBookings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of ServiceBookings.
-     */
-    distinct?: ServiceBookingScalarFieldEnum | ServiceBookingScalarFieldEnum[]
-  }
-
-  /**
-   * ServiceBooking findMany
-   */
-  export type ServiceBookingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingInclude<ExtArgs> | null
-    /**
-     * Filter, which ServiceBookings to fetch.
-     */
-    where?: ServiceBookingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ServiceBookings to fetch.
-     */
-    orderBy?: ServiceBookingOrderByWithRelationInput | ServiceBookingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing ServiceBookings.
-     */
-    cursor?: ServiceBookingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ServiceBookings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ServiceBookings.
-     */
-    skip?: number
-    distinct?: ServiceBookingScalarFieldEnum | ServiceBookingScalarFieldEnum[]
-  }
-
-  /**
-   * ServiceBooking create
-   */
-  export type ServiceBookingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingInclude<ExtArgs> | null
-    /**
-     * The data needed to create a ServiceBooking.
-     */
-    data: XOR<ServiceBookingCreateInput, ServiceBookingUncheckedCreateInput>
-  }
-
-  /**
-   * ServiceBooking createMany
-   */
-  export type ServiceBookingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many ServiceBookings.
-     */
-    data: ServiceBookingCreateManyInput | ServiceBookingCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * ServiceBooking createManyAndReturn
-   */
-  export type ServiceBookingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * The data used to create many ServiceBookings.
-     */
-    data: ServiceBookingCreateManyInput | ServiceBookingCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ServiceBooking update
-   */
-  export type ServiceBookingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingInclude<ExtArgs> | null
-    /**
-     * The data needed to update a ServiceBooking.
-     */
-    data: XOR<ServiceBookingUpdateInput, ServiceBookingUncheckedUpdateInput>
-    /**
-     * Choose, which ServiceBooking to update.
-     */
-    where: ServiceBookingWhereUniqueInput
-  }
-
-  /**
-   * ServiceBooking updateMany
-   */
-  export type ServiceBookingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update ServiceBookings.
-     */
-    data: XOR<ServiceBookingUpdateManyMutationInput, ServiceBookingUncheckedUpdateManyInput>
-    /**
-     * Filter which ServiceBookings to update
-     */
-    where?: ServiceBookingWhereInput
-    /**
-     * Limit how many ServiceBookings to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ServiceBooking updateManyAndReturn
-   */
-  export type ServiceBookingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * The data used to update ServiceBookings.
-     */
-    data: XOR<ServiceBookingUpdateManyMutationInput, ServiceBookingUncheckedUpdateManyInput>
-    /**
-     * Filter which ServiceBookings to update
-     */
-    where?: ServiceBookingWhereInput
-    /**
-     * Limit how many ServiceBookings to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ServiceBooking upsert
-   */
-  export type ServiceBookingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingInclude<ExtArgs> | null
-    /**
-     * The filter to search for the ServiceBooking to update in case it exists.
-     */
-    where: ServiceBookingWhereUniqueInput
-    /**
-     * In case the ServiceBooking found by the `where` argument doesn't exist, create a new ServiceBooking with this data.
-     */
-    create: XOR<ServiceBookingCreateInput, ServiceBookingUncheckedCreateInput>
-    /**
-     * In case the ServiceBooking was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<ServiceBookingUpdateInput, ServiceBookingUncheckedUpdateInput>
-  }
-
-  /**
-   * ServiceBooking delete
-   */
-  export type ServiceBookingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingInclude<ExtArgs> | null
-    /**
-     * Filter which ServiceBooking to delete.
-     */
-    where: ServiceBookingWhereUniqueInput
-  }
-
-  /**
-   * ServiceBooking deleteMany
-   */
-  export type ServiceBookingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ServiceBookings to delete
-     */
-    where?: ServiceBookingWhereInput
-    /**
-     * Limit how many ServiceBookings to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * ServiceBooking without action
-   */
-  export type ServiceBookingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ServiceBooking
-     */
-    select?: ServiceBookingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ServiceBooking
-     */
-    omit?: ServiceBookingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ServiceBookingInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Enums
    */
 
@@ -12122,23 +10758,6 @@ export namespace Prisma {
   };
 
   export type ConfirmedMatchScalarFieldEnum = (typeof ConfirmedMatchScalarFieldEnum)[keyof typeof ConfirmedMatchScalarFieldEnum]
-
-
-  export const ServiceBookingScalarFieldEnum: {
-    id: 'id',
-    bookingId: 'bookingId',
-    cleanerId: 'cleanerId',
-    homeownerId: 'homeownerId',
-    serviceDate: 'serviceDate',
-    status: 'status',
-    serviceType: 'serviceType',
-    ratePerHr: 'ratePerHr',
-    hours: 'hours',
-    totalAmount: 'totalAmount',
-    createdAt: 'createdAt'
-  };
-
-  export type ServiceBookingScalarFieldEnum = (typeof ServiceBookingScalarFieldEnum)[keyof typeof ServiceBookingScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -12283,20 +10902,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'BookingStatus'
-   */
-  export type EnumBookingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BookingStatus'>
-    
-
-
-  /**
-   * Reference to a field of type 'BookingStatus[]'
-   */
-  export type ListEnumBookingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BookingStatus[]'>
-    
-
-
-  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -12332,8 +10937,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistListRelationFilter
     shortlistedIn?: ShortlistListRelationFilter
     confirmedMatchesAsHomeowner?: ConfirmedMatchListRelationFilter
-    serviceBookingsAsHomeowner?: ServiceBookingListRelationFilter
-    serviceBookingsAsCleaner?: ServiceBookingListRelationFilter
     loginLogs?: UserLoginLogListRelationFilter
   }
 
@@ -12353,8 +10956,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistOrderByRelationAggregateInput
     shortlistedIn?: ShortlistOrderByRelationAggregateInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchOrderByRelationAggregateInput
-    serviceBookingsAsHomeowner?: ServiceBookingOrderByRelationAggregateInput
-    serviceBookingsAsCleaner?: ServiceBookingOrderByRelationAggregateInput
     loginLogs?: UserLoginLogOrderByRelationAggregateInput
   }
 
@@ -12377,8 +10978,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistListRelationFilter
     shortlistedIn?: ShortlistListRelationFilter
     confirmedMatchesAsHomeowner?: ConfirmedMatchListRelationFilter
-    serviceBookingsAsHomeowner?: ServiceBookingListRelationFilter
-    serviceBookingsAsCleaner?: ServiceBookingListRelationFilter
     loginLogs?: UserLoginLogListRelationFilter
   }, "id" | "username" | "email">
 
@@ -12823,96 +11422,6 @@ export namespace Prisma {
     confirmationDate?: DateTimeWithAggregatesFilter<"ConfirmedMatch"> | Date | string
   }
 
-  export type ServiceBookingWhereInput = {
-    AND?: ServiceBookingWhereInput | ServiceBookingWhereInput[]
-    OR?: ServiceBookingWhereInput[]
-    NOT?: ServiceBookingWhereInput | ServiceBookingWhereInput[]
-    id?: StringFilter<"ServiceBooking"> | string
-    bookingId?: StringFilter<"ServiceBooking"> | string
-    cleanerId?: StringFilter<"ServiceBooking"> | string
-    homeownerId?: StringFilter<"ServiceBooking"> | string
-    serviceDate?: DateTimeFilter<"ServiceBooking"> | Date | string
-    status?: EnumBookingStatusFilter<"ServiceBooking"> | $Enums.BookingStatus
-    serviceType?: StringFilter<"ServiceBooking"> | string
-    ratePerHr?: FloatFilter<"ServiceBooking"> | number
-    hours?: FloatFilter<"ServiceBooking"> | number
-    totalAmount?: FloatFilter<"ServiceBooking"> | number
-    createdAt?: DateTimeFilter<"ServiceBooking"> | Date | string
-    cleaner?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
-    homeowner?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
-  }
-
-  export type ServiceBookingOrderByWithRelationInput = {
-    id?: SortOrder
-    bookingId?: SortOrder
-    cleanerId?: SortOrder
-    homeownerId?: SortOrder
-    serviceDate?: SortOrder
-    status?: SortOrder
-    serviceType?: SortOrder
-    ratePerHr?: SortOrder
-    hours?: SortOrder
-    totalAmount?: SortOrder
-    createdAt?: SortOrder
-    cleaner?: UserAccountOrderByWithRelationInput
-    homeowner?: UserAccountOrderByWithRelationInput
-  }
-
-  export type ServiceBookingWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    bookingId?: string
-    AND?: ServiceBookingWhereInput | ServiceBookingWhereInput[]
-    OR?: ServiceBookingWhereInput[]
-    NOT?: ServiceBookingWhereInput | ServiceBookingWhereInput[]
-    cleanerId?: StringFilter<"ServiceBooking"> | string
-    homeownerId?: StringFilter<"ServiceBooking"> | string
-    serviceDate?: DateTimeFilter<"ServiceBooking"> | Date | string
-    status?: EnumBookingStatusFilter<"ServiceBooking"> | $Enums.BookingStatus
-    serviceType?: StringFilter<"ServiceBooking"> | string
-    ratePerHr?: FloatFilter<"ServiceBooking"> | number
-    hours?: FloatFilter<"ServiceBooking"> | number
-    totalAmount?: FloatFilter<"ServiceBooking"> | number
-    createdAt?: DateTimeFilter<"ServiceBooking"> | Date | string
-    cleaner?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
-    homeowner?: XOR<UserAccountScalarRelationFilter, UserAccountWhereInput>
-  }, "id" | "bookingId">
-
-  export type ServiceBookingOrderByWithAggregationInput = {
-    id?: SortOrder
-    bookingId?: SortOrder
-    cleanerId?: SortOrder
-    homeownerId?: SortOrder
-    serviceDate?: SortOrder
-    status?: SortOrder
-    serviceType?: SortOrder
-    ratePerHr?: SortOrder
-    hours?: SortOrder
-    totalAmount?: SortOrder
-    createdAt?: SortOrder
-    _count?: ServiceBookingCountOrderByAggregateInput
-    _avg?: ServiceBookingAvgOrderByAggregateInput
-    _max?: ServiceBookingMaxOrderByAggregateInput
-    _min?: ServiceBookingMinOrderByAggregateInput
-    _sum?: ServiceBookingSumOrderByAggregateInput
-  }
-
-  export type ServiceBookingScalarWhereWithAggregatesInput = {
-    AND?: ServiceBookingScalarWhereWithAggregatesInput | ServiceBookingScalarWhereWithAggregatesInput[]
-    OR?: ServiceBookingScalarWhereWithAggregatesInput[]
-    NOT?: ServiceBookingScalarWhereWithAggregatesInput | ServiceBookingScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"ServiceBooking"> | string
-    bookingId?: StringWithAggregatesFilter<"ServiceBooking"> | string
-    cleanerId?: StringWithAggregatesFilter<"ServiceBooking"> | string
-    homeownerId?: StringWithAggregatesFilter<"ServiceBooking"> | string
-    serviceDate?: DateTimeWithAggregatesFilter<"ServiceBooking"> | Date | string
-    status?: EnumBookingStatusWithAggregatesFilter<"ServiceBooking"> | $Enums.BookingStatus
-    serviceType?: StringWithAggregatesFilter<"ServiceBooking"> | string
-    ratePerHr?: FloatWithAggregatesFilter<"ServiceBooking"> | number
-    hours?: FloatWithAggregatesFilter<"ServiceBooking"> | number
-    totalAmount?: FloatWithAggregatesFilter<"ServiceBooking"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"ServiceBooking"> | Date | string
-  }
-
   export type UserAccountCreateInput = {
     id?: string
     username: string
@@ -12928,8 +11437,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
@@ -12948,8 +11455,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -12968,8 +11473,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
@@ -12988,8 +11491,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -13434,102 +11935,6 @@ export namespace Prisma {
     confirmationDate?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type ServiceBookingCreateInput = {
-    id?: string
-    bookingId: string
-    serviceDate: Date | string
-    status: $Enums.BookingStatus
-    serviceType: string
-    ratePerHr: number
-    hours: number
-    totalAmount: number
-    createdAt?: Date | string
-    cleaner: UserAccountCreateNestedOneWithoutServiceBookingsAsCleanerInput
-    homeowner: UserAccountCreateNestedOneWithoutServiceBookingsAsHomeownerInput
-  }
-
-  export type ServiceBookingUncheckedCreateInput = {
-    id?: string
-    bookingId: string
-    cleanerId: string
-    homeownerId: string
-    serviceDate: Date | string
-    status: $Enums.BookingStatus
-    serviceType: string
-    ratePerHr: number
-    hours: number
-    totalAmount: number
-    createdAt?: Date | string
-  }
-
-  export type ServiceBookingUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
-    serviceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    serviceType?: StringFieldUpdateOperationsInput | string
-    ratePerHr?: FloatFieldUpdateOperationsInput | number
-    hours?: FloatFieldUpdateOperationsInput | number
-    totalAmount?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    cleaner?: UserAccountUpdateOneRequiredWithoutServiceBookingsAsCleanerNestedInput
-    homeowner?: UserAccountUpdateOneRequiredWithoutServiceBookingsAsHomeownerNestedInput
-  }
-
-  export type ServiceBookingUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
-    cleanerId?: StringFieldUpdateOperationsInput | string
-    homeownerId?: StringFieldUpdateOperationsInput | string
-    serviceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    serviceType?: StringFieldUpdateOperationsInput | string
-    ratePerHr?: FloatFieldUpdateOperationsInput | number
-    hours?: FloatFieldUpdateOperationsInput | number
-    totalAmount?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ServiceBookingCreateManyInput = {
-    id?: string
-    bookingId: string
-    cleanerId: string
-    homeownerId: string
-    serviceDate: Date | string
-    status: $Enums.BookingStatus
-    serviceType: string
-    ratePerHr: number
-    hours: number
-    totalAmount: number
-    createdAt?: Date | string
-  }
-
-  export type ServiceBookingUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
-    serviceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    serviceType?: StringFieldUpdateOperationsInput | string
-    ratePerHr?: FloatFieldUpdateOperationsInput | number
-    hours?: FloatFieldUpdateOperationsInput | number
-    totalAmount?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ServiceBookingUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
-    cleanerId?: StringFieldUpdateOperationsInput | string
-    homeownerId?: StringFieldUpdateOperationsInput | string
-    serviceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    serviceType?: StringFieldUpdateOperationsInput | string
-    ratePerHr?: FloatFieldUpdateOperationsInput | number
-    hours?: FloatFieldUpdateOperationsInput | number
-    totalAmount?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -13607,12 +12012,6 @@ export namespace Prisma {
     none?: ConfirmedMatchWhereInput
   }
 
-  export type ServiceBookingListRelationFilter = {
-    every?: ServiceBookingWhereInput
-    some?: ServiceBookingWhereInput
-    none?: ServiceBookingWhereInput
-  }
-
   export type UserLoginLogListRelationFilter = {
     every?: UserLoginLogWhereInput
     some?: UserLoginLogWhereInput
@@ -13637,10 +12036,6 @@ export namespace Prisma {
   }
 
   export type ConfirmedMatchOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type ServiceBookingOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -14042,77 +12437,6 @@ export namespace Prisma {
     confirmationDate?: SortOrder
   }
 
-  export type EnumBookingStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.BookingStatus | EnumBookingStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.BookingStatus[] | ListEnumBookingStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.BookingStatus[] | ListEnumBookingStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumBookingStatusFilter<$PrismaModel> | $Enums.BookingStatus
-  }
-
-  export type ServiceBookingCountOrderByAggregateInput = {
-    id?: SortOrder
-    bookingId?: SortOrder
-    cleanerId?: SortOrder
-    homeownerId?: SortOrder
-    serviceDate?: SortOrder
-    status?: SortOrder
-    serviceType?: SortOrder
-    ratePerHr?: SortOrder
-    hours?: SortOrder
-    totalAmount?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ServiceBookingAvgOrderByAggregateInput = {
-    ratePerHr?: SortOrder
-    hours?: SortOrder
-    totalAmount?: SortOrder
-  }
-
-  export type ServiceBookingMaxOrderByAggregateInput = {
-    id?: SortOrder
-    bookingId?: SortOrder
-    cleanerId?: SortOrder
-    homeownerId?: SortOrder
-    serviceDate?: SortOrder
-    status?: SortOrder
-    serviceType?: SortOrder
-    ratePerHr?: SortOrder
-    hours?: SortOrder
-    totalAmount?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ServiceBookingMinOrderByAggregateInput = {
-    id?: SortOrder
-    bookingId?: SortOrder
-    cleanerId?: SortOrder
-    homeownerId?: SortOrder
-    serviceDate?: SortOrder
-    status?: SortOrder
-    serviceType?: SortOrder
-    ratePerHr?: SortOrder
-    hours?: SortOrder
-    totalAmount?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ServiceBookingSumOrderByAggregateInput = {
-    ratePerHr?: SortOrder
-    hours?: SortOrder
-    totalAmount?: SortOrder
-  }
-
-  export type EnumBookingStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.BookingStatus | EnumBookingStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.BookingStatus[] | ListEnumBookingStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.BookingStatus[] | ListEnumBookingStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumBookingStatusWithAggregatesFilter<$PrismaModel> | $Enums.BookingStatus
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumBookingStatusFilter<$PrismaModel>
-    _max?: NestedEnumBookingStatusFilter<$PrismaModel>
-  }
-
   export type UserProfileCreateNestedOneWithoutUserAccountsInput = {
     create?: XOR<UserProfileCreateWithoutUserAccountsInput, UserProfileUncheckedCreateWithoutUserAccountsInput>
     connectOrCreate?: UserProfileCreateOrConnectWithoutUserAccountsInput
@@ -14159,20 +12483,6 @@ export namespace Prisma {
     connectOrCreate?: ConfirmedMatchCreateOrConnectWithoutHomeownerInput | ConfirmedMatchCreateOrConnectWithoutHomeownerInput[]
     createMany?: ConfirmedMatchCreateManyHomeownerInputEnvelope
     connect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
-  }
-
-  export type ServiceBookingCreateNestedManyWithoutHomeownerInput = {
-    create?: XOR<ServiceBookingCreateWithoutHomeownerInput, ServiceBookingUncheckedCreateWithoutHomeownerInput> | ServiceBookingCreateWithoutHomeownerInput[] | ServiceBookingUncheckedCreateWithoutHomeownerInput[]
-    connectOrCreate?: ServiceBookingCreateOrConnectWithoutHomeownerInput | ServiceBookingCreateOrConnectWithoutHomeownerInput[]
-    createMany?: ServiceBookingCreateManyHomeownerInputEnvelope
-    connect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-  }
-
-  export type ServiceBookingCreateNestedManyWithoutCleanerInput = {
-    create?: XOR<ServiceBookingCreateWithoutCleanerInput, ServiceBookingUncheckedCreateWithoutCleanerInput> | ServiceBookingCreateWithoutCleanerInput[] | ServiceBookingUncheckedCreateWithoutCleanerInput[]
-    connectOrCreate?: ServiceBookingCreateOrConnectWithoutCleanerInput | ServiceBookingCreateOrConnectWithoutCleanerInput[]
-    createMany?: ServiceBookingCreateManyCleanerInputEnvelope
-    connect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
   }
 
   export type UserLoginLogCreateNestedManyWithoutUserInput = {
@@ -14222,20 +12532,6 @@ export namespace Prisma {
     connectOrCreate?: ConfirmedMatchCreateOrConnectWithoutHomeownerInput | ConfirmedMatchCreateOrConnectWithoutHomeownerInput[]
     createMany?: ConfirmedMatchCreateManyHomeownerInputEnvelope
     connect?: ConfirmedMatchWhereUniqueInput | ConfirmedMatchWhereUniqueInput[]
-  }
-
-  export type ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput = {
-    create?: XOR<ServiceBookingCreateWithoutHomeownerInput, ServiceBookingUncheckedCreateWithoutHomeownerInput> | ServiceBookingCreateWithoutHomeownerInput[] | ServiceBookingUncheckedCreateWithoutHomeownerInput[]
-    connectOrCreate?: ServiceBookingCreateOrConnectWithoutHomeownerInput | ServiceBookingCreateOrConnectWithoutHomeownerInput[]
-    createMany?: ServiceBookingCreateManyHomeownerInputEnvelope
-    connect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-  }
-
-  export type ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput = {
-    create?: XOR<ServiceBookingCreateWithoutCleanerInput, ServiceBookingUncheckedCreateWithoutCleanerInput> | ServiceBookingCreateWithoutCleanerInput[] | ServiceBookingUncheckedCreateWithoutCleanerInput[]
-    connectOrCreate?: ServiceBookingCreateOrConnectWithoutCleanerInput | ServiceBookingCreateOrConnectWithoutCleanerInput[]
-    createMany?: ServiceBookingCreateManyCleanerInputEnvelope
-    connect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
   }
 
   export type UserLoginLogUncheckedCreateNestedManyWithoutUserInput = {
@@ -14351,34 +12647,6 @@ export namespace Prisma {
     deleteMany?: ConfirmedMatchScalarWhereInput | ConfirmedMatchScalarWhereInput[]
   }
 
-  export type ServiceBookingUpdateManyWithoutHomeownerNestedInput = {
-    create?: XOR<ServiceBookingCreateWithoutHomeownerInput, ServiceBookingUncheckedCreateWithoutHomeownerInput> | ServiceBookingCreateWithoutHomeownerInput[] | ServiceBookingUncheckedCreateWithoutHomeownerInput[]
-    connectOrCreate?: ServiceBookingCreateOrConnectWithoutHomeownerInput | ServiceBookingCreateOrConnectWithoutHomeownerInput[]
-    upsert?: ServiceBookingUpsertWithWhereUniqueWithoutHomeownerInput | ServiceBookingUpsertWithWhereUniqueWithoutHomeownerInput[]
-    createMany?: ServiceBookingCreateManyHomeownerInputEnvelope
-    set?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    disconnect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    delete?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    connect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    update?: ServiceBookingUpdateWithWhereUniqueWithoutHomeownerInput | ServiceBookingUpdateWithWhereUniqueWithoutHomeownerInput[]
-    updateMany?: ServiceBookingUpdateManyWithWhereWithoutHomeownerInput | ServiceBookingUpdateManyWithWhereWithoutHomeownerInput[]
-    deleteMany?: ServiceBookingScalarWhereInput | ServiceBookingScalarWhereInput[]
-  }
-
-  export type ServiceBookingUpdateManyWithoutCleanerNestedInput = {
-    create?: XOR<ServiceBookingCreateWithoutCleanerInput, ServiceBookingUncheckedCreateWithoutCleanerInput> | ServiceBookingCreateWithoutCleanerInput[] | ServiceBookingUncheckedCreateWithoutCleanerInput[]
-    connectOrCreate?: ServiceBookingCreateOrConnectWithoutCleanerInput | ServiceBookingCreateOrConnectWithoutCleanerInput[]
-    upsert?: ServiceBookingUpsertWithWhereUniqueWithoutCleanerInput | ServiceBookingUpsertWithWhereUniqueWithoutCleanerInput[]
-    createMany?: ServiceBookingCreateManyCleanerInputEnvelope
-    set?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    disconnect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    delete?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    connect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    update?: ServiceBookingUpdateWithWhereUniqueWithoutCleanerInput | ServiceBookingUpdateWithWhereUniqueWithoutCleanerInput[]
-    updateMany?: ServiceBookingUpdateManyWithWhereWithoutCleanerInput | ServiceBookingUpdateManyWithWhereWithoutCleanerInput[]
-    deleteMany?: ServiceBookingScalarWhereInput | ServiceBookingScalarWhereInput[]
-  }
-
   export type UserLoginLogUpdateManyWithoutUserNestedInput = {
     create?: XOR<UserLoginLogCreateWithoutUserInput, UserLoginLogUncheckedCreateWithoutUserInput> | UserLoginLogCreateWithoutUserInput[] | UserLoginLogUncheckedCreateWithoutUserInput[]
     connectOrCreate?: UserLoginLogCreateOrConnectWithoutUserInput | UserLoginLogCreateOrConnectWithoutUserInput[]
@@ -14479,34 +12747,6 @@ export namespace Prisma {
     update?: ConfirmedMatchUpdateWithWhereUniqueWithoutHomeownerInput | ConfirmedMatchUpdateWithWhereUniqueWithoutHomeownerInput[]
     updateMany?: ConfirmedMatchUpdateManyWithWhereWithoutHomeownerInput | ConfirmedMatchUpdateManyWithWhereWithoutHomeownerInput[]
     deleteMany?: ConfirmedMatchScalarWhereInput | ConfirmedMatchScalarWhereInput[]
-  }
-
-  export type ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput = {
-    create?: XOR<ServiceBookingCreateWithoutHomeownerInput, ServiceBookingUncheckedCreateWithoutHomeownerInput> | ServiceBookingCreateWithoutHomeownerInput[] | ServiceBookingUncheckedCreateWithoutHomeownerInput[]
-    connectOrCreate?: ServiceBookingCreateOrConnectWithoutHomeownerInput | ServiceBookingCreateOrConnectWithoutHomeownerInput[]
-    upsert?: ServiceBookingUpsertWithWhereUniqueWithoutHomeownerInput | ServiceBookingUpsertWithWhereUniqueWithoutHomeownerInput[]
-    createMany?: ServiceBookingCreateManyHomeownerInputEnvelope
-    set?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    disconnect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    delete?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    connect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    update?: ServiceBookingUpdateWithWhereUniqueWithoutHomeownerInput | ServiceBookingUpdateWithWhereUniqueWithoutHomeownerInput[]
-    updateMany?: ServiceBookingUpdateManyWithWhereWithoutHomeownerInput | ServiceBookingUpdateManyWithWhereWithoutHomeownerInput[]
-    deleteMany?: ServiceBookingScalarWhereInput | ServiceBookingScalarWhereInput[]
-  }
-
-  export type ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput = {
-    create?: XOR<ServiceBookingCreateWithoutCleanerInput, ServiceBookingUncheckedCreateWithoutCleanerInput> | ServiceBookingCreateWithoutCleanerInput[] | ServiceBookingUncheckedCreateWithoutCleanerInput[]
-    connectOrCreate?: ServiceBookingCreateOrConnectWithoutCleanerInput | ServiceBookingCreateOrConnectWithoutCleanerInput[]
-    upsert?: ServiceBookingUpsertWithWhereUniqueWithoutCleanerInput | ServiceBookingUpsertWithWhereUniqueWithoutCleanerInput[]
-    createMany?: ServiceBookingCreateManyCleanerInputEnvelope
-    set?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    disconnect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    delete?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    connect?: ServiceBookingWhereUniqueInput | ServiceBookingWhereUniqueInput[]
-    update?: ServiceBookingUpdateWithWhereUniqueWithoutCleanerInput | ServiceBookingUpdateWithWhereUniqueWithoutCleanerInput[]
-    updateMany?: ServiceBookingUpdateManyWithWhereWithoutCleanerInput | ServiceBookingUpdateManyWithWhereWithoutCleanerInput[]
-    deleteMany?: ServiceBookingScalarWhereInput | ServiceBookingScalarWhereInput[]
   }
 
   export type UserLoginLogUncheckedUpdateManyWithoutUserNestedInput = {
@@ -14808,38 +13048,6 @@ export namespace Prisma {
     update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutConfirmedMatchesAsHomeownerInput, UserAccountUpdateWithoutConfirmedMatchesAsHomeownerInput>, UserAccountUncheckedUpdateWithoutConfirmedMatchesAsHomeownerInput>
   }
 
-  export type UserAccountCreateNestedOneWithoutServiceBookingsAsCleanerInput = {
-    create?: XOR<UserAccountCreateWithoutServiceBookingsAsCleanerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsCleanerInput>
-    connectOrCreate?: UserAccountCreateOrConnectWithoutServiceBookingsAsCleanerInput
-    connect?: UserAccountWhereUniqueInput
-  }
-
-  export type UserAccountCreateNestedOneWithoutServiceBookingsAsHomeownerInput = {
-    create?: XOR<UserAccountCreateWithoutServiceBookingsAsHomeownerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsHomeownerInput>
-    connectOrCreate?: UserAccountCreateOrConnectWithoutServiceBookingsAsHomeownerInput
-    connect?: UserAccountWhereUniqueInput
-  }
-
-  export type EnumBookingStatusFieldUpdateOperationsInput = {
-    set?: $Enums.BookingStatus
-  }
-
-  export type UserAccountUpdateOneRequiredWithoutServiceBookingsAsCleanerNestedInput = {
-    create?: XOR<UserAccountCreateWithoutServiceBookingsAsCleanerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsCleanerInput>
-    connectOrCreate?: UserAccountCreateOrConnectWithoutServiceBookingsAsCleanerInput
-    upsert?: UserAccountUpsertWithoutServiceBookingsAsCleanerInput
-    connect?: UserAccountWhereUniqueInput
-    update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutServiceBookingsAsCleanerInput, UserAccountUpdateWithoutServiceBookingsAsCleanerInput>, UserAccountUncheckedUpdateWithoutServiceBookingsAsCleanerInput>
-  }
-
-  export type UserAccountUpdateOneRequiredWithoutServiceBookingsAsHomeownerNestedInput = {
-    create?: XOR<UserAccountCreateWithoutServiceBookingsAsHomeownerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsHomeownerInput>
-    connectOrCreate?: UserAccountCreateOrConnectWithoutServiceBookingsAsHomeownerInput
-    upsert?: UserAccountUpsertWithoutServiceBookingsAsHomeownerInput
-    connect?: UserAccountWhereUniqueInput
-    update?: XOR<XOR<UserAccountUpdateToOneWithWhereWithoutServiceBookingsAsHomeownerInput, UserAccountUpdateWithoutServiceBookingsAsHomeownerInput>, UserAccountUncheckedUpdateWithoutServiceBookingsAsHomeownerInput>
-  }
-
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -15044,23 +13252,6 @@ export namespace Prisma {
     _max?: NestedEnumServiceListingStatusFilter<$PrismaModel>
   }
 
-  export type NestedEnumBookingStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.BookingStatus | EnumBookingStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.BookingStatus[] | ListEnumBookingStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.BookingStatus[] | ListEnumBookingStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumBookingStatusFilter<$PrismaModel> | $Enums.BookingStatus
-  }
-
-  export type NestedEnumBookingStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.BookingStatus | EnumBookingStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.BookingStatus[] | ListEnumBookingStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.BookingStatus[] | ListEnumBookingStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumBookingStatusWithAggregatesFilter<$PrismaModel> | $Enums.BookingStatus
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumBookingStatusFilter<$PrismaModel>
-    _max?: NestedEnumBookingStatusFilter<$PrismaModel>
-  }
-
   export type UserProfileCreateWithoutUserAccountsInput = {
     id?: string
     name: string
@@ -15223,78 +13414,6 @@ export namespace Prisma {
 
   export type ConfirmedMatchCreateManyHomeownerInputEnvelope = {
     data: ConfirmedMatchCreateManyHomeownerInput | ConfirmedMatchCreateManyHomeownerInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type ServiceBookingCreateWithoutHomeownerInput = {
-    id?: string
-    bookingId: string
-    serviceDate: Date | string
-    status: $Enums.BookingStatus
-    serviceType: string
-    ratePerHr: number
-    hours: number
-    totalAmount: number
-    createdAt?: Date | string
-    cleaner: UserAccountCreateNestedOneWithoutServiceBookingsAsCleanerInput
-  }
-
-  export type ServiceBookingUncheckedCreateWithoutHomeownerInput = {
-    id?: string
-    bookingId: string
-    cleanerId: string
-    serviceDate: Date | string
-    status: $Enums.BookingStatus
-    serviceType: string
-    ratePerHr: number
-    hours: number
-    totalAmount: number
-    createdAt?: Date | string
-  }
-
-  export type ServiceBookingCreateOrConnectWithoutHomeownerInput = {
-    where: ServiceBookingWhereUniqueInput
-    create: XOR<ServiceBookingCreateWithoutHomeownerInput, ServiceBookingUncheckedCreateWithoutHomeownerInput>
-  }
-
-  export type ServiceBookingCreateManyHomeownerInputEnvelope = {
-    data: ServiceBookingCreateManyHomeownerInput | ServiceBookingCreateManyHomeownerInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type ServiceBookingCreateWithoutCleanerInput = {
-    id?: string
-    bookingId: string
-    serviceDate: Date | string
-    status: $Enums.BookingStatus
-    serviceType: string
-    ratePerHr: number
-    hours: number
-    totalAmount: number
-    createdAt?: Date | string
-    homeowner: UserAccountCreateNestedOneWithoutServiceBookingsAsHomeownerInput
-  }
-
-  export type ServiceBookingUncheckedCreateWithoutCleanerInput = {
-    id?: string
-    bookingId: string
-    homeownerId: string
-    serviceDate: Date | string
-    status: $Enums.BookingStatus
-    serviceType: string
-    ratePerHr: number
-    hours: number
-    totalAmount: number
-    createdAt?: Date | string
-  }
-
-  export type ServiceBookingCreateOrConnectWithoutCleanerInput = {
-    where: ServiceBookingWhereUniqueInput
-    create: XOR<ServiceBookingCreateWithoutCleanerInput, ServiceBookingUncheckedCreateWithoutCleanerInput>
-  }
-
-  export type ServiceBookingCreateManyCleanerInputEnvelope = {
-    data: ServiceBookingCreateManyCleanerInput | ServiceBookingCreateManyCleanerInput[]
     skipDuplicates?: boolean
   }
 
@@ -15491,55 +13610,6 @@ export namespace Prisma {
     confirmationDate?: DateTimeFilter<"ConfirmedMatch"> | Date | string
   }
 
-  export type ServiceBookingUpsertWithWhereUniqueWithoutHomeownerInput = {
-    where: ServiceBookingWhereUniqueInput
-    update: XOR<ServiceBookingUpdateWithoutHomeownerInput, ServiceBookingUncheckedUpdateWithoutHomeownerInput>
-    create: XOR<ServiceBookingCreateWithoutHomeownerInput, ServiceBookingUncheckedCreateWithoutHomeownerInput>
-  }
-
-  export type ServiceBookingUpdateWithWhereUniqueWithoutHomeownerInput = {
-    where: ServiceBookingWhereUniqueInput
-    data: XOR<ServiceBookingUpdateWithoutHomeownerInput, ServiceBookingUncheckedUpdateWithoutHomeownerInput>
-  }
-
-  export type ServiceBookingUpdateManyWithWhereWithoutHomeownerInput = {
-    where: ServiceBookingScalarWhereInput
-    data: XOR<ServiceBookingUpdateManyMutationInput, ServiceBookingUncheckedUpdateManyWithoutHomeownerInput>
-  }
-
-  export type ServiceBookingScalarWhereInput = {
-    AND?: ServiceBookingScalarWhereInput | ServiceBookingScalarWhereInput[]
-    OR?: ServiceBookingScalarWhereInput[]
-    NOT?: ServiceBookingScalarWhereInput | ServiceBookingScalarWhereInput[]
-    id?: StringFilter<"ServiceBooking"> | string
-    bookingId?: StringFilter<"ServiceBooking"> | string
-    cleanerId?: StringFilter<"ServiceBooking"> | string
-    homeownerId?: StringFilter<"ServiceBooking"> | string
-    serviceDate?: DateTimeFilter<"ServiceBooking"> | Date | string
-    status?: EnumBookingStatusFilter<"ServiceBooking"> | $Enums.BookingStatus
-    serviceType?: StringFilter<"ServiceBooking"> | string
-    ratePerHr?: FloatFilter<"ServiceBooking"> | number
-    hours?: FloatFilter<"ServiceBooking"> | number
-    totalAmount?: FloatFilter<"ServiceBooking"> | number
-    createdAt?: DateTimeFilter<"ServiceBooking"> | Date | string
-  }
-
-  export type ServiceBookingUpsertWithWhereUniqueWithoutCleanerInput = {
-    where: ServiceBookingWhereUniqueInput
-    update: XOR<ServiceBookingUpdateWithoutCleanerInput, ServiceBookingUncheckedUpdateWithoutCleanerInput>
-    create: XOR<ServiceBookingCreateWithoutCleanerInput, ServiceBookingUncheckedCreateWithoutCleanerInput>
-  }
-
-  export type ServiceBookingUpdateWithWhereUniqueWithoutCleanerInput = {
-    where: ServiceBookingWhereUniqueInput
-    data: XOR<ServiceBookingUpdateWithoutCleanerInput, ServiceBookingUncheckedUpdateWithoutCleanerInput>
-  }
-
-  export type ServiceBookingUpdateManyWithWhereWithoutCleanerInput = {
-    where: ServiceBookingScalarWhereInput
-    data: XOR<ServiceBookingUpdateManyMutationInput, ServiceBookingUncheckedUpdateManyWithoutCleanerInput>
-  }
-
   export type UserLoginLogUpsertWithWhereUniqueWithoutUserInput = {
     where: UserLoginLogWhereUniqueInput
     update: XOR<UserLoginLogUpdateWithoutUserInput, UserLoginLogUncheckedUpdateWithoutUserInput>
@@ -15582,8 +13652,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
   }
 
   export type UserAccountUncheckedCreateWithoutLoginLogsInput = {
@@ -15601,8 +13669,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
   }
 
   export type UserAccountCreateOrConnectWithoutLoginLogsInput = {
@@ -15636,8 +13702,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
   }
 
   export type UserAccountUncheckedUpdateWithoutLoginLogsInput = {
@@ -15655,8 +13719,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
   }
 
   export type UserAccountCreateWithoutUserProfileInput = {
@@ -15673,8 +13735,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
@@ -15692,8 +13752,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -15799,8 +13857,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
@@ -15818,8 +13874,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -15898,8 +13952,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
@@ -15917,8 +13969,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -15981,8 +14031,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
@@ -16000,8 +14048,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -16024,8 +14070,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
@@ -16043,8 +14087,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -16078,8 +14120,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
@@ -16097,8 +14137,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -16127,8 +14165,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
@@ -16146,8 +14182,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -16165,8 +14199,6 @@ export namespace Prisma {
     viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
@@ -16184,8 +14216,6 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -16208,8 +14238,6 @@ export namespace Prisma {
     viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
@@ -16227,8 +14255,6 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -16262,8 +14288,6 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
@@ -16281,8 +14305,6 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -16311,8 +14333,6 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
@@ -16330,8 +14350,6 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -16376,8 +14394,6 @@ export namespace Prisma {
     viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
     createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
-    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
   }
 
@@ -16395,8 +14411,6 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
     createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
     shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
     loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -16463,8 +14477,6 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
@@ -16482,192 +14494,6 @@ export namespace Prisma {
     viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
-    loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserAccountCreateWithoutServiceBookingsAsCleanerInput = {
-    id?: string
-    username: string
-    email: string
-    password: string
-    status?: $Enums.UserStatus
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
-    serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
-    profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
-    viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
-    createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
-    shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
-    confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingCreateNestedManyWithoutHomeownerInput
-    loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
-  }
-
-  export type UserAccountUncheckedCreateWithoutServiceBookingsAsCleanerInput = {
-    id?: string
-    username: string
-    email: string
-    password: string
-    status?: $Enums.UserStatus
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    userProfileId?: string | null
-    serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
-    profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
-    viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
-    createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
-    shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
-    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedCreateNestedManyWithoutHomeownerInput
-    loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type UserAccountCreateOrConnectWithoutServiceBookingsAsCleanerInput = {
-    where: UserAccountWhereUniqueInput
-    create: XOR<UserAccountCreateWithoutServiceBookingsAsCleanerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsCleanerInput>
-  }
-
-  export type UserAccountCreateWithoutServiceBookingsAsHomeownerInput = {
-    id?: string
-    username: string
-    email: string
-    password: string
-    status?: $Enums.UserStatus
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    userProfile?: UserProfileCreateNestedOneWithoutUserAccountsInput
-    serviceListings?: ServiceListingCreateNestedManyWithoutCleanerInput
-    profileViews?: ProfileViewCreateNestedManyWithoutViewedProfileInput
-    viewedOthers?: ProfileViewCreateNestedManyWithoutViewerInput
-    createdShortlists?: ShortlistCreateNestedManyWithoutHomeownerInput
-    shortlistedIn?: ShortlistCreateNestedManyWithoutCleanerInput
-    confirmedMatchesAsHomeowner?: ConfirmedMatchCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingCreateNestedManyWithoutCleanerInput
-    loginLogs?: UserLoginLogCreateNestedManyWithoutUserInput
-  }
-
-  export type UserAccountUncheckedCreateWithoutServiceBookingsAsHomeownerInput = {
-    id?: string
-    username: string
-    email: string
-    password: string
-    status?: $Enums.UserStatus
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    userProfileId?: string | null
-    serviceListings?: ServiceListingUncheckedCreateNestedManyWithoutCleanerInput
-    profileViews?: ProfileViewUncheckedCreateNestedManyWithoutViewedProfileInput
-    viewedOthers?: ProfileViewUncheckedCreateNestedManyWithoutViewerInput
-    createdShortlists?: ShortlistUncheckedCreateNestedManyWithoutHomeownerInput
-    shortlistedIn?: ShortlistUncheckedCreateNestedManyWithoutCleanerInput
-    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedCreateNestedManyWithoutHomeownerInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedCreateNestedManyWithoutCleanerInput
-    loginLogs?: UserLoginLogUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type UserAccountCreateOrConnectWithoutServiceBookingsAsHomeownerInput = {
-    where: UserAccountWhereUniqueInput
-    create: XOR<UserAccountCreateWithoutServiceBookingsAsHomeownerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsHomeownerInput>
-  }
-
-  export type UserAccountUpsertWithoutServiceBookingsAsCleanerInput = {
-    update: XOR<UserAccountUpdateWithoutServiceBookingsAsCleanerInput, UserAccountUncheckedUpdateWithoutServiceBookingsAsCleanerInput>
-    create: XOR<UserAccountCreateWithoutServiceBookingsAsCleanerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsCleanerInput>
-    where?: UserAccountWhereInput
-  }
-
-  export type UserAccountUpdateToOneWithWhereWithoutServiceBookingsAsCleanerInput = {
-    where?: UserAccountWhereInput
-    data: XOR<UserAccountUpdateWithoutServiceBookingsAsCleanerInput, UserAccountUncheckedUpdateWithoutServiceBookingsAsCleanerInput>
-  }
-
-  export type UserAccountUpdateWithoutServiceBookingsAsCleanerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    username?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
-    serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
-    profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
-    viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
-    createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
-    shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
-    confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserAccountUncheckedUpdateWithoutServiceBookingsAsCleanerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    username?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
-    profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
-    viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
-    createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
-    shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
-    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserAccountUpsertWithoutServiceBookingsAsHomeownerInput = {
-    update: XOR<UserAccountUpdateWithoutServiceBookingsAsHomeownerInput, UserAccountUncheckedUpdateWithoutServiceBookingsAsHomeownerInput>
-    create: XOR<UserAccountCreateWithoutServiceBookingsAsHomeownerInput, UserAccountUncheckedCreateWithoutServiceBookingsAsHomeownerInput>
-    where?: UserAccountWhereInput
-  }
-
-  export type UserAccountUpdateToOneWithWhereWithoutServiceBookingsAsHomeownerInput = {
-    where?: UserAccountWhereInput
-    data: XOR<UserAccountUpdateWithoutServiceBookingsAsHomeownerInput, UserAccountUncheckedUpdateWithoutServiceBookingsAsHomeownerInput>
-  }
-
-  export type UserAccountUpdateWithoutServiceBookingsAsHomeownerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    username?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userProfile?: UserProfileUpdateOneWithoutUserAccountsNestedInput
-    serviceListings?: ServiceListingUpdateManyWithoutCleanerNestedInput
-    profileViews?: ProfileViewUpdateManyWithoutViewedProfileNestedInput
-    viewedOthers?: ProfileViewUpdateManyWithoutViewerNestedInput
-    createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
-    shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
-    confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
-    loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserAccountUncheckedUpdateWithoutServiceBookingsAsHomeownerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    username?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userProfileId?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceListings?: ServiceListingUncheckedUpdateManyWithoutCleanerNestedInput
-    profileViews?: ProfileViewUncheckedUpdateManyWithoutViewedProfileNestedInput
-    viewedOthers?: ProfileViewUncheckedUpdateManyWithoutViewerNestedInput
-    createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
-    shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
-    confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -16709,32 +14535,6 @@ export namespace Prisma {
     id?: string
     serviceListingId: string
     confirmationDate?: Date | string
-  }
-
-  export type ServiceBookingCreateManyHomeownerInput = {
-    id?: string
-    bookingId: string
-    cleanerId: string
-    serviceDate: Date | string
-    status: $Enums.BookingStatus
-    serviceType: string
-    ratePerHr: number
-    hours: number
-    totalAmount: number
-    createdAt?: Date | string
-  }
-
-  export type ServiceBookingCreateManyCleanerInput = {
-    id?: string
-    bookingId: string
-    homeownerId: string
-    serviceDate: Date | string
-    status: $Enums.BookingStatus
-    serviceType: string
-    ratePerHr: number
-    hours: number
-    totalAmount: number
-    createdAt?: Date | string
   }
 
   export type UserLoginLogCreateManyUserInput = {
@@ -16866,84 +14666,6 @@ export namespace Prisma {
     confirmationDate?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type ServiceBookingUpdateWithoutHomeownerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
-    serviceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    serviceType?: StringFieldUpdateOperationsInput | string
-    ratePerHr?: FloatFieldUpdateOperationsInput | number
-    hours?: FloatFieldUpdateOperationsInput | number
-    totalAmount?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    cleaner?: UserAccountUpdateOneRequiredWithoutServiceBookingsAsCleanerNestedInput
-  }
-
-  export type ServiceBookingUncheckedUpdateWithoutHomeownerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
-    cleanerId?: StringFieldUpdateOperationsInput | string
-    serviceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    serviceType?: StringFieldUpdateOperationsInput | string
-    ratePerHr?: FloatFieldUpdateOperationsInput | number
-    hours?: FloatFieldUpdateOperationsInput | number
-    totalAmount?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ServiceBookingUncheckedUpdateManyWithoutHomeownerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
-    cleanerId?: StringFieldUpdateOperationsInput | string
-    serviceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    serviceType?: StringFieldUpdateOperationsInput | string
-    ratePerHr?: FloatFieldUpdateOperationsInput | number
-    hours?: FloatFieldUpdateOperationsInput | number
-    totalAmount?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ServiceBookingUpdateWithoutCleanerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
-    serviceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    serviceType?: StringFieldUpdateOperationsInput | string
-    ratePerHr?: FloatFieldUpdateOperationsInput | number
-    hours?: FloatFieldUpdateOperationsInput | number
-    totalAmount?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    homeowner?: UserAccountUpdateOneRequiredWithoutServiceBookingsAsHomeownerNestedInput
-  }
-
-  export type ServiceBookingUncheckedUpdateWithoutCleanerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
-    homeownerId?: StringFieldUpdateOperationsInput | string
-    serviceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    serviceType?: StringFieldUpdateOperationsInput | string
-    ratePerHr?: FloatFieldUpdateOperationsInput | number
-    hours?: FloatFieldUpdateOperationsInput | number
-    totalAmount?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ServiceBookingUncheckedUpdateManyWithoutCleanerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
-    homeownerId?: StringFieldUpdateOperationsInput | string
-    serviceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    serviceType?: StringFieldUpdateOperationsInput | string
-    ratePerHr?: FloatFieldUpdateOperationsInput | number
-    hours?: FloatFieldUpdateOperationsInput | number
-    totalAmount?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type UserLoginLogUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     loginTime?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16989,8 +14711,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUpdateManyWithoutUserNestedInput
   }
 
@@ -17008,8 +14728,6 @@ export namespace Prisma {
     createdShortlists?: ShortlistUncheckedUpdateManyWithoutHomeownerNestedInput
     shortlistedIn?: ShortlistUncheckedUpdateManyWithoutCleanerNestedInput
     confirmedMatchesAsHomeowner?: ConfirmedMatchUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsHomeowner?: ServiceBookingUncheckedUpdateManyWithoutHomeownerNestedInput
-    serviceBookingsAsCleaner?: ServiceBookingUncheckedUpdateManyWithoutCleanerNestedInput
     loginLogs?: UserLoginLogUncheckedUpdateManyWithoutUserNestedInput
   }
 

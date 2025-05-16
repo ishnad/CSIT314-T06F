@@ -163,7 +163,7 @@ const renderingMethods = {
         {historyLoading ? (
           <div className="loading">Loading your cleaning history...</div>
         ) : filteredHistory && filteredHistory.length > 0 ? (
-          <div className="history-list">
+          <div className="bookings-list">
             {filteredHistory.map(item => {
               // Extract data handling differences in API response format
               const id = item.id || item.matchId || item.bookingId;
@@ -179,15 +179,15 @@ const renderingMethods = {
               const rating = item.rating || item.cleanerRating || 0; // Display rating if it exists
               
               return (
-                <div key={id} className="history-card">
-                  <div className="history-header">
+                <div key={id} className="booking-card">
+                  <div className="booking-header">
                     <h3>{service}</h3>
                     <span className={`status-badge ${status.toLowerCase()}`}>
                       {status}
                     </span>
                   </div>
                   
-                  <div className="history-details">
+                  <div className="booking-details">
                     <p><strong>Cleaner:</strong> {cleanerName}</p>
                     <p><strong>Date:</strong> {date}</p>
                     <p><strong>Time:</strong> {time}</p>
@@ -209,15 +209,6 @@ const renderingMethods = {
                       </div>
                     )}
                   </div>
-                  
-                  {status === 'Completed' && (
-                    <button 
-                      className="book-again-button"
-                      onClick={() => this.bookAgain && this.bookAgain(id)}
-                    >
-                      Book Again
-                    </button>
-                  )}
                 </div>
               );
             })}
