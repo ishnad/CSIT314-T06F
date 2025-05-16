@@ -1,4 +1,4 @@
-const { PrismaClient, UserStatus } = require('../generated/prisma');
+const { Prisma, PrismaClient, UserStatus } = require('../generated/prisma');
 const bcrypt = require('bcrypt');
 
 class UserAccountEntity {
@@ -381,11 +381,14 @@ async createUserAccount({ username, password, email, userProfileName }) {
                         },
                         select: {
                             id: true,
-                            serviceType: true,
-                            title: true,
                             description: true,
                             ratePerHr: true,
-                            status: true
+                            status: true,
+                            serviceCategory: {
+                                select: {
+                                    serviceCatName: true
+                                }
+                            }
                         }
                     }
                 }
@@ -397,7 +400,10 @@ async createUserAccount({ username, password, email, userProfileName }) {
                 email: cleanerAccount.email,
                 status: cleanerAccount.status,
                 profileName: cleanerAccount.userProfile.name,
-                serviceListings: cleanerAccount.serviceListings
+                serviceListings: cleanerAccount.serviceListings.map(listing => ({
+                    ...listing,
+                    serviceType: listing.serviceCategory?.serviceCatName || 'Cleaning Service'
+                }))
             };
 
         } catch (error) {

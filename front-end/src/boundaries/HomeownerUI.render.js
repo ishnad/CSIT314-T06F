@@ -38,31 +38,27 @@ const renderingMethods = {
                 <div key={cleaner.id} className="cleaner-card">
                   <div className="cleaner-header">
                     <h3>{cleaner.name}</h3>
-                    <span className="cleaner-rating">★ {cleaner.rating}/5</span>
                   </div>
 
-                  <div className="cleaner-details">
-                    <p><strong>Rate/hour:</strong> {cleaner.price}</p>
-                    <p><strong>Email:</strong> {cleaner.email}</p>
-                    <p><strong>Description:</strong> {cleaner.description}</p>
+                  <div className="cleaner-details">=
                     <p><strong>Services:</strong> {cleaner.services.join(', ')}</p>
                   </div>
 
                   <div className="cleaner-actions">
                     <button
-                      className="book-button"
-                      onClick={() => this.bookCleaner(cleaner.id)}
+                      className="view-profile-button"
+                      onClick={() => this.viewCleanerProfile(cleaner.id)}
                     >
-                      Book Now
+                      View Profile
                     </button>
-                    {/* Only show save button if not already saved */}
+                    {/* Only show shortlist button if not already saved */}
                     {!isSaved ? (
                       <button
                         className="save-button"
                         onClick={() => this.saveCleaner(cleaner.id)}
                       >
                         <span className="save-icon">☆</span>
-                        <span className="save-text">Save</span>
+                        <span className="save-text">Shortlist</span>
                       </button>
                     ) : (
                       <button
@@ -70,7 +66,7 @@ const renderingMethods = {
                         disabled
                       >
                         <span className="save-icon">★</span>
-                        <span className="save-text">Saved</span>
+                        <span className="save-text">Shortlisted</span>
                       </button>
                     )}
                   </div>
@@ -115,7 +111,6 @@ const renderingMethods = {
               <div key={cleaner.id} className="cleaner-card">
                 <div className="cleaner-header">
                   <h3>{cleaner.name}</h3>
-                  <span className="cleaner-rating">★ {cleaner.rating}/5</span>
                 </div>
 
                 <div className="cleaner-details">
@@ -324,10 +319,44 @@ const renderingMethods = {
 
   // Main render method for the homeowner UI
   renderHomeowner() {
-    const { message, activeTab } = this.state;
+    const { message, activeTab, showCleanerProfile, selectedCleaner } = this.state;
 
     return (
       <div className="app-container">
+        {showCleanerProfile && selectedCleaner && (
+          <div className="cleaner-profile-modal">
+            <div className="modal-content">
+              <button 
+                className="close-button"
+                onClick={this.closeCleanerProfile}
+              >
+                &times;
+              </button>
+              
+              <h2>{selectedCleaner.username}'s Services</h2>
+              
+              {selectedCleaner.serviceListings?.length > 0 ? (
+                <div className="service-listings">
+                  {selectedCleaner.serviceListings.map(service => (
+                    <div key={service.id} className="service-card">
+                      <h3>{service.serviceType || 'Cleaning Service'}</h3>
+                      <p><strong>Description:</strong> {service.description}</p>
+                      <p><strong>Rate:</strong> ${service.ratePerHr}/hour</p>
+                      <button 
+                        className="book-service-button"
+                        onClick={() => this.bookService(selectedCleaner.id, service.id)}
+                      >
+                        Book This Service
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>This cleaner hasn't listed any services yet.</p>
+              )}
+            </div>
+          </div>
+        )}
         <main className="app-content">
           <div className="homeowner-ui-container">
             {message && (

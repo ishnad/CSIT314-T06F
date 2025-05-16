@@ -35,7 +35,9 @@ class HomeownerUI extends Component {
       // UI state
       loading: false,
       message: null,
-      error: null
+      error: null,
+      showCleanerProfile: false,
+      selectedCleaner: null
     };
 
     // Bind rendering methods from the imported object to this instance
@@ -540,71 +542,50 @@ class HomeownerUI extends Component {
     }, 3000);
   };
 
-  // Book cleaner
-  bookCleaner = async (cleanerId) => {
-    const { cleaners, savedCleaners } = this.state;
-
-    // Try to find the cleaner in both the cleaners list and savedCleaners list
-    const cleaner = cleaners.find(c => c.id === cleanerId) ||
-      savedCleaners.find(c => c.id === cleanerId);
-
-    if (!cleaner) return;
-
+  // View cleaner profile
+  viewCleanerProfile = async (cleanerId) => {
     try {
       this.setState({ loading: true });
-
-      // Create a new booking via API
-      const bookingData = {
-        cleanerId: cleaner.id,
-        service: cleaner.services ? cleaner.services[0] : 'Standard Service', // Default to first service or standard
-        date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
-        time: "10:00 AM"
-      };
-
-      const response = await fetch('http://localhost:3000/api/matches/cleaner/confirmed', {
-        method: 'POST',
+      
+      const response = await fetch(`http://localhost:3000/api/users/${cleanerId}/profile`, {
         headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookingData),
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to book cleaner: ${response.statusText}`);
+        throw new Error(`Failed to fetch cleaner profile: ${response.statusText}`);
       }
 
-      // Get the created booking from response
-      const newBooking = await response.json();
-
-      // Update state and show success message
+      const profileData = await response.json();
+      
       this.setState({
         loading: false,
-        message: {
-          text: `Booking with ${cleaner.name} confirmed for tomorrow at 10:00 AM`,
-          type: "success"
-        },
-        activeTab: 'booked' // Switch to booked tab
+        showCleanerProfile: true,
+        selectedCleaner: {
+          ...profileData,
+          id: cleanerId
+        }
       });
 
-      // Refresh the bookings list to include the new booking
-      this.loadBookedCleaners();
-
     } catch (err) {
-      console.error('Error booking cleaner:', err);
-
+      console.error('Error viewing cleaner profile:', err);
       this.setState({
         loading: false,
-        error: err.message,
         message: {
-          text: `Error booking cleaner: ${err.message}`,
+          text: `Error: ${err.message}`,
           type: 'error'
         }
       });
     }
+  };
 
-    setTimeout(() => {
-      this.setState({ message: null });
-    }, 3000);
+  // Close cleaner profile modal
+  closeCleanerProfile = () => {
+    this.setState({
+      showCleanerProfile: false,
+      selectedCleaner: null
+    });
   };
 
   // View booking details
