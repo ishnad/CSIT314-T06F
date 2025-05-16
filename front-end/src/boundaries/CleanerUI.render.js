@@ -349,7 +349,43 @@ const renderingMethods = {
           padding: '20px',
           borderRadius: '8px',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          margin: '20px 0'
+          margin: '20px 0',
+          '.insight-chart': {
+            display: 'flex',
+            justifyContent: 'space-between',
+            height: '150px',
+            marginTop: '20px',
+            '.chart-bar': {
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              width: '12%',
+              '.bar-container': {
+                height: '100%',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                position: 'relative'
+              },
+              '.bar-fill': {
+                width: '100%',
+                transition: 'height 0.3s ease',
+                borderRadius: '4px 4px 0 0'
+              },
+              '.bar-value': {
+                position: 'absolute',
+                top: '-25px',
+                fontSize: '12px',
+                fontWeight: 'bold'
+              },
+              '.bar-label': {
+                marginTop: '5px',
+                fontSize: '12px',
+                fontWeight: 'bold'
+              }
+            }
+          }
         }}>
           <h2>Profile Insights</h2>
 
@@ -366,16 +402,32 @@ const renderingMethods = {
                     <div className="insight-value">{profileInsights.totalViews}</div>
                     <div className="insight-label">Total Views</div>
                     <div className="insight-chart">
-                      {/* Use a more stable key if day.date is unique, otherwise index is fallback */}
-                      {profileInsights.dailyViewsLastWeek && profileInsights.dailyViewsLastWeek.map((day, index) => (
-                        <div key={day.date || index} className="chart-bar"> {/* Prefer day.date if unique & available */}
-                          <div
-                            className="bar-fill"
-                            style={{ height: `${Math.min(day.views * 10, 100)}%` }} // Example scaling
-                          ></div>
-                          <div className="bar-label">{new Date(day.date).getDate()}</div> {/* Format date for label */}
-                        </div>
-                      ))}
+                      {profileInsights.dailyViewsLastWeek && profileInsights.dailyViewsLastWeek.map((day, index) => {
+                        const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(day.date).getDay()];
+                        const hasViews = day.views > 0;
+                        // Calculate bar height based on the maximum views in the week to normalize heights
+                        const maxViews = Math.max(...profileInsights.dailyViewsLastWeek.map(d => d.views), 1);
+                        const barHeight = Math.max(10, (day.views / maxViews) * 100);
+                        return (
+                          <div key={day.date || index} className="chart-bar">
+                            <div className="bar-container">
+                              <div
+                                className="bar-fill"
+                                style={{ 
+                                  height: `${barHeight}%`,
+                                  backgroundColor: hasViews ? '#4a6fa5' : '#e0e0e0'
+                                }}
+                              ></div>
+                              {hasViews && (
+                                <div className="bar-value">{day.views}</div>
+                              )}
+                            </div>
+                            <div className="bar-label">
+                              {dayName}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </>
                 ) : (

@@ -21,7 +21,7 @@ class CleanerUI extends Component {
       showCreateForm: false,
       newListing: {
         serviceCatName: 'Basic Cleaning',
-        description: 'Describe your service',
+        description: '',
         ratePerHr: 30.00
       },
       createListingError: null,
@@ -159,6 +159,17 @@ class CleanerUI extends Component {
       }
 
       const data = await response.json();
+      
+      // Validate that totalViews matches sum of daily views
+      if (data.dailyViewsLastWeek) {
+        const calculatedTotal = data.dailyViewsLastWeek.reduce((sum, day) => sum + day.views, 0);
+        if (data.totalViews !== calculatedTotal) {
+          console.warn(`Total views (${data.totalViews}) doesn't match sum of daily views (${calculatedTotal})`);
+          // Use the calculated total if they don't match
+          data.totalViews = calculatedTotal;
+        }
+      }
+
       this.setState({ profileInsights: data });
     } catch (error) {
       console.error('Error fetching profile insights:', error);
@@ -245,7 +256,9 @@ class CleanerUI extends Component {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          ...this.state.newListing,
+          serviceCatName: this.state.newListing.serviceCatName,
+          description: this.state.newListing.description,
+          ratePerHr: parseFloat(this.state.newListing.ratePerHr),
           cleanerId: this.props.user?.id
         }),
       });

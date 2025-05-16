@@ -7,14 +7,31 @@ class ServiceListingEntity {
 
     /**
      * Creates a new service listing in the database.
-     * @param {string} serviceCategoryId - ID of the service category.
+     * @param {string} serviceCatName - ID of the service category.
      * @param {string} description - Description of the service.
      * @param {number} ratePerHr - Rate per hour.
      * @param {string} cleanerId - ID of the user creating the listing.
      * @returns {Promise true|{error: {status: number, error: string}}>} The created listing object or an error object.
      */
-    async createServiceListing(serviceCategoryId, description, ratePerHr, cleanerId) {
+    async createServiceListing(serviceCatName, description, ratePerHr, cleanerId) {
         try {
+            // First find the service category by name
+            const serviceCategory = await this.prisma.serviceCategory.findFirst({
+                where: { 
+                    serviceCatName: serviceCatName,
+                    status: 'ACTIVE'
+                }
+            });
+            
+            if (!serviceCategory) {
+                return { error: { status: 404, error: `Service category '${serviceCatName}' not found or inactive` } };
+            }
+
+            // Validate the service category has an ID
+            if (!serviceCategory.id) {
+                return { error: { status: 500, error: 'Service category has no ID' } };
+            }
+
             await this.prisma.serviceListing.create({
                 data: {
                     description: description.trim(),
@@ -22,8 +39,8 @@ class ServiceListingEntity {
                     cleaner: { // Connect to the cleaner
                         connect: { id: cleanerId }
                     },
-                    serviceCategory: { // Connect to the service category
-                        connect: { id: serviceCategoryId }
+                    serviceCategory: { // Connect to the service category using its ID
+                        connect: { id: serviceCategory.id }
                     },
                     status: ServiceListingStatus.ACTIVE // Default status
                 },

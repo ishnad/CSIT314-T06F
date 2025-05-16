@@ -110,6 +110,89 @@ async function main() {
   // --- End Seed Bulk Users ---
 
 
+  // --- Seed Service Categories ---
+  const serviceCategories = [
+    { name: 'Basic Cleaning', description: 'General cleaning services' },
+    { name: 'Deep Cleaning', description: 'Thorough cleaning of entire home' },
+    { name: 'Window Cleaning', description: 'Interior and exterior window cleaning' },
+    { name: 'Carpet Cleaning', description: 'Professional carpet and rug cleaning' },
+    { name: 'Move-In/Move-Out Cleaning', description: 'Cleaning for property transitions' }
+  ];
+
+  for (const category of serviceCategories) {
+    await prisma.serviceCategory.upsert({
+      where: { serviceCatName: category.name },
+      update: {},
+      create: {
+        serviceCatName: category.name,
+        serviceCatDescription: category.description,
+        status: 'ACTIVE'
+      }
+    });
+  }
+  console.log('Seeded service categories');
+
+  // --- Seed Service Listings ---
+  const cleaners = await prisma.userAccount.findMany({
+    where: {
+      userProfile: {
+        name: 'Cleaner'
+      }
+    },
+    take: 20 // Only seed listings for first 20 cleaners
+  });
+
+  const categories = await prisma.serviceCategory.findMany();
+
+  for (const cleaner of cleaners) {
+    // Each cleaner gets 1-3 random service listings
+    const listingCount = Math.floor(Math.random() * 3) + 1;
+    
+    for (let i = 0; i < listingCount; i++) {
+      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+      const rate = Math.floor(Math.random() * 20) + 15; // Random rate between 15-35
+
+      await prisma.serviceListing.create({
+        data: {
+          description: `${randomCategory.serviceCatName} service by ${cleaner.username}`,
+          ratePerHr: rate,
+          cleanerId: cleaner.id,
+          serviceCategoryId: randomCategory.id,
+          status: 'ACTIVE'
+        }
+      });
+    }
+  }
+  console.log('Seeded service listings');
+
+  // --- Seed Profile Views ---
+  const homeowners = await prisma.userAccount.findMany({
+    where: {
+      userProfile: {
+        name: 'Homeowner'
+      }
+    },
+    take: 30
+  });
+
+  for (let i = 0; i < 100; i++) { // Create 100 random profile views
+    const randomViewer = homeowners[Math.floor(Math.random() * homeowners.length)];
+    const randomCleaner = cleaners[Math.floor(Math.random() * cleaners.length)];
+    
+    // Random date in last 30 days
+    const viewedAt = new Date();
+    viewedAt.setDate(viewedAt.getDate() - Math.floor(Math.random() * 30));
+
+    await prisma.profileView.create({
+      data: {
+        viewedProfileId: randomCleaner.id,
+        viewerId: randomViewer.id,
+        viewedAt: viewedAt
+      }
+    });
+  }
+  console.log('Seeded profile views');
+
   console.log(`Seeding finished.`);
 }
 
