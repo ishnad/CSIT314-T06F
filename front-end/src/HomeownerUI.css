@@ -1,0 +1,367 @@
+/* HomeownerUI styles - add to your CSS file */
+.homeowner-navbar {
+  background-color: #38a169; /* Green color for homeowner */
+}
+
+.homeowner-ui-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 25px;
+}
+
+.dashboard-summary {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.summary-card {
+  background-color: white;
+  border-radius: var(--border-radius);
+  padding: 20px;
+  flex: 1;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  transition: var(--transition);
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.summary-count {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--primary);
+  margin-top: 10px;
+}
+
+.section-title {
+  margin: 25px 0 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--gray-200);
+  color: var(--gray-800);
+}
+
+.services-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.service-card {
+  background-color: white;
+  border-radius: var(--border-radius);
+  padding: 25px;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.service-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+.service-price {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--gray-800);
+  margin: 15px 0;
+}
+
+.service-duration {
+  color: var(--gray-600);
+  margin-bottom: 20px;
+}
+
+.book-button {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.book-button:hover {
+  background-color: var(--primary-hover);
+}
+
+.bookings-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.booking-card {
+  background-color: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.booking-header {
+  padding: 15px;
+  background-color: var(--gray-50);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.booking-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.booking-details {
+  padding: 15px;
+}
+
+.booking-details p {
+  margin: 8px 0;
+}
+
+.booking-actions {
+  padding: 15px;
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid var(--gray-200);
+}
+
+.booking-actions button {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+/* Update the cleaner card and actions styles */
+.cleaner-header {
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.cleaner-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.cleaner-rating {
+  color: #f6b93b;
+  font-weight: 500;
+}
+
+.cleaner-details {
+  padding: 15px;
+  flex-grow: 1;
+}
+
+.cleaner-details p {
+  margin: 8px 0;
+}
+
+.cleaner-actions {
+  display: flex;
+  gap: 10px;
+  padding: 0 15px 15px;
+}
+
+.book-button {
+  flex: 1;
+  padding: 12px 10px;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.book-button:hover {
+  background-color: var(--primary-dark);
+}
+
+.save-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 0.8;
+  padding: 12px 10px;
+  background-color: white;
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.save-button:hover {
+  background-color: var(--gray-100);
+}
+
+.save-button.saved {
+  background-color: #fff8e6;
+  border-color: #f6b93b;
+  color: #d69e2e;
+}
+
+.save-button.saved:hover {
+  background-color: #fff3d1;
+}
+
+.save-icon {
+  font-size: 1.2rem;
+}
+
+.cleaner-card {
+  background-color: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.cleaner-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .cleaner-card {
+    background-color: var(--gray-800);
+  }
+  
+  .cleaner-header {
+    border-color: var(--gray-700);
+  }
+  
+  .save-button {
+    background-color: var(--gray-800);
+    border-color: var(--gray-600);
+    color: var(--gray-300);
+  }
+  
+  .save-button:hover {
+    background-color: var(--gray-700);
+  }
+  
+  .save-button.saved {
+    background-color: rgba(246, 185, 59, 0.1);
+    border-color: #b17e28;
+    color: #f6c85f;
+  }
+  
+  .save-button.saved:hover {
+    background-color: rgba(246, 185, 59, 0.2);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 500px) {
+  .cleaner-actions {
+    flex-direction: column;
+  }
+  
+  .save-button {
+    flex: 1;
+  }
+}
+
+.view-details-button {
+  background-color: var(--gray-100);
+  color: var(--gray-800);
+}
+
+.view-details-button:hover {
+  background-color: var(--gray-200);
+}
+
+.cancel-button {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: var(--danger);
+}
+
+.cancel-button:hover {
+  background-color: rgba(220, 53, 69, 0.2);
+}
+
+.no-items {
+  padding: 40px;
+  text-align: center;
+  background-color: white;
+  border-radius: var(--border-radius);
+  color: var(--gray-600);
+  font-style: italic;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .section-title {
+    border-color: var(--gray-700);
+    color: var(--gray-100);
+  }
+  
+  .summary-card,
+  .bookings-table,
+  .service-card,
+  .booking-card,
+  .no-items {
+    background-color: var(--gray-800);
+  }
+  
+  .booking-header {
+    background-color: var(--gray-900);
+  }
+  
+  .view-details-button {
+    background-color: var(--gray-700);
+    color: var(--gray-100);
+  }
+  
+  .view-details-button:hover {
+    background-color: var(--gray-600);
+  }
+  
+  .status-badge.confirmed {
+    background-color: rgba(40, 167, 69, 0.2);
+    color: #8cde9b;
+  }
+  
+  .status-badge.completed {
+    background-color: rgba(23, 162, 184, 0.2);
+    color: #8ddcec;
+  }
+  
+  .status-badge.cancelled {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #f1a0a8;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dashboard-summary {
+    flex-direction: column;
+  }
+  
+  .bookings-list {
+    grid-template-columns: 1fr;
+  }
+}
