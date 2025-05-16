@@ -11,7 +11,7 @@ class SaveShortlistController {
      * @param {import('express').Response} res - Express response object.
      */
     async shortlistCleaner(req, res) {
-        const { cleanerId } = req.body; // Or req.params.cleanerId if using URL parameter
+        const { homeownerId, cleanerId } = req.body;
 
         const result = await this.shortlistEntity.shortlistCleaner(homeownerId, cleanerId);
 
@@ -20,6 +20,8 @@ class SaveShortlistController {
         } else if (result.error) {
             // Error object returned from entity
             res.status(result.error.status).json({ error: result.error.message });
+        } else {
+            res.status(500).json({ error: "Unexpected error occurred" });
         }
     }
 }
@@ -79,6 +81,18 @@ class ViewShortlistController {
         }
 
         res.status(200).json(result); // Returns the list of shortlisted cleaners
+    }
+
+    async getAllShortlistedCleaners(req, res) {
+        const homeownerId = req.user?.id;
+
+        const result = await this.shortlistEntity.getAllShortlistedCleaners(homeownerId);
+
+        if (result.error) {
+            return res.status(result.error.status).json({ error: result.error.message });
+        }
+
+        res.status(200).json(result);
     }
 }
 

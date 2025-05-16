@@ -1,4 +1,4 @@
-const { PrismaClient } = require('../generated/prisma');
+const { PrismaClient, UserStatus } = require('../generated/prisma');
 
 class ShortlistEntity {
     constructor() {
@@ -16,30 +16,34 @@ class ShortlistEntity {
      */
     async shortlistCleaner(homeownerId, cleanerId) {
         try {
+            // Check if cleaner exists and is actually a cleaner
             const cleanerAccount = await this.prisma.userAccount.findUnique({
                 where: { id: cleanerId },
-                include: { name: true }
-            });
-            
-            const existingEntry = await this.prisma.shortlist.findUnique({
-                where: {
-                    homeownerCleanerUnique: { // Using the @@unique constraint name
-                        homeownerId: homeownerId,
-                        cleanerId: cleanerId
-                    }
+                include: { 
+                    userProfile: { select: { name: true } } 
                 }
             });
 
-            if (existingEntry) {
-                return { error: { status: 409, error: `Shortlist of Cleaner '${cleanerAccount.name}' already exists.` } };
-            }
-
-            await this.prisma.shortlist.create({
-                data: {
+            // Check for existing shortlist entry
+            const existingEntry = await this.prisma.shortlist.findFirst({
+                where: {
                     homeownerId: homeownerId,
                     cleanerId: cleanerId
                 }
             });
+
+            if (existingEntry) {
+                return { error: { status: 409, error: `Cleaner '${cleanerAccount.username}' is already in your shortlist` } };
+            }
+
+            // Create new shortlist entry
+            await this.prisma.shortlist.create({
+                data: {
+                    homeowner: { connect: { id: homeownerId } },
+                    cleaner: { connect: { id: cleanerId } }
+                }
+            });
+
             return true;
 
         } catch (error) {
@@ -61,9 +65,13 @@ class ShortlistEntity {
     async searchShortlistCleaner(homeownerId, keyword) {
         try {
             const cleanerProfile = await this.prisma.userProfile.findUnique({
-                where: { name: 'CLEANER' },
+                where: { name: 'Cleaner' },
                 select: { id: true }
             });
+
+            if (!cleanerProfile) {
+                throw new Error("Cleaner profile not found in database");
+            }
 
             // Define search conditions if a keyword is provided
             const keywordSearchConditions = keyword ? {
@@ -75,8 +83,9 @@ class ShortlistEntity {
                             some: {
                                 status: 'ACTIVE',
                                 OR: [
-                                    { serviceType: { contains: keyword, mode: 'insensitive' } },
-                                    { title: { contains: keyword, mode: 'insensitive' } },
+                                    { serviceCategory: { 
+                                        serviceCatName: { contains: keyword, mode: 'insensitive' } 
+                                    }},
                                     { description: { contains: keyword, mode: 'insensitive' } },
                                 ],
                             },
@@ -104,10 +113,13 @@ class ShortlistEntity {
                                 where: { status: 'ACTIVE' }, // Only active service listings
                                 select: {
                                     id: true,
-                                    serviceType: true,
-                                    title: true,
                                     description: true,
                                     ratePerHr: true,
+                                    serviceCategory: {
+                                        select: {
+                                            serviceCatName: true
+                                        }
+                                    }
                                 }
                             },
                         }
@@ -141,9 +153,13 @@ class ShortlistEntity {
     async fetchAllCleanersForHomeowner(homeownerId) {
         try {
             const cleanerUserProfile = await this.prisma.userProfile.findUnique({
-                where: { name: 'CLEANER' },
+                where: { name: 'Cleaner' },
                 select: { id: true }
             });
+
+            if (!cleanerUserProfile) {
+                throw new Error("Cleaner profile not found in database");
+            }
 
             const shortlistEntries = await this.prisma.shortlist.findMany({
                 where: {
@@ -189,6 +205,66 @@ class ShortlistEntity {
                 error: {
                     status: 500,
                     message: "An unexpected error occurred while retrieving your shortlist."
+                }
+            };
+        }
+    }
+
+    /**
+     * Fetches all shortlisted cleaners for a homeowner with complete details
+     * @param {string} homeownerId - The ID of the homeowner
+     * @returns {Promise<Array|Object>} Array of cleaners or error object
+     */
+    async getAllShortlistedCleaners(homeownerId) {
+        try {
+            const cleanerProfile = await this.prisma.userProfile.findUnique({
+                where: { name: 'Cleaner' },
+                select: { id: true }
+            });
+
+            const shortlistEntries = await this.prisma.shortlist.findMany({
+                where: {
+                    homeownerId: homeownerId,
+                    cleaner: {
+                        userProfileId: cleanerProfile.id,
+                        status: 'ACTIVE'
+                    }
+                },
+                include: {
+                    cleaner: {
+                        include: {
+                            serviceListings: {
+                                where: { status: 'ACTIVE' },
+                                include: {
+                                    serviceCategory: {
+                                        select: {
+                                            serviceCatName: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            return shortlistEntries.map(entry => ({
+                id: entry.cleaner.id,
+                username: entry.cleaner.username,
+                email: entry.cleaner.email,
+                serviceListings: entry.cleaner.serviceListings.map(listing => ({
+                    ...listing,
+                    serviceType: listing.serviceCategory?.serviceCatName || 'Cleaning'
+                })),
+                shortlistedAt: entry.createdAt
+            }));
+
+        } catch (error) {
+            console.error("Error fetching all shortlisted cleaners:", error);
+            return {
+                error: {
+                    status: 500,
+                    message: "Failed to fetch shortlisted cleaners"
                 }
             };
         }

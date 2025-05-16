@@ -1,18 +1,18 @@
 import React from 'react';
 import '../Navbar.css';
 
-function Navbar({ currentPage, navigateTo, user, onLogout }) {
+function Navbar({ currentPage, navigateTo, user, onLogout, activeTab }) {
   // Create a function to handle tab click that both navigates and refreshes
   const handleTabClick = (tabName) => {
-    // If already on the same tab, just refresh the data
+    // Always navigate to the tab first
+    navigateTo(tabName);
+    
+    // Then refresh the data if it's the same tab
     if (currentPage === tabName) {
       if (typeof window.refreshActiveTab === 'function') {
         window.refreshActiveTab();
       }
     }
-    
-    // Navigate to the tab
-    navigateTo(tabName);
   };
   
   return (

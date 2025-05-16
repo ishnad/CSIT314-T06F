@@ -66,7 +66,6 @@ class HomeownerUI extends Component {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
@@ -112,19 +111,46 @@ class HomeownerUI extends Component {
   };
 
   // Method for navigation
-  navigateTo = (tab) => {
-    // Refresh data based on which tab we're navigating to
-    if (tab === 'browseCleaners') {
-      this.fetchCleaners();
-    } else if (tab === 'saved') {
-      this.loadSavedCleaners();
-    } else if (tab === 'booked') {
-      this.loadBookedCleaners();
-    } else if (tab === 'history') {
-      this.loadCleaningHistory();
+  componentDidUpdate(prevProps) {
+    // Sync active tab with props when changed from parent
+    if (this.props.currentPage !== prevProps.currentPage) {
+      this.setState({ activeTab: this.props.currentPage }, () => {
+        this.refreshData();
+      });
     }
+  }
 
-    this.setState({ activeTab: tab });
+  navigateTo = (tab) => {
+    // Notify parent component of tab change
+    if (this.props.onNavigate) {
+      this.props.onNavigate(tab);
+    }
+    // Update local state
+    this.setState({ activeTab: tab }, () => {
+      this.refreshData();
+    });
+  };
+
+  refreshData = () => {
+    const { activeTab } = this.state;
+    console.log('Refreshing data for tab:', activeTab);
+    
+    switch(activeTab) {
+      case 'browseCleaners':
+        this.fetchCleaners();
+        break;
+      case 'saved':
+        this.loadSavedCleaners();
+        break;
+      case 'booked':
+        this.loadBookedCleaners();
+        break;
+      case 'history':
+        this.loadCleaningHistory();
+        break;
+      default:
+        this.fetchCleaners();
+    }
   };
 
   // Method to refresh data
@@ -147,7 +173,11 @@ class HomeownerUI extends Component {
     try {
       this.setState({ historyLoading: true, error: null });
 
-      const response = await fetch('http://localhost:3000/api/history/');
+      const response = await fetch('http://localhost:3000/api/history/', {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch cleaning history: ${response.statusText}`);
@@ -237,7 +267,11 @@ class HomeownerUI extends Component {
     try {
       this.setState({ savedCleanersLoading: true, error: null });
 
-      const response = await fetch('http://localhost:3000/api/shortlist/');
+      const response = await fetch('http://localhost:3000/api/shortlist/all', {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch saved cleaners: ${response.statusText}`);
@@ -245,9 +279,31 @@ class HomeownerUI extends Component {
 
       const data = await response.json();
 
+      // Transform API response to match cleaner card format
+      const savedCleaners = data.map(cleaner => {
+        // Get unique service category names from all service listings
+        const serviceCategories = [...new Set(
+          cleaner.serviceListings
+            ?.map(listing => listing.serviceCategory?.serviceCatName)
+            .filter(name => name)
+        )] || ['House Cleaning'];
+
+        return {
+          id: cleaner.id,
+          name: cleaner.username,
+          username: cleaner.username,
+          email: cleaner.email,
+          description: cleaner.serviceListings?.[0]?.description || 'Professional cleaning services',
+          services: serviceCategories,
+          price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}`,
+          availability: 'Available',
+          shortlistedAt: cleaner.shortlistedAt
+        };
+      });
+
       this.setState({
-        savedCleaners: data,
-        filteredSavedCleaners: data,
+        savedCleaners: savedCleaners,
+        filteredSavedCleaners: savedCleaners,
         savedCleanersLoading: false
       });
     } catch (err) {
@@ -317,18 +373,25 @@ class HomeownerUI extends Component {
 
   // Method to search saved cleaners from the backend
   searchSavedCleaners = async () => {
-    const { savedSearchTerm } = this.state;
+    const { savedSearchTerm, savedCleaners } = this.state;
 
     if (!savedSearchTerm.trim()) {
-      // If search term is empty, load all saved cleaners
-      this.loadSavedCleaners();
+      // If search term is empty, show all saved cleaners
+      this.setState({
+        filteredSavedCleaners: savedCleaners,
+        savedCleanersLoading: false
+      });
       return;
     }
 
     try {
       this.setState({ savedCleanersLoading: true, error: null });
 
-      const response = await fetch(`http://localhost:3000/api/shortlist/search?query=${encodeURIComponent(savedSearchTerm)}`);
+      const response = await fetch(`http://localhost:3001/api/shortlist/search?keyword=${encodeURIComponent(savedSearchTerm)}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
 
       if (!response.ok) {
         throw new Error(`Search failed: ${response.statusText}`);
@@ -336,8 +399,23 @@ class HomeownerUI extends Component {
 
       const data = await response.json();
 
+      // Transform API response to match cleaner card format
+      const filteredCleaners = data.map(cleaner => ({
+        id: cleaner.id,
+        name: cleaner.username,
+        username: cleaner.username,
+        email: cleaner.email,
+        description: cleaner.serviceListings?.[0]?.description || 'Professional cleaning services',
+        services: cleaner.serviceListings?.map(listing => 
+          listing.serviceCategory?.serviceCatName || 'Cleaning'
+        ) || ['House Cleaning'],
+        price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}`,
+        availability: 'Available',
+        shortlistedAt: cleaner.shortlistedAt
+      }));
+
       this.setState({
-        filteredSavedCleaners: data,
+        filteredSavedCleaners: filteredCleaners,
         savedCleanersLoading: false
       });
     } catch (err) {
@@ -440,7 +518,6 @@ class HomeownerUI extends Component {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
@@ -499,12 +576,15 @@ class HomeownerUI extends Component {
       }
 
       // Call API to add cleaner to shortlist
-      const response = await fetch('http://localhost:3000/api/shortlist/add', {
+      const response = await fetch('http://localhost:3001/api/shortlist/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(cleanerToSave),
+        body: JSON.stringify({
+          homeownerId: this.props.user.id,
+          cleanerId: cleanerId
+        }),
       });
 
       if (!response.ok) {
@@ -548,9 +628,6 @@ class HomeownerUI extends Component {
       this.setState({ loading: true });
       
       const response = await fetch(`http://localhost:3000/api/users/${cleanerId}/profile`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
       });
 
       if (!response.ok) {

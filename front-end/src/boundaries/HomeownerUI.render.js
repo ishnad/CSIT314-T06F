@@ -110,22 +110,19 @@ const renderingMethods = {
             {filteredSavedCleaners.map(cleaner => (
               <div key={cleaner.id} className="cleaner-card">
                 <div className="cleaner-header">
-                  <h3>{cleaner.name}</h3>
+                  <h3>{cleaner.name || cleaner.username}</h3>
                 </div>
 
-                <div className="cleaner-details">
-                  <p><strong>Rate/hour:</strong> {cleaner.price}</p>
-                  <p><strong>Description:</strong> {cleaner.description || 'No description available'}</p>
-                  <p><strong>Services:</strong> {Array.isArray(cleaner.services) ? cleaner.services.join(', ') : 'No services listed'}</p>
-                  <p><strong>Status:</strong> {cleaner.availability || 'Unknown'}</p>
+                <div className="cleaner-details">=
+                  <p><strong>Services:</strong> {cleaner.services.join(', ')}</p>
                 </div>
 
                 <div className="cleaner-actions">
                   <button
-                    className="book-button full-width"
-                    onClick={() => this.bookCleaner(cleaner.id)}
+                    className="view-profile-button"
+                    onClick={() => this.viewCleanerProfile(cleaner.id)}
                   >
-                    Book Now
+                    View Profile
                   </button>
                 </div>
               </div>
@@ -320,6 +317,7 @@ const renderingMethods = {
   // Main render method for the homeowner UI
   renderHomeowner() {
     const { message, activeTab, showCleanerProfile, selectedCleaner } = this.state;
+    console.log('Current activeTab:', activeTab); // Debug log
 
     return (
       <div className="app-container">
@@ -366,10 +364,21 @@ const renderingMethods = {
             )}
 
             {/* Render the appropriate tab content */}
-            {activeTab === 'browseCleaners' && this.renderBrowseCleaners()}
-            {activeTab === 'saved' && this.renderSavedCleaners()}
-            {activeTab === 'booked' && this.renderBookedCleanings()}
-            {activeTab === 'history' && this.renderCleaningHistory()}
+            {/* Using a switch statement for better tab management */}
+            {(() => {
+              switch(activeTab) {
+                case 'browseCleaners':
+                  return this.renderBrowseCleaners();
+                case 'saved':
+                  return this.renderSavedCleaners();
+                case 'booked':
+                  return this.renderBookedCleanings();
+                case 'history': 
+                  return this.renderCleaningHistory();
+                default:
+                  return this.renderBrowseCleaners(); // Fallback
+              }
+            })()}
           </div>
         </main>
 

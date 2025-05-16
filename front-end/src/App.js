@@ -109,6 +109,7 @@ function App() {
             navigateTo={navigateTo} 
             user={user}
             onLogout={handleLogout}
+            activeTab={currentPage}
           />
           
           <main className="app-content">
