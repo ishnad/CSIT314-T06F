@@ -1,4 +1,4 @@
-const { PrismaClient, Prisma } = require('../generated/prisma');
+const { PrismaClient, Prisma, ServiceListingStatus } = require('../generated/prisma');
 
 class ServiceListingEntity {
     constructor() {
@@ -7,62 +7,60 @@ class ServiceListingEntity {
 
     /**
      * Creates a new service listing in the database.
-     * @param {string} serviceType - Type of service.
-     * @param {string} title - Title of the listing.
+     * @param {string} serviceCategoryId - ID of the service category.
      * @param {string} description - Description of the service.
      * @param {number} ratePerHr - Rate per hour.
      * @param {string} cleanerId - ID of the user creating the listing.
-     * @returns {Promise<boolean|{error: {status: number, error: string}}>} True on successful creation, or an error object on failure.
+     * @returns {Promise true|{error: {status: number, error: string}}>} The created listing object or an error object.
      */
-    async createServiceListing(serviceCatName, description, ratePerHr, cleanerId) {
+    async createServiceListing(serviceCategoryId, description, ratePerHr, cleanerId) {
         try {
-            if (!cleanerId) {
-                return { error: { status: 400, error: 'Cleaner ID is required' } };
-            }
-
             await this.prisma.serviceListing.create({
                 data: {
-                    serviceCatName: serviceCatName.trim(),
                     description: description.trim(),
                     ratePerHr: ratePerHr,
-                    cleanerId: cleanerId,
+                    cleaner: { // Connect to the cleaner
+                        connect: { id: cleanerId }
+                    },
+                    serviceCategory: { // Connect to the service category
+                        connect: { id: serviceCategoryId }
+                    },
+                    status: ServiceListingStatus.ACTIVE // Default status
                 },
-                // Select the fields to return
-                select: {
+                select: { // Select fields for the returned object
                     id: true,
-                    serviceCatName: true,
                     description: true,
                     ratePerHr: true,
+                    status: true,
                     createdAt: true,
-                    cleaner: { // Include cleaner's username for context
+                    cleaner: {
                         select: {
                             id: true,
                             username: true
+                        }
+                    },
+                    serviceCategory: { // Select category details through relation
+                        select: {
+                            id: true,
+                            serviceCatName: true
                         }
                     }
                 }
             });
 
-            return true; // Return true on successful creation
+            // Format the output
+            return true;
 
         } catch (error) {
             console.error("Error creating service listing:", error);
-            // Handle potential Prisma errors (e.g., database connection issues, constraint violations)
-            // Check for specific Prisma errors if needed (e.g., P2003 foreign key constraint)
-            if (error.code === 'P2003') { // Foreign key constraint failed (e.g., cleanerId doesn't exist)
-                 return { error: { status: 400, error: `Invalid cleanerId provided.` } };
-            }
             return { error: { status: 500, error: 'Failed to create service listing due to a server error.' } };
         }
     }
 
     /**
-     * Retrieves a list of all service listings for a specific cleaner with key details.
-     * This function is typically called when the cleaner navigates to their "My Listings" page.
-     * @param {string} requestingCleanerId - The ID of the cleaner whose listings are to be retrieved.
-     * @returns {Promise<Array<object>|null|object>} An array of listing objects with key details,
-     * or null if no listings are found (as per use case alternate flow),
-     * or an error object.
+     * Retrieves all service listings for a specific cleaner.
+     * @param {string} requestingCleanerId - The ID of the cleaner whose listings are to be fetched.
+     * @returns {Promise<Array<object>|{error: {status: number, message: string}}>} A list of service listings or an error object.
      */
     async getAllCleanerListings(requestingCleanerId) {
         try {
@@ -72,7 +70,6 @@ class ServiceListingEntity {
                 },
                 select: {
                     id: true,
-                    serviceCatName: true,
                     description: true,
                     ratePerHr: true,
                     status: true,
@@ -82,33 +79,43 @@ class ServiceListingEntity {
                         select: {
                             username: true
                         }
+                    },
+                    serviceCategory: {
+                        select: {
+                            id: true,
+                            serviceCatName: true
+                        }
                     }
                 },
                 orderBy: {
-                    createdAt: 'desc'
+                    createdAt: "desc"
                 }
             });
 
-            return (listings || []).map(listing => ({
-                ...listing,
+            const formattedListings = listings.map(listing => ({
+                id: listing.id,
+                description: listing.description,
+                ratePerHr: listing.ratePerHr,
+                status: listing.status,
+                createdAt: listing.createdAt,
+                updatedAt: listing.updatedAt,
                 cleanerUsername: listing.cleaner?.username,
-                cleaner: undefined
+                serviceCatName: listing.serviceCategory?.serviceCatName,
+                serviceCategoryId: listing.serviceCategory?.id
             }));
 
+            return formattedListings;
+            
         } catch (error) {
-            console.error(`Error retrieving service listings for cleaner ${requestingCleanerId}:`, error);
-            if (error.code === 'P2023') {
-                return { error: { status: 400, error: 'Invalid cleaner ID format.' } };
-            }
-            return { error: { status: 500, error: 'Failed to retrieve service listings due to a server error.' } };
+            console.error(`Error fetching listings for cleaner ${requestingCleanerId}:`, error);
+            return { error: { status: 500, message: "Failed to retrieve cleaner's service listings." } };
         }
     }
 
     /**
-     * Retrieves the details of a specific service listing, ensuring the requester is the owner.
+     * Retrieves the details of a specific service listing.
      * @param {string} listingId - The ID of the listing to retrieve.
-     * @param {string} requestingCleanerId - The ID of the user requesting the details.
-     * @returns {Promise<object>} The listing object or an error object.
+     * @returns {Promise<object|{error: {status: number, error: string}}>} The listing object or an error object.
      */
     async getListingDetails(listingId) {
         try {
@@ -116,34 +123,42 @@ class ServiceListingEntity {
                 where: { id: listingId },
                 select: {
                     id: true,
-                    serviceCatName: true,
                     description: true,
                     ratePerHr: true,
+                    status: true,
                     createdAt: true,
+                    updatedAt: true,
+                    cleanerId: true,
                     cleaner: {
                         select: {
                             username: true
+                        }
+                    },
+                    serviceCategoryId: true,
+                    serviceCategory: {
+                        select: {
+                            serviceCatName: true
                         }
                     }
                 }
             });
 
-            if (!listing) {
-                return { error: { status: 404, error: `Service listing with ID ${listingId} not found.` } };
-            }
-
+            // Format the output
             return {
-                ...listing,
+                id: listing.id,
+                description: listing.description,
+                ratePerHr: listing.ratePerHr,
+                status: listing.status,
+                createdAt: listing.createdAt,
+                updatedAt: listing.updatedAt,
+                cleanerId: listing.cleanerId,
                 cleanerUsername: listing.cleaner?.username,
-                cleaner: undefined
+                serviceCategoryId: listing.serviceCategoryId,
+                serviceCatName: listing.serviceCategory?.serviceCatName,
             };
 
         } catch (error) {
             console.error(`Error retrieving service listing ${listingId}:`, error);
-             // Handle potential Prisma errors (e.g., malformed ID format)
-            if (error.code === 'P2023' || (error instanceof Prisma.PrismaClientKnownRequestError && error.message.includes("Malformed ObjectID"))) {
-                 return { error: { status: 400, error: 'Invalid listing ID format.' } };
-            }
             return { error: { status: 500, error: 'Failed to retrieve service listing due to a server error.' } };
         }
     }
@@ -151,9 +166,8 @@ class ServiceListingEntity {
     /**
      * Edits an existing service listing in the database.
      * @param {string} listingId - The ID of the listing to edit.
-     * @param {string} cleanerId - The ID of the cleaner attempting the edit (for ownership verification).
      * @param {object} updateData - Data to update the listing with.
-     * @returns {Promise<boolean|object>} True if successful, or an error object.
+     * @returns {Promise true |{error: {status: number, error: string}}>} The updated listing object or an error object.
      */
     async editServiceListing(listingId, updateData) {
         const allowedUpdateFields = ['serviceType', 'title', 'description', 'ratePerHr'];
@@ -163,77 +177,60 @@ class ServiceListingEntity {
                 actualUpdateData[field] = updateData[field];
             }
         }
-
         try {
             await this.prisma.serviceListing.update({
                 where: { id: listingId },
                 data: actualUpdateData,
             });
 
-            return true; // Successfully updated
+            return true;
 
         } catch (error) {
             console.error(`Error editing service listing ${listingId}:`, error);
-            if (error.code === 'P2023' || (error instanceof Prisma.PrismaClientKnownRequestError && error.message.includes("Malformed ObjectID"))) {
-                 return { error: { status: 400, error: 'Invalid listing ID format.' } };
-            }
-            // P2025: Record to update not found (could happen in a race condition if deleted after initial check)
-            if (error.code === 'P2025') {
-                return { error: { status: 404, error: `Service listing with ID ${listingId} not found for update.` } };
-            }
             return { error: { status: 500, error: 'Failed to edit service listing due to a server error.' } };
         }
     }
 
     /**
-     * Suspends a service listing.
-     * @param {string} listingId - The ID of the listing to suspend.
-     * @param {string} cleanerId - The ID of the cleaner attempting the suspension (for ownership verification).
-     * @returns {Promise<boolean|object>} True if successful, or an error object.
+     * Toggles the status of a service listing (ACTIVE <-> SUSPENDED).
+     * @param {string} listingId - The ID of the listing to toggle.
+     * @returns {Promise true |{error: {status: number, error: string}}>} The new status or an error object.
      */
     async toggleListingStatus(listingId) {
         try {
-            // Get current status
             const existingListing = await this.prisma.serviceListing.findUnique({
                 where: { id: listingId },
                 select: { cleanerId: true, status: true }
             });
 
-            if (!existingListing) {
-                return { error: { status: 404, error: 'Listing not found' } };
-            }
-
-            const newStatus = existingListing.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+            const newStatus = existingListing.status === ServiceListingStatus.ACTIVE
+                ? ServiceListingStatus.SUSPENDED
+                : ServiceListingStatus.ACTIVE;
             
             await this.prisma.serviceListing.update({
                 where: { id: listingId },
                 data: { status: newStatus },
             });
 
-            return { newStatus }; // Return the new status
+            return { newStatus };
 
         } catch (error) {
-            console.error(`Error suspending service listing ${listingId}:`, error);
-            if (error.code === 'P2023' || (error instanceof Prisma.PrismaClientKnownRequestError && error.message.includes("Malformed ObjectID"))) {
-                 return { error: { status: 400, error: 'Invalid listing ID format.' } };
-            }
-            if (error.code === 'P2025') { // Record to update not found
-                return { error: { status: 404, error: `Service listing with ID ${listingId} not found for update.` } };
-            }
-            return { error: { status: 500, error: 'Failed to suspend service listing due to a server error.' } };
+            console.error(`Error toggling status for service listing ${listingId}:`, error);
+            return { error: { status: 500, error: 'Failed to toggle service listing status due to a server error.' } };
         }
     }
 
     /**
-     * Searches for active service listings based on various criteria, excluding those of the searcher.
-     * @param {string} searcherCleanerId - The ID of the cleaner performing the search (to exclude their own listings).
-     * @param {string} [keyword] - Keyword to search in title and description.
-     * @param {string} [serviceType] - Filter by service type.
-     * @param {number} [minRate] - Minimum rate per hour.
-     * @param {number} [maxRate] - Maximum rate per hour.
-     * @returns {Promise<Array<{id: string, serviceType: string, title: string, description: string, ratePerHr: number, updatedAt: Date, cleanerId: string, cleanerUsername: string}>|{message: string}|{error: {status: number, error: string}}>} Array of listings, a message object, or an error object.
+     * Searches for active service listings based on various criteria.
+     * Now takes multiple arguments directly.
+     * @param {string} [searcherCleanerId] - ID of the cleaner performing search (to exclude their own listings).
+     * @param {string} [keyword] - Keyword for name/description.
+     * @param {string} [serviceCategoryId] - Filter by specific service category ID.
+     * @param {number} [minRate] - Minimum rate.
+     * @param {number} [maxRate] - Maximum rate.
+     * @returns {Promise<Array<object>|{error: {status: number, error: string}}>} Array of listings or an error object.
      */
-    async searchListings(searcherCleanerId, keyword, serviceType, minRate, maxRate) {
+    async searchListings(searcherCleanerId, keyword, serviceCategoryId, minRate, maxRate) {
         const whereConditions = {
             status: 'ACTIVE', // Only search active listings
             cleanerId: {
@@ -241,19 +238,18 @@ class ServiceListingEntity {
             },
         };
 
+        const orConditions = [];
         if (keyword && typeof keyword === 'string' && keyword.trim() !== '') {
             const trimmedKeyword = keyword.trim();
-            whereConditions.OR = [
-                { serviceCatName: { contains: trimmedKeyword, mode: 'insensitive' } },
-                { description: { contains: trimmedKeyword, mode: 'insensitive' } },
-            ];
+            orConditions.push({ description: { contains: trimmedKeyword, mode: 'insensitive' } });
+            orConditions.push({ serviceCategory: { serviceCatName: { contains: trimmedKeyword, mode: 'insensitive' } } });
+        }
+        if (orConditions.length > 0) {
+            whereConditions.OR = orConditions;
         }
 
-        if (serviceType && typeof serviceType === 'string' && serviceType.trim() !== '') {
-            whereConditions.serviceCatName = {
-                equals: serviceType.trim(),
-                mode: 'insensitive',
-            };
+        if (serviceCategoryId && typeof serviceCategoryId === 'string' && serviceCategoryId.trim() !== '') {
+            whereConditions.serviceCategoryId = serviceCategoryId.trim();
         }
 
         const rateFilter = {};
@@ -275,49 +271,55 @@ class ServiceListingEntity {
                 where: whereConditions,
                 select: {
                     id: true,
-                    serviceCatName: true,
                     description: true,
                     ratePerHr: true,
-                    updatedAt: true, // To show how recent the listing is
+                    status: true,
+                    updatedAt: true,
                     cleaner: {
                         select: {
                             id: true,
-                            username: true // Show who the cleaner is
+                            username: true
+                        }
+                    },
+                    serviceCategory: {
+                        select: {
+                            id: true,
+                            serviceCatName: true
                         }
                     }
                 },
                 orderBy: {
-                    updatedAt: 'desc', // Show most recently updated listings first
+                    updatedAt: 'desc',
                 }
             });
 
-            if (listings.length === 0) {
-                // Only return error if there was an active search
-                if (keyword || serviceType || minRate !== undefined || maxRate !== undefined) {
-                    return { error: { status: 404, error: "No matching listings found." } };
-                }
-                return []; // Return empty array when no filters and no listings
+            if (listings.length === 0 && (keyword || serviceCategoryId || minRate !== undefined || maxRate !== undefined)) {
+                return { error: { status: 404, error: "No matching listings found." } };
             }
-
+            
             return listings.map(listing => ({
-                ...listing,
-                cleanerId: listing.cleaner.id,
-                cleanerUsername: listing.cleaner.username,
-                cleaner: undefined
+                id: listing.id,
+                description: listing.description,
+                ratePerHr: listing.ratePerHr,
+                status: listing.status,
+                updatedAt: listing.updatedAt,
+                cleanerId: listing.cleaner?.id,
+                cleanerUsername: listing.cleaner?.username,
+                serviceCategoryId: listing.serviceCategory?.id,
+                serviceCatName: listing.serviceCategory?.serviceCatName,
             }));
 
         } catch (error) {
             console.error(`Error searching service listings:`, error);
             if (error instanceof Prisma.PrismaClientValidationError) {
-                 return { error: { status: 400, error: 'Invalid filter parameters provided for search.' } };
+                return { error: { status: 400, error: 'Invalid filter parameters provided for search.' } };
             }
             return { error: { status: 500, error: 'Failed to search service listings due to a server error.' } };
         }
     }
 
     /**
-     * Retrieves new service listings created within a specified period.
-     * Includes cleaner's username and service category name for context.
+     * Retrieves new service listings created within a specified period for reports.
      * @param {Date} startDate - The start of the period (inclusive).
      * @param {Date} endDate - The end of the period (exclusive).
      * @returns {Promise<Array<object>|{error: {status: number, message: string}}>} A list of service listings or an error object.
@@ -327,18 +329,24 @@ class ServiceListingEntity {
             const listings = await this.prisma.serviceListing.findMany({
                 where: {
                     createdAt: {
-                        gte: startDate, // Greater than or equal to start date
-                        lt: endDate,    // Less than end date
+                        gte: startDate,
+                        lt: endDate,
                     },
                 },
-                include: {
-                    cleaner: { // Include the cleaner's details
+                select: {
+                    id: true,
+                    description: true,
+                    ratePerHr: true,
+                    status: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    cleaner: {
                         select: {
                             id: true,
                             username: true,
                         }
                     },
-                    serviceCategory: { // Include the service category details
+                    serviceCategory: {
                         select: {
                             id: true,
                             serviceCatName: true,
@@ -346,10 +354,21 @@ class ServiceListingEntity {
                     }
                 },
                 orderBy: {
-                    createdAt: 'desc', // Show newest first
+                    createdAt: 'desc',
                 }
             });
-            return listings;
+            return listings.map(listing => ({
+                id: listing.id,
+                description: listing.description,
+                ratePerHr: listing.ratePerHr,
+                status: listing.status,
+                createdAt: listing.createdAt,
+                updatedAt: listing.updatedAt,
+                cleanerId: listing.cleaner?.id,
+                cleanerUsername: listing.cleaner?.username,
+                serviceCategoryId: listing.serviceCategory?.id,
+                serviceCatName: listing.serviceCategory?.serviceCatName,
+            }));
         } catch (error) {
             console.error("Error retrieving new service listings in entity:", error);
             return { error: { status: 500, message: 'Failed to retrieve new service listings.' } };

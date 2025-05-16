@@ -1,4 +1,4 @@
-import React, { Component } from 'react'; // Removed useState, useEffect
+import React, { Component } from 'react';
 import renderingMethods from './CleanerUI.render';
 
 class CleanerUI extends Component {
