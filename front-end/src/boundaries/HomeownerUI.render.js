@@ -167,7 +167,7 @@ const renderingMethods = {
             {filteredHistory.map(item => {
               // Extract data handling differences in API response format
               const id = item.id || item.matchId || item.bookingId;
-              const cleanerName = item.cleaner?.name || item.cleanerName || 'Unknown Cleaner';
+              const cleanerName = item.cleanerUsername;
               const serviceName = item.serviceName;
               const serviceType = item.service || item.serviceType || 'Standard Service';
               const date = item.date || 
@@ -189,8 +189,8 @@ const renderingMethods = {
                   </div>
                   
                   <div className="booking-details">
+                    <p><strong>Service:</strong> {serviceType}</p>
                     <p><strong>Cleaner:</strong> {cleanerName}</p>
-                    <p><strong>Service Type:</strong> {serviceType}</p>
                     <p><strong>Date:</strong> {date}</p>
                     <p><strong>Time:</strong> {time}</p>
                     

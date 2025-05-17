@@ -187,16 +187,45 @@ class HomeownerUI extends Component {
       const data = await response.json();
 
       // Transform API response to match history card format
-      const history = data.map(item => ({
-        id: item.matchId,
-        date: new Date(item.confirmationDate).toLocaleDateString(),
-        time: new Date(item.confirmationDate).toLocaleTimeString(),
-        cleanerName: item.cleanerUsername,
-        serviceName: item.serviceName,
-        serviceType: item.serviceType,
-        ratePerHr: item.ratePerHr,
-        status: 'Completed'
-      }));
+      const history = data.map(item => {
+        try {
+          // Parse ISO date string or fallback to current date
+          const confirmationDate = item.confirmationDate ? 
+            new Date(item.confirmationDate) : 
+            new Date();
+          
+          // Format date consistently (MM/DD/YYYY)
+          const formattedDate = confirmationDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+          });
+
+          // Format time consistently (HH:MM AM/PM)
+          const formattedTime = confirmationDate.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true
+          });
+
+          return {
+            id: item.matchId,
+            date: formattedDate,
+            time: formattedTime,
+            cleanerName: item.cleanerUsername,
+            cleanerUsername: item.cleanerUsername,
+            serviceName: item.serviceName,
+            serviceType: item.serviceType,
+            ratePerHr: item.ratePerHr,
+            status: item.status || 'COMPLETED',
+            // Keep original date object for filtering
+            originalDate: confirmationDate
+          };
+        } catch (error) {
+          console.error('Error formatting history item:', error);
+          return null;
+        }
+      }).filter(Boolean); // Remove any null items from mapping errors
 
       this.setState({
         history: history,
@@ -243,19 +272,71 @@ class HomeownerUI extends Component {
     }
 
     try {
-      this.setState({ historyLoading: true, error: null });
+      this.setState({ historyLoading: true });
 
-      const response = await fetch(`http://localhost:3001/api/matches/homeowner/history?keyword=${encodeURIComponent(historySearchTerm)}`);
-
-      if (!response.ok) {
-        throw new Error(`Search failed: ${response.statusText}`);
+      // First try to parse as date in different formats
+      let searchDate;
+      const dateFormats = [
+        'MM/dd/yyyy', 
+        'yyyy-MM-dd',
+        'dd-MM-yyyy',
+        'MM-dd-yyyy'
+      ];
+      
+      let isDateSearch = false;
+      for (const format of dateFormats) {
+        searchDate = new Date(historySearchTerm);
+        if (!isNaN(searchDate.getTime())) {
+          isDateSearch = true;
+          break;
+        }
       }
 
-      const data = await response.json();
+      let filtered = history;
+      if (isDateSearch) {
+        // Filter by date match (any time on that day)
+        filtered = history.filter(item => {
+          const itemDate = item.originalDate;
+          return (
+            itemDate.getFullYear() === searchDate.getFullYear() &&
+            itemDate.getMonth() === searchDate.getMonth() &&
+            itemDate.getDate() === searchDate.getDate()
+          );
+        });
+      } else {
+        // Filter by text search (case insensitive)
+        const searchLower = historySearchTerm.toLowerCase();
+        filtered = history.filter(item => {
+          // Check all searchable fields with more flexible matching
+          const fieldsToSearch = [
+            item.serviceName,
+            item.serviceType,
+            item.cleanerName,
+            item.cleanerUsername,
+            item.status
+          ];
+          
+          // Handle numeric searches - match any numeric part in cleaner username
+          if (!isNaN(historySearchTerm)) {
+            // Check if search term appears in cleaner username
+            return item.cleanerUsername && 
+                   item.cleanerUsername.toString().includes(historySearchTerm);
+          }
+          
+          // Normal text search - case insensitive match in all fields
+          return fieldsToSearch.some(
+            field => field && field.toString().toLowerCase().includes(searchLower)
+          );
+        });
+      }
 
       this.setState({
-        filteredHistory: data,
-        historyLoading: false
+        filteredHistory: filtered,
+        historyLoading: false,
+        message: filtered.length === 0 ? {
+          text: "No history found matching your search",
+          type: "info"
+        } : null
       });
     } catch (err) {
       console.error('Error searching cleaning history:', err);

@@ -476,20 +476,13 @@ class MatchServiceEntity {
                         lt: new Date() // Only past matches
                     }
                 },
-                select: {
-                    id: true,
-                    confirmationDate: true,
+                include: {
                     serviceListing: {
-                        select: {
-                            name: true,
-                            ratePerHr: true,
-                            serviceCategory: {
-                                select: {
-                                    serviceCatName: true
-                                }
-                            },
+                        include: {
+                            serviceCategory: true,
                             cleaner: {
                                 select: {
+                                    id: true,
                                     username: true
                                 }
                             }
@@ -497,22 +490,31 @@ class MatchServiceEntity {
                     }
                 },
                 orderBy: {
-                    confirmationDate: 'desc' // Newest first
+                    confirmationDate: 'desc'
                 }
             });
 
             if (!matches.length) {
-                return { error: { status: 404, error: "No past matches found" } };
+                return [];
             }
 
-            return matches.map(match => ({
-                matchId: match.id,
-                confirmationDate: match.confirmationDate,
-                cleanerUsername: match.serviceListing.cleaner.username,
-                serviceName: match.serviceListing.name,
-                serviceType: match.serviceListing.serviceCategory?.serviceCatName || 'Cleaning Service',
-                ratePerHr: match.serviceListing.ratePerHr
-            }));
+            return matches.map(match => {
+                const serviceListing = match.serviceListing || {};
+                const serviceCategory = serviceListing.serviceCategory || {};
+                const cleaner = serviceListing.cleaner || {};
+                
+                return {
+                    matchId: match.id,
+                    cleanerId: cleaner.id || '',
+                    cleanerUsername: cleaner.username || 'Unknown Cleaner',
+                    confirmationDate: match.confirmationDate.toISOString(),
+                    serviceType: serviceCategory.serviceCatName || 'Cleaning Service',
+                    serviceName: serviceListing.name || 'Service',
+                    serviceTitle: serviceListing.name || 'Service',
+                    ratePerHr: serviceListing.ratePerHr || 0,
+                    status: 'COMPLETED'
+                };
+            });
 
         } catch (error) {
             console.error('Error fetching past matches:', error);
