@@ -135,9 +135,12 @@ const renderingMethods = {
         {reportError && <div style={styles.errorMessage}>{reportError}</div>}
         {dailyReportData && (
           <div style={styles.detailsContainer}>
-            <h3 style={styles.heading}>Daily Report for {dailyReportData.date}</h3>
-            <p style={styles.detailItem}>Total Logins: {dailyReportData.totalLogins}</p>
-            {/* Add other relevant daily report data */}
+            <h3 style={styles.heading}>Daily Report ({new Date(dailyReportData.periodStart).toLocaleDateString()})</h3>
+            <p style={styles.detailItem}>Period: {new Date(dailyReportData.periodStart).toLocaleString()} to {new Date(dailyReportData.periodEnd).toLocaleString()}</p>
+            <p style={styles.detailItem}><strong>Total Logins:</strong> {dailyReportData.totalLogins}</p>
+            <p style={styles.detailItem}><strong>New User Registrations:</strong> {dailyReportData.totalRegistrations}</p>
+            <p style={styles.detailItem}><strong>Confirmed Bookings:</strong> {dailyReportData.confirmedBookings}</p>
+            <p style={styles.detailItem}>Report Generated: {new Date(dailyReportData.reportGeneratedAt).toLocaleString()}</p>
           </div>
         )}
       </div>

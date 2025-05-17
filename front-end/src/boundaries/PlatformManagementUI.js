@@ -136,7 +136,11 @@ class PlatformManagementUI extends Component {
     this.setState({ isGeneratingReport: true, dailyReportData: null, reportError: null });
 
     try {
-      const response = await fetch('/api/reports/daily', {
+      const endDate = new Date();
+      const startDate = new Date(endDate);
+      startDate.setDate(startDate.getDate() - 1); // 24 hours ago
+      
+      const response = await fetch(`http://localhost:3001/api/reports/daily?start=${startDate.toISOString()}&end=${endDate.toISOString()}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -166,7 +170,7 @@ class PlatformManagementUI extends Component {
     const formattedEndDate = endDate.toISOString().split('T')[0];
 
     try {
-      const response = await fetch(`/api/reports/weekly-listings?startDate=${formattedStartDate}&endDate=${formattedEndDate}`, {
+      const response = await fetch(`http://localhost:3001/api/reports/weekly-service-trends`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -194,7 +198,7 @@ class PlatformManagementUI extends Component {
     const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
 
     try {
-      const response = await fetch(`/api/reports/monthly-revenue?startDate=${startDate}&endDate=${endDate}`, {
+      const response = await fetch('http://localhost:3001/api/reports/monthly-revenue', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -423,8 +427,6 @@ class PlatformManagementUI extends Component {
         {currentPage === 'searchServiceCategories' && (
           <>
             {renderingMethods.renderSearchCategoriesSection.call(this)}
-            <hr />
-            {renderingMethods.renderViewCategoryDetailsSection.call(this)}
           </>
         )}
       </div>

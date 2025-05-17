@@ -521,6 +521,67 @@ class MatchServiceEntity {
             return { error: { status: 500, error: "Failed to fetch past matches" } };
         }
     }
+    /**
+     * Gets the count of confirmed bookings within a specified period
+     * @param {Date} startDate - Start of period
+     * @param {Date} endDate - End of period
+     * @returns {Promise<number|{error: {status: number, message: string}}>} Count or error
+     */
+    async getConfirmedBookingsInPeriod(startDate, endDate) {
+        try {
+            const count = await this.prisma.confirmedMatch.count({
+                where: {
+                    confirmationDate: {
+                        gte: startDate,
+                        lt: endDate
+                    }
+                }
+            });
+            return count;
+        } catch (error) {
+            console.error('Error getting confirmed bookings count:', error);
+            return { error: { status: 500, message: 'Failed to retrieve confirmed bookings count' } };
+        }
+    }
+
+    /**
+     * Gets total revenue and booking count for a period
+     * @param {Date} startDate - Start of period
+     * @param {Date} endDate - End of period
+     * @returns {Promise<{totalRevenue: number, totalBookingsCompleted: number}|{error: {status: number, message: string}}>}
+     */
+    async getRevenueInPeriod(startDate, endDate) {
+        try {
+            const bookings = await this.prisma.confirmedMatch.findMany({
+                where: {
+                    confirmationDate: {
+                        gte: startDate,
+                        lt: endDate
+                    }
+                },
+                include: {
+                    serviceListing: {
+                        select: {
+                            ratePerHr: true
+                        }
+                    }
+                }
+            });
+
+            const totalBookingsCompleted = bookings.length;
+            const totalRevenue = bookings.reduce((sum, booking) => {
+                return sum + (booking.serviceListing?.ratePerHr || 0);
+            }, 0);
+
+            return {
+                totalRevenue,
+                totalBookingsCompleted
+            };
+        } catch (error) {
+            console.error('Error getting revenue data:', error);
+            return { error: { status: 500, message: 'Failed to retrieve revenue data' } };
+        }
+    }
 }
 
 module.exports = MatchServiceEntity;

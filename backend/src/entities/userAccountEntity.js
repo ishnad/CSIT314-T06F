@@ -355,6 +355,29 @@ async createUserAccount({ username, password, email, userProfileName }) {
     }
 
     /**
+     * Logs a user login with optional IP and user agent
+     * @param {string} userId - The user ID
+     * @param {string} [ipAddress] - Optional IP address
+     * @param {string} [userAgent] - Optional user agent
+     * @returns {Promise<object|{error: {status: number, message: string}}>}
+     */
+    async logLogin(userId, ipAddress, userAgent) {
+        try {
+            const loginLog = await this.prisma.userLoginLog.create({
+                data: {
+                    userId,
+                    ipAddress,
+                    userAgent
+                }
+            });
+            return loginLog;
+        } catch (error) {
+            console.error("Error logging user login:", error);
+            return { error: { status: 500, message: 'Failed to log login' } };
+        }
+    }
+
+    /**
      * Retrieves a cleaner's profile, including their active service listings.
      * @param {string} cleanerId - The ID of the cleaner (UserAccount ID).
      * @returns {Promise<object|{error: {status: number, error: string}}>} The cleaner's profile data or an error object.
@@ -562,7 +585,7 @@ async createUserAccount({ username, password, email, userProfileName }) {
      * @param {Date} endDate - The end of the period.
      * @returns {Promise<number|{error: {status: number, message: string}}>} The total count or an error object.
      */
-    async getTotalRegistrations(startDate, endDate) {
+    async getTotalRegistrationsInPeriod(startDate, endDate) {
         try {
             const count = await this.prisma.userAccount.count({
                 where: {
@@ -577,6 +600,9 @@ async createUserAccount({ username, password, email, userProfileName }) {
             console.error("Error getting total registrations in entity:", error);
             return { error: { status: 500, message: 'Failed to retrieve total registrations.' } };
         }
+    }
+    async getTotalRegistrations(startDate, endDate) {
+        return this.getTotalRegistrationsInPeriod(startDate, endDate);
     }
 }
 

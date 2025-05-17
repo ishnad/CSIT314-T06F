@@ -36,7 +36,7 @@ class UserLoginLogEntity {
      * @param {Date} endDate - The end of the period.
      * @returns {Promise<number|{error: {status: number, message: string}}>} The total count or an error object.
      */
-    async getTotalLogins(startDate, endDate) {
+    async getTotalLoginsInPeriod(startDate, endDate) {
         try {
             const count = await this.prisma.userLoginLog.count({
                 where: {
@@ -51,6 +51,10 @@ class UserLoginLogEntity {
             console.error("Error getting total logins in entity:", error);
             return { error: { status: 500, message: 'Failed to retrieve total logins.' } };
         }
+    }
+
+    async getTotalLogins(startDate, endDate) {
+        return this.getTotalLoginsInPeriod(startDate, endDate);
     }
 }
 

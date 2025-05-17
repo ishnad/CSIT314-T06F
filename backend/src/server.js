@@ -15,6 +15,7 @@ const confirmedMatchesRoutes = require('./routes/confirmedMatchesRoutes');
 const serviceHistoryRoutes = require('./routes/serviceHistoryRoutes');
 const shortlistRoutes = require('./routes/shortlistRoutes');
 const serviceCategoryRoutes = require('./routes/serviceCategoryRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 app.use(cors({
   origin: 'http://localhost:3000',
@@ -32,6 +33,7 @@ app.use('/api/matches', confirmedMatchesRoutes);
 app.use('/api/history', serviceHistoryRoutes);
 app.use('/api/shortlist', shortlistRoutes);
 app.use('/api', serviceCategoryRoutes);
+app.use('/api', reportRoutes);
 
 
 // Health Check Route

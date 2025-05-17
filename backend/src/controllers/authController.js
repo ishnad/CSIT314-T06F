@@ -25,7 +25,11 @@ class AuthController {
                 console.error("Controller error: validateLogin returned unexpected value:", result);
                 res.status(500).json({ error: 'An unexpected error occurred during login.' });
             } else {
-                // Success case
+                // Success case - log the login
+                const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+                const userAgent = req.headers['user-agent'];
+                await this.userAccountEntity.logLogin(result.id, ipAddress, userAgent);
+
                 res.status(200).json({
                     message: 'Login successful.',
                     user: {
