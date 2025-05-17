@@ -79,7 +79,9 @@ class HomeownerUI extends Component {
         name: cleaner.username, // Using username as name if no name field exists
         email: cleaner.email,
         description: cleaner.serviceListings?.[0]?.description || 'Professional cleaning services',
-        services: cleaner.serviceListings?.map(listing => listing.serviceType) || ['House Cleaning'],
+        services: cleaner.serviceListings?.map(listing => 
+          listing.serviceCategory?.serviceCatName || 'Cleaning'
+        ) || ['House Cleaning'],
         availability: 'Available',
         price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}` // Default to $20 if no rate
       }));
@@ -190,6 +192,7 @@ class HomeownerUI extends Component {
         date: new Date(item.confirmationDate).toLocaleDateString(),
         time: new Date(item.confirmationDate).toLocaleTimeString(),
         cleanerName: item.cleanerUsername,
+        serviceName: item.serviceName,
         serviceType: item.serviceType,
         ratePerHr: item.ratePerHr,
         status: 'Completed'
@@ -197,7 +200,7 @@ class HomeownerUI extends Component {
 
       this.setState({
         history: history,
-        filteredHistory: history,
+        filteredHistory: history, // Initialize with all history
         historyLoading: false
       });
     } catch (err) {
@@ -231,18 +234,18 @@ class HomeownerUI extends Component {
 
   // Method to search cleaning history from the backend
   searchCleaningHistory = async () => {
-    const { historySearchTerm } = this.state;
+    const { history, historySearchTerm } = this.state;
 
     if (!historySearchTerm.trim()) {
-      // If search term is empty, load all history
-      this.loadCleaningHistory();
+      // If search term is empty, show all history
+      this.setState({ filteredHistory: history });
       return;
     }
 
     try {
       this.setState({ historyLoading: true, error: null });
 
-      const response = await fetch(`http://localhost:3000/api/history/search?query=${encodeURIComponent(historySearchTerm)}`);
+      const response = await fetch(`http://localhost:3001/api/matches/homeowner/history?keyword=${encodeURIComponent(historySearchTerm)}`);
 
       if (!response.ok) {
         throw new Error(`Search failed: ${response.statusText}`);
@@ -375,6 +378,19 @@ class HomeownerUI extends Component {
 
       const data = await response.json();
 
+      // Ensure data is an array before mapping
+      if (!Array.isArray(data)) {
+        this.setState({
+          filteredSavedCleaners: [],
+          savedCleanersLoading: false,
+          message: {
+            text: "No cleaners found matching your search",
+            type: "info"
+          }
+        });
+        return;
+      }
+
       // Transform API response to match cleaner card format
       const filteredCleaners = data.map(cleaner => ({
         id: cleaner.id,
@@ -391,8 +407,12 @@ class HomeownerUI extends Component {
       }));
 
       this.setState({
-        filteredSavedCleaners: filteredCleaners,
-        savedCleanersLoading: false
+        filteredSavedCleaners: filteredCleaners.length > 0 ? filteredCleaners : [],
+        savedCleanersLoading: false,
+        message: filteredCleaners.length === 0 ? {
+          text: "No cleaners found matching your search",
+          type: "info"
+        } : null
       });
     } catch (err) {
       console.error('Error searching saved cleaners:', err);
@@ -503,6 +523,19 @@ class HomeownerUI extends Component {
 
       const data = await response.json();
 
+      // Ensure data is an array before mapping
+      if (!Array.isArray(data)) {
+        this.setState({
+          filteredCleaners: [],
+          loading: false,
+          message: {
+            text: "No cleaners found matching your search",
+            type: "info"
+          }
+        });
+        return;
+      }
+
       // Transform the API response
       const filteredCleaners = data.map(cleaner => ({
         id: cleaner.id,
@@ -510,14 +543,20 @@ class HomeownerUI extends Component {
         name: cleaner.username,
         email: cleaner.email,
         description: cleaner.serviceListings?.[0]?.description || 'Professional cleaning services',
-        services: cleaner.serviceListings?.map(listing => listing.serviceType) || ['House Cleaning'],
+        services: cleaner.serviceListings?.map(listing => 
+          listing.serviceCategory?.serviceCatName || 'Cleaning'
+        ) || ['House Cleaning'],
         availability: 'Available',
         price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}` // Default to $20 if no rate
       }));
 
       this.setState({
-        filteredCleaners: filteredCleaners,
-        loading: false
+        filteredCleaners: filteredCleaners.length > 0 ? filteredCleaners : [],
+        loading: false,
+        message: filteredCleaners.length === 0 ? {
+          text: "No cleaners found matching your search",
+          type: "info"
+        } : null
       });
     } catch (err) {
       console.error('Error searching cleaners:', err);
@@ -603,7 +642,7 @@ class HomeownerUI extends Component {
     try {
       this.setState({ loading: true });
       
-      const response = await fetch('http://localhost:3001/api/matches/cleaner/confirmed/all', {
+      const response = await fetch('http://localhost:3001/api/matches/cleaner/confirmed', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -616,8 +655,16 @@ class HomeownerUI extends Component {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || response.statusText);
+        let errorMessage = `Failed to book service (${response.status})`;
+        try {
+          const errorData = await response.json();
+          if (errorData.error) {
+            errorMessage += `: ${errorData.error}`;
+          }
+        } catch (e) {
+          errorMessage += `: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -631,8 +678,6 @@ class HomeownerUI extends Component {
         }
       });
 
-      // Refresh bookings list
-      this.loadBookedCleaners();
 
     } catch (err) {
       console.error('Error booking service:', err);

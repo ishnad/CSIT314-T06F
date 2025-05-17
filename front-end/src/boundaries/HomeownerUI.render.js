@@ -162,13 +162,14 @@ const renderingMethods = {
 
         {historyLoading ? (
           <div className="loading">Loading your cleaning history...</div>
-        ) : filteredHistory && filteredHistory.length > 0 ? (
+        ) : filteredHistory.length > 0 ? (
           <div className="bookings-list">
             {filteredHistory.map(item => {
               // Extract data handling differences in API response format
               const id = item.id || item.matchId || item.bookingId;
               const cleanerName = item.cleaner?.name || item.cleanerName || 'Unknown Cleaner';
-              const service = item.service || item.serviceType || 'Standard Service';
+              const serviceName = item.serviceName;
+              const serviceType = item.service || item.serviceType || 'Standard Service';
               const date = item.date || 
                         (item.completedDate ? new Date(item.completedDate).toLocaleDateString() : 
                         (item.scheduledTime ? new Date(item.scheduledTime).toLocaleDateString() : 'Unknown'));
@@ -181,7 +182,7 @@ const renderingMethods = {
               return (
                 <div key={id} className="booking-card">
                   <div className="booking-header">
-                    <h3>{service}</h3>
+                    <h3>{serviceName}</h3>
                     <span className={`status-badge ${status.toLowerCase()}`}>
                       {status}
                     </span>
@@ -189,6 +190,7 @@ const renderingMethods = {
                   
                   <div className="booking-details">
                     <p><strong>Cleaner:</strong> {cleanerName}</p>
+                    <p><strong>Service Type:</strong> {serviceType}</p>
                     <p><strong>Date:</strong> {date}</p>
                     <p><strong>Time:</strong> {time}</p>
                     

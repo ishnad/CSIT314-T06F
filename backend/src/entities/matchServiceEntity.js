@@ -34,8 +34,8 @@ class MatchServiceEntity {
             return matches.map(match => ({
                 matchId: match.id,
                 confirmationDate: match.confirmationDate,
-                serviceTitle: match.serviceListing.description,
-                serviceType: match.serviceListing.serviceCategory?.serviceCatName || 'Cleaning Service',
+                serviceTitle: match.serviceListing.name,
+                serviceType: match.serviceListing.serviceCategory?.serviceCatName,
                 serviceRatePerHr: match.serviceListing.ratePerHr,
                 homeownerUsername: match.homeowner.username
             }));
@@ -98,6 +98,7 @@ class MatchServiceEntity {
                     serviceListing: {
                         select: {
                             id: true,
+                            name: true,
                             description: true,
                             ratePerHr: true,
                             serviceCategory: {
@@ -128,7 +129,8 @@ class MatchServiceEntity {
             return matches.map(match => ({
                 matchId: match.id,
                 confirmationDate: match.confirmationDate,
-                serviceTitle: match.serviceListing.description,
+                serviceTitle: match.serviceListing.name,
+                serviceName: match.serviceListing.name,
                 serviceType: match.serviceListing.serviceCategory?.serviceCatName || 'Cleaning Service',
                 serviceRatePerHr: match.serviceListing.ratePerHr,
                 // serviceDuration: match.serviceListing.duration,
@@ -336,6 +338,130 @@ class MatchServiceEntity {
             return { error: { status: 500, error: "Failed to create booking" } };
         }
     }
+    
+    /**
+     * Retrieves and filters the service history for a specific homeowner from ConfirmedMatch table.
+     * @param {string} homeownerId - The ID of the logged-in homeowner.
+     * @param {object} filters - An object containing filter criteria.
+     * @param {string} [filters.keyword] - A general keyword to search across service type, and cleaner's name.
+     * @param {string} [filters.serviceType] - Specific service type to filter by.
+     * @param {string} [filters.serviceDate] - Specific date to filter by.
+     * @param {string} [filters.status] - Specific status to filter by.
+     * @returns {Promise<Array<object>|{error: {status: number, message: string}}>} 
+     */
+    async getHomeownerServiceHistory(homeownerId, filters = {}) {
+        try {
+            const { keyword, serviceType, serviceDate } = filters;
+            const whereClause = {
+                homeownerId: homeownerId,
+            };
+
+            // Apply filters only if they exist
+            if (serviceType) {
+                whereClause.serviceListing = {
+                    ...whereClause.serviceListing,
+                    serviceCategory: {
+                        serviceCatName: {
+                            contains: serviceType,
+                            mode: 'insensitive'
+                        }
+                    }
+                };
+            }
+
+            if (serviceDate) {
+                const date = new Date(serviceDate);
+                if (!isNaN(date.getTime())) {
+                    const startDate = new Date(date);
+                    startDate.setUTCHours(0, 0, 0, 0);
+                    
+                    const endDate = new Date(date);
+                    endDate.setUTCHours(23, 59, 59, 999);
+                    
+                    whereClause.confirmationDate = {
+                        gte: startDate,
+                        lte: endDate,
+                    };
+                }
+            }
+
+            if (keyword) {
+                const trimmedKeyword = keyword.trim();
+                whereClause.OR = [
+                    { 
+                        serviceListing: {
+                            serviceCategory: {
+                                serviceCatName: {
+                                    contains: trimmedKeyword,
+                                    mode: 'insensitive'
+                                }
+                            }
+                        }
+                    },
+                    { 
+                        serviceListing: {
+                            cleaner: {
+                                username: {
+                                    contains: trimmedKeyword,
+                                    mode: 'insensitive'
+                                }
+                            }
+                        }
+                    }
+                ];
+            }
+
+            // Always include the cleaner and service category data
+            const history = await this.prisma.confirmedMatch.findMany({
+                where: whereClause,
+                include: {
+                    serviceListing: {
+                        include: {
+                            serviceCategory: true,
+                            cleaner: {
+                                select: {
+                                    id: true,
+                                    username: true
+                                }
+                            }
+                        }
+                    }
+                },
+                orderBy: {
+                    confirmationDate: 'desc'
+                }
+            });
+
+            // Transform results with proper null checks
+            return history.map(match => {
+                const serviceListing = match.serviceListing || {};
+                const serviceCategory = serviceListing.serviceCategory || {};
+                const cleaner = serviceListing.cleaner || {};
+                
+                return {
+                    matchId: match.id,
+                    cleanerId: cleaner.id || '',
+                    cleanerUsername: cleaner.username || 'Unknown Cleaner',
+                    confirmationDate: match.confirmationDate.toISOString(),
+                    serviceType: serviceCategory.serviceCatName || 'Cleaning Service',
+                    serviceName: serviceListing.name || 'Service',
+                    serviceTitle: serviceListing.name || 'Service',
+                    ratePerHr: serviceListing.ratePerHr || 0,
+                    status: 'COMPLETED'
+                };
+            });
+
+        } catch (error) {
+            console.error(`Error fetching service history for homeowner ${homeownerId}:`, error);
+            return {
+                error: {
+                    status: 500,
+                    message: 'Failed to retrieve service history due to a server error.'
+                }
+            };
+        }
+    }
+
     /**
      * Fetches past matches for a homeowner
      * @param {string} homeownerId - The ID of the homeowner
@@ -355,6 +481,7 @@ class MatchServiceEntity {
                     confirmationDate: true,
                     serviceListing: {
                         select: {
+                            name: true,
                             ratePerHr: true,
                             serviceCategory: {
                                 select: {
@@ -382,6 +509,7 @@ class MatchServiceEntity {
                 matchId: match.id,
                 confirmationDate: match.confirmationDate,
                 cleanerUsername: match.serviceListing.cleaner.username,
+                serviceName: match.serviceListing.name,
                 serviceType: match.serviceListing.serviceCategory?.serviceCatName || 'Cleaning Service',
                 ratePerHr: match.serviceListing.ratePerHr
             }));

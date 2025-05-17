@@ -40,31 +40,39 @@ class SearchServiceHistoryController {
      * @param {import('express').Response} res - Express response object.
      */
     async searchServiceHistory(req, res) {
-        const homeownerId = req.user.id;
+        try {
+            const homeownerId = req.user.id;
 
-        // Extract search parameters from query string
-        const { keyword, serviceType, serviceDate, status } = req.query;
+            // Extract and validate search parameters
+            const filters = {};
+            if (req.query.keyword) filters.keyword = req.query.keyword;
+            if (req.query.serviceType) filters.serviceType = req.query.serviceType;
+            if (req.query.serviceDate) filters.serviceDate = req.query.serviceDate;
+            if (req.query.status) filters.status = req.query.status;
 
-        const filters = {
-            keyword,
-            serviceType,
-            serviceDate,
-            status
-        };
+            const result = await this.serviceBookingEntity.getServiceHistory(homeownerId, filters);
 
-        const result = await this.serviceBookingEntity.getServiceHistory(homeownerId, filters);
+            if (result.error) {
+                return res.status(result.error.status || 500).json({ 
+                    error: result.error.message || "Error searching service history" 
+                });
+            }
 
-        if (result.error) {
-            return res.status(result.error.status || 500).json({ error: result.error.message });
+            // Ensure we always return an array, even if empty
+            const history = Array.isArray(result) ? result : [];
+            
+            return res.status(200).json({
+                message: history.length > 0 
+                    ? "Search results" 
+                    : "No service history matches your search",
+                history
+            });
+        } catch (error) {
+            console.error('Error in searchServiceHistory:', error);
+            return res.status(500).json({ 
+                error: "An unexpected error occurred while searching service history" 
+            });
         }
-
-        if (result.length === 0) {
-            // Alternate flow: No matching past services
-            return res.status(200).json({ message: "No service history matches your search", history: [] });
-        }
-
-        // Normal flow: Display list of matching past services
-        return res.status(200).json(result);
     }
 }
 

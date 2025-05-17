@@ -23,7 +23,7 @@ class ServiceListingEntity {
 
             await this.prisma.serviceListing.create({
                 data: {
-                    name: name.trim(), // Added name
+                    name: name.trim(),
                     description: description.trim(),
                     ratePerHr: ratePerHr,
                     cleaner: { // Connect to the cleaner
@@ -36,7 +36,7 @@ class ServiceListingEntity {
                 },
                 select: { // Select fields for the returned object
                     id: true,
-                    name: true, // Added name
+                    name: true,
                     description: true,
                     ratePerHr: true,
                     status: true,
@@ -78,7 +78,7 @@ class ServiceListingEntity {
                 },
                 select: {
                     id: true,
-                    name: true, // Added name
+                    name: true,
                     description: true,
                     ratePerHr: true,
                     status: true,
@@ -103,7 +103,7 @@ class ServiceListingEntity {
 
             const formattedListings = listings.map(listing => ({
                 id: listing.id,
-                name: listing.name, // Added name
+                name: listing.name,
                 description: listing.description,
                 ratePerHr: listing.ratePerHr,
                 status: listing.status,
@@ -133,7 +133,7 @@ class ServiceListingEntity {
                 where: { id: listingId },
                 select: {
                     id: true,
-                    name: true, // Added name
+                    name: true,
                     description: true,
                     ratePerHr: true,
                     status: true,
@@ -304,7 +304,7 @@ class ServiceListingEntity {
                 where: whereConditions,
                 select: {
                     id: true,
-                    name: true, // Added name
+                    name: true,
                     description: true,
                     ratePerHr: true,
                     status: true,
@@ -333,7 +333,7 @@ class ServiceListingEntity {
 
             return listings.map(listing => ({
                 id: listing.id,
-                name: listing.name, // Added name
+                name: listing.name,
                 description: listing.description,
                 ratePerHr: listing.ratePerHr,
                 status: listing.status,
@@ -370,7 +370,7 @@ class ServiceListingEntity {
                 },
                 select: {
                     id: true,
-                    name: true, // Added name
+                    name: true,
                     description: true,
                     ratePerHr: true,
                     status: true,
@@ -395,7 +395,7 @@ class ServiceListingEntity {
             });
             return listings.map(listing => ({
                 id: listing.id,
-                name: listing.name, // Added name
+                name: listing.name,
                 description: listing.description,
                 ratePerHr: listing.ratePerHr,
                 status: listing.status,

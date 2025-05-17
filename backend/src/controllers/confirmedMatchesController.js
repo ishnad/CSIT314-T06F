@@ -31,7 +31,7 @@ class ConfirmedMatchesController {
         }
 
         // Extract filters from query parameters
-        const { serviceType, startDate, endDate } = req.query;
+        const { serviceType, startDate, endDate, serviceName } = req.query;
         const filters = { 
             serviceType: serviceType || '',
             startDate: startDate || '',
@@ -79,6 +79,33 @@ class SearchConfirmedMatchesController {
             // Success: return the list of matches
             res.status(200).json(result);
         }
+    }
+}
+
+class HomeownerServiceHistoryController {
+    constructor() {
+        this.matchServiceEntity = new MatchServiceEntity();
+    }
+
+    /**
+     * Handles the HTTP request to get service history for a homeowner
+     * @param {object} req - Express request object
+     * @param {object} res - Express response object
+     */
+    async getServiceHistory(req, res) {
+        const homeownerId = req.user?.id;
+        const { keyword, serviceType, serviceDate } = req.query;
+
+        const result = await this.matchServiceEntity.getHomeownerServiceHistory(
+            homeownerId, 
+            { keyword, serviceType, serviceDate }
+        );
+
+        if (result.error) {
+            return res.status(result.error.status).json({ error: result.error.message });
+        }
+
+        res.status(200).json(result);
     }
 }
 
@@ -132,5 +159,6 @@ module.exports = {
     ConfirmedMatchesController, 
     SearchConfirmedMatchesController,
     CreateMatchController,
-    FetchPastMatchesController
+    FetchPastMatchesController,
+    HomeownerServiceHistoryController
 };

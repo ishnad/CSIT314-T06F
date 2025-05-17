@@ -193,8 +193,8 @@ async createUserAccount({ username, password, email, userProfileName }) {
         // Map the result to return profile name and permissions directly
         return users.map(user => ({
             ...user,
-            permissions: user.userProfile ? user.userProfile.permissions : [], // Add permissions
-            userProfile: user.userProfile ? user.userProfile.name : null // Keep profile name
+            permissions: user.userProfile ? user.userProfile.permissions : [],
+            userProfile: user.userProfile ? user.userProfile.name : null
         }));
     }
 
@@ -272,8 +272,8 @@ async createUserAccount({ username, password, email, userProfileName }) {
         // Map the result to return profile name and permissions directly
         return users.map(user => ({
             ...user,
-            permissions: user.userProfile ? user.userProfile.permissions : [], // Add permissions
-            userProfile: user.userProfile ? user.userProfile.name : null // Keep profile name
+            permissions: user.userProfile ? user.userProfile.permissions : [],
+            userProfile: user.userProfile ? user.userProfile.name : null
         }));
     }
 

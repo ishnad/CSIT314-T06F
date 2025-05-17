@@ -265,8 +265,8 @@ const renderingMethods = {
                   </button>
                   <button
                     onClick={() => this.openEditModal(listing)} // Ensure openEditModal is bound and available
-                    className="edit-button" // Added a class for styling
-                    style={{ marginLeft: '10px' }} // Example styling
+                    className="edit-button"
+                    style={{ marginLeft: '10px' }}
                   >
                     Edit
                   </button>
@@ -473,7 +473,7 @@ const renderingMethods = {
     // Ensure editFormData in CleanerUI's state is populated with id and status by openEditModal
     const { showEditModal, editFormData, isSavingChanges, editError, editingListingId, isSuspending } = this.state;
 
-    if (!showEditModal || !editFormData) return null; // Add check for editFormData
+    if (!showEditModal || !editFormData) return null;
 
     return (
       <div className="modal-overlay">
