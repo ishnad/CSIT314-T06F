@@ -75,7 +75,10 @@ class CleanerUI extends Component {
       searchMessage: null,
 
       // General Message State
-      message: null
+      message: null,
+      
+      // Service Categories
+      serviceCategories: []
     }; // End of this.state
 
     // Bind rendering methods to this instance - MOVED INSIDE CONSTRUCTOR
@@ -93,6 +96,7 @@ class CleanerUI extends Component {
         this.handleSearchSubmit(); // Load initial search results
         this.fetchProfileInsights(this.props.user.id);
         this.fetchShortlistCount(this.props.user.id);
+        this.fetchServiceCategories();
     } else {
         console.warn("CleanerUI: User ID not available on mount. Cannot fetch initial data.");
         this.setState({
@@ -120,13 +124,34 @@ class CleanerUI extends Component {
         this.setState({ listingsError: "Cannot fetch data: Cleaner ID is missing.", loadingListings: false });
         return;
     }
-    this.setState({ loadingListings: true, insightsLoading: true, loadingMatches: true }); // Set loading for all
-    await Promise.all([
+    this.setState({ loadingListings: true, insightsLoading: true, loadingMatches: true });
+    
+    try {
+      await Promise.all([
         this.fetchProfileInsights(cleanerId),
         this.fetchShortlistCount(cleanerId),
         this.fetchServiceListings(cleanerId),
-        this.handleMatchFilterSubmit(), // Load matches by default
-    ]);
+      ]);
+      
+      // Load matches separately to handle its errors independently
+      try {
+        await this.handleMatchFilterSubmit();
+      } catch (matchError) {
+        console.error('Error loading matches:', matchError);
+        this.setState({ 
+          matchesError: 'Failed to load matches',
+          loadingMatches: false 
+        });
+      }
+    } catch (error) {
+      console.error('Error in fetchInitialData:', error);
+      this.setState({ 
+        listingsError: 'Failed to load initial data',
+        insightsError: 'Failed to load insights',
+        loadingListings: false,
+        insightsLoading: false
+      });
+    }
   };
 
   // Insights Actions
@@ -179,6 +204,43 @@ class CleanerUI extends Component {
       setTimeout(() => this.setState({ message: null }), 5000);
     } finally {
       this.setState({ insightsLoading: false });
+    }
+  };
+
+  fetchServiceCategories = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/listings/service-categories', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      // Check if the response is ok before trying to parse JSON
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText || 'Failed to fetch service categories'}`);
+      }
+
+      // Parse the response and verify it's an array
+      const categories = await response.json();
+      if (!Array.isArray(categories)) {
+        throw new Error('Expected an array of service categories');
+      }
+
+      console.log('Successfully fetched service categories:', categories);
+      this.setState({ 
+        serviceCategories: categories,
+        message: null // Clear any previous error messages
+      });
+    } catch (error) {
+      console.error('Error fetching service categories:', error);
+      this.setState({ 
+        message: { 
+          text: `Error loading service categories: ${error.message}`,
+          type: 'error' 
+        } 
+      });
     }
   };
 
@@ -243,7 +305,16 @@ class CleanerUI extends Component {
   handleCreateListingSubmit = async (e) => {
     e.preventDefault();
     const { name, serviceCatName, description, ratePerHr } = this.state.newListing;
-    
+    const cleanerId = this.props.user?.id;
+
+    if (!cleanerId) {
+      this.setState({
+        createListingError: 'User not logged in',
+        isCreatingListing: false
+      });
+      return;
+    }
+
     // Input validation
     if (!name || name.trim().length < 2 || name.trim().length > 100) {
       this.setState({
@@ -259,7 +330,8 @@ class CleanerUI extends Component {
       });
       return;
     }
-    if (!ratePerHr || isNaN(parseFloat(ratePerHr)) || parseFloat(ratePerHr) <= 0) {
+    const numericRate = parseFloat(ratePerHr);
+    if (isNaN(numericRate) || numericRate <= 0) {
       this.setState({
         createListingError: 'Rate must be a positive number',
         isCreatingListing: false
@@ -407,6 +479,7 @@ class CleanerUI extends Component {
       editingListingId: listing.id,
       editFormData: {
         id: listing.id,
+        name: listing.name || '',
         serviceCatName: listing.serviceCatName || 'Basic Cleaning',
         description: listing.description || '',
         ratePerHr: listing.ratePerHr ? listing.ratePerHr.toString() : '0',
@@ -457,7 +530,8 @@ class CleanerUI extends Component {
       });
       return;
     }
-    if (!ratePerHr || isNaN(parseFloat(ratePerHr)) || parseFloat(ratePerHr) <= 0) {
+    const numericRate = parseFloat(ratePerHr);
+    if (isNaN(numericRate) || numericRate <= 0) {
       this.setState({
         editError: 'Rate must be a positive number',
         isSavingChanges: false
@@ -477,6 +551,7 @@ class CleanerUI extends Component {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+            name: name.trim(),
             serviceCatName,
             description,
             ratePerHr
@@ -596,7 +671,7 @@ class CleanerUI extends Component {
       const params = new URLSearchParams();
       
       if (searchKeyword && searchKeyword.trim() !== '') params.append('keyword', searchKeyword.trim());
-      if (searchFilters.serviceType) params.append('serviceType', searchFilters.serviceType);
+      if (searchFilters.serviceType) params.append('serviceCatName', searchFilters.serviceType.trim());
       if (searchFilters.minRate) params.append('minRate', searchFilters.minRate);
       if (searchFilters.maxRate) params.append('maxRate', searchFilters.maxRate);
 
@@ -708,11 +783,11 @@ class CleanerUI extends Component {
 
     try {
       const { serviceType, startDate, endDate } = this.state.filters;
-      const queryParams = {};
+      const queryParams = new URLSearchParams();
       
-      if (serviceType) queryParams.serviceType = serviceType;
-      if (startDate) queryParams.startDate = startDate;
-      if (endDate) queryParams.endDate = endDate;
+      if (serviceType) queryParams.append('serviceType', serviceType);
+      if (startDate) queryParams.append('startDate', startDate);
+      if (endDate) queryParams.append('endDate', endDate);
       
       const cleanerId = this.props.user?.id;
       if (!cleanerId) {
@@ -722,10 +797,9 @@ class CleanerUI extends Component {
         });
         return;
       }
-      queryParams.cleanerId = cleanerId;
+      queryParams.append('cleanerId', cleanerId);
 
-      // Build URL with query params
-      const url = new URL('http://localhost:3001/api/matches/cleaner/confirmed/search');
+      const url = `http://localhost:3001/api/matches/cleaner/confirmed/search?${queryParams.toString()}`;
       Object.entries(queryParams).forEach(([key, value]) => {
         url.searchParams.append(key, value);
       });
@@ -809,10 +883,11 @@ class CleanerUI extends Component {
                     style={{ width: '100%', padding: '8px' }}
                   >
                     <option value="">All Services</option>
-                    <option value="Basic Cleaning">Basic Cleaning</option>
-                    <option value="Deep Cleaning">Deep Cleaning</option>
-                    <option value="Office Cleaning">Office Cleaning</option>
-                    <option value="Window Cleaning">Window Cleaning</option>
+                    {this.state.serviceCategories?.map(category => (
+                      <option key={category.id} value={category.serviceCatName}>
+                        {category.serviceCatName}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 

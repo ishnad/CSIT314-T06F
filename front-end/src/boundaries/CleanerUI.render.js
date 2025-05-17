@@ -33,12 +33,11 @@ const renderingMethods = {
                 onChange={this.handleCreateListingInputChange}
                 required
               >
-                <option value="Basic Cleaning">Basic Cleaning</option>
-                <option value="Deep Cleaning">Deep Cleaning</option>
-                <option value="Office Cleaning">Office Cleaning</option>
-                <option value="Window Cleaning">Window Cleaning</option>
-                <option value="Carpet Cleaning">Carpet Cleaning</option>
-                <option value="Move-In/Move-Out Cleaning">Move-In/Move-Out Cleaning</option>
+                {this.state.serviceCategories?.map(category => (
+                  <option key={category.id} value={category.serviceCatName}>
+                    {category.serviceCatName}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -141,10 +140,11 @@ const renderingMethods = {
                 style={{ width: '100%', padding: '8px' }}
               >
                 <option value="">All Services</option>
-                <option value="Basic Cleaning">Basic Cleaning</option>
-                <option value="Deep Cleaning">Deep Cleaning</option>
-                <option value="Office Cleaning">Office Cleaning</option>
-                <option value="Window Cleaning">Window Cleaning</option>
+                {this.state.serviceCategories?.map(category => (
+                  <option key={category.id} value={category.serviceCatName}>
+                    {category.serviceCatName}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -206,7 +206,7 @@ const renderingMethods = {
               {searchResults.map(listing => (
                 <div key={listing.id} className="listing-item">
                   <div className="listing-header">
-                    <span className="service-category">{listing.serviceCatName}</span>
+                    <span className="service-category">{listing.name}</span>
                     <span className="service-rate">${listing.ratePerHr}/hr</span>
                     <span className="service-by">By: {listing.cleanerUsername || 'Unknown'}</span>
                   </div>
@@ -252,7 +252,7 @@ const renderingMethods = {
             {serviceListings.map(listing => (
               <div key={listing.id} className="listing-card">
                 <div className="listing-header">
-                  <span className="service-category">{listing.serviceCatName}</span>
+                  <span className="service-category">{listing.name}</span>
                   <span className="service-rate">${listing.ratePerHr}/hr</span>
                   <span className="service-by">By: {listing.cleanerUsername || 'You'}</span>
                 </div>
@@ -319,16 +319,12 @@ const renderingMethods = {
           ) : listingDetails ? ( // Ensure listingDetails is not null before accessing its properties
             <div className="details-content">
               <div className="detail-row">
+                <h3 style={{ margin: '0 0 10px 0' }}>{listingDetails.name}</h3>
+              </div>
+              <div className="detail-row">
                 <span className="detail-label">Service Category:</span>
                 <span className="detail-value">{listingDetails.serviceCatName}</span>
               </div>
-              {/* Add title if it exists */}
-              {listingDetails.title && (
-                <div className="detail-row">
-                    <span className="detail-label">Title:</span>
-                    <span className="detail-value">{listingDetails.title}</span>
-                </div>
-              )}
               <div className="detail-row">
                 <span className="detail-label">Description:</span>
                 <span className="detail-value">{listingDetails.description}</span>
@@ -496,6 +492,7 @@ const renderingMethods = {
                 required
                 minLength="2"
                 maxLength="100"
+                disabled={isSavingChanges} // Disable while saving
               />
             </div>
 
@@ -503,16 +500,16 @@ const renderingMethods = {
               <label htmlFor="editServiceCatName">Service Category:</label> {/* Changed id to avoid conflict if create form is also in DOM */}
               <select
                 id="editServiceCatName"
-                name="serviceCatName" // Ensure this matches the property name in editFormData and handleEditInputChange
-                value={editFormData.serviceCatName || ''} // Use initial '' if undefined
+                name="serviceCatName"
+                value={editFormData.serviceCatName || ''}
                 onChange={this.handleEditInputChange}
                 required
               >
-                <option value="Basic Cleaning">Basic Cleaning</option>
-                <option value="Deep Cleaning">Deep Cleaning</option>
-                <option value="Office Cleaning">Office Cleaning</option>
-                <option value="Window Cleaning">Window Cleaning</option>
-                {/* Add other relevant options */}
+                {this.state.serviceCategories?.map(category => (
+                  <option key={category.id} value={category.serviceCatName}>
+                    {category.serviceCatName}
+                  </option>
+                ))}
               </select>
             </div>
 

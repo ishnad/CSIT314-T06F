@@ -15,22 +15,11 @@ class ServiceListingEntity {
      */
     async createServiceListing(name, serviceCatName, description, ratePerHr, cleanerId) {
         try {
-            // First find the service category by name
             const serviceCategory = await this.prisma.serviceCategory.findFirst({
                 where: { 
-                    serviceCatName: serviceCatName,
-                    status: 'ACTIVE'
+                    serviceCatName: serviceCatName
                 }
             });
-            
-            if (!serviceCategory) {
-                return { error: { status: 404, error: `Service category '${serviceCatName}' not found or inactive` } };
-            }
-
-            // Validate the service category has an ID
-            if (!serviceCategory.id) {
-                return { error: { status: 500, error: 'Service category has no ID' } };
-            }
 
             await this.prisma.serviceListing.create({
                 data: {
@@ -165,10 +154,14 @@ class ServiceListingEntity {
                 }
             });
 
+            if (!listing) {
+                return { error: { status: 404, error: 'Service listing not found' } };
+            }
+
             // Format the output
             return {
                 id: listing.id,
-                name: listing.name, // Added name
+                name: listing.name,
                 description: listing.description,
                 ratePerHr: listing.ratePerHr,
                 status: listing.status,
@@ -193,11 +186,17 @@ class ServiceListingEntity {
      * @returns {Promise true |{error: {status: number, error: string}}>} The updated listing object or an error object.
      */
     async editServiceListing(listingId, updateData) {
-        const allowedUpdateFields = ['name', 'description', 'ratePerHr']; // Added 'name'
-        const actualUpdateData = {};
-        for (const field of allowedUpdateFields) {
-            if (updateData[field] !== undefined) {
-                actualUpdateData[field] = updateData[field];
+        // If updating service category, find the category first
+        if (updateData.serviceCatName) {
+            const serviceCategory = await this.prisma.serviceCategory.findFirst({
+                where: { 
+                    serviceCatName: updateData.serviceCatName
+                }
+            });
+            
+            if (serviceCategory) {
+                updateData.serviceCategory = { connect: { id: serviceCategory.id } };
+                delete updateData.serviceCatName;
             }
         }
         try {
@@ -253,27 +252,37 @@ class ServiceListingEntity {
      * @param {number} [maxRate] - Maximum rate.
      * @returns {Promise<Array<object>|{error: {status: number, error: string}}>} Array of listings or an error object.
      */
-    async searchListings(searcherCleanerId, keyword, serviceCategoryId, minRate, maxRate) {
+    async searchListings(searcherCleanerId, keyword, serviceCatName, minRate, maxRate) {
         const whereConditions = {
-            status: 'ACTIVE', // Only search active listings
-            cleanerId: {
-                not: searcherCleanerId // Exclude listings from the user performing the search
-            },
+            status: 'ACTIVE' // Only search active listings
         };
 
-        const orConditions = [];
-        if (keyword && typeof keyword === 'string' && keyword.trim() !== '') {
-            const trimmedKeyword = keyword.trim();
-            orConditions.push({ name: { contains: trimmedKeyword, mode: 'insensitive' } }); // Added name search
-            orConditions.push({ description: { contains: trimmedKeyword, mode: 'insensitive' } });
-            orConditions.push({ serviceCategory: { serviceCatName: { contains: trimmedKeyword, mode: 'insensitive' } } });
-        }
-        if (orConditions.length > 0) {
-            whereConditions.OR = orConditions;
+        // Only exclude own listings if searcherCleanerId is provided
+        if (searcherCleanerId) {
+            whereConditions.cleanerId = {
+                not: searcherCleanerId
+            };
         }
 
-        if (serviceCategoryId && typeof serviceCategoryId === 'string' && serviceCategoryId.trim() !== '') {
-            whereConditions.serviceCategoryId = serviceCategoryId.trim();
+        if (keyword && typeof keyword === 'string' && keyword.trim() !== '') {
+            const trimmedKeyword = keyword.trim();
+            whereConditions.AND = [
+                {
+                    OR: [
+                        { name: { contains: trimmedKeyword, mode: 'insensitive' } },
+                        { description: { contains: trimmedKeyword, mode: 'insensitive' } }
+                    ]
+                }
+            ];
+        }
+
+        if (serviceCatName && typeof serviceCatName === 'string' && serviceCatName.trim() !== '') {
+            whereConditions.serviceCategory = {
+                serviceCatName: {
+                    equals: serviceCatName.trim(),
+                    mode: 'insensitive'
+                }
+            };
         }
 
         const rateFilter = {};
@@ -400,6 +409,34 @@ class ServiceListingEntity {
         } catch (error) {
             console.error("Error retrieving new service listings in entity:", error);
             return { error: { status: 500, message: 'Failed to retrieve new service listings.' } };
+        }
+    }
+
+    /**
+     * Gets all active service categories
+     * @returns {Promise<Array<object>|{error: {status: number, error: string}}>} Array of categories or error
+     */
+    async getActiveServiceCategories() {
+        try {
+            const categories = await this.prisma.serviceCategory.findMany({
+                where: {
+                    status: 'ACTIVE'
+                },
+                select: {
+                    id: true,
+                    serviceCatName: true,
+                    serviceCatDescription: true
+                },
+                orderBy: {
+                    serviceCatName: 'asc'
+                }
+            });
+            
+            // Always return an array, even if empty
+            return categories || [];
+        } catch (error) {
+            console.error('Error fetching active service categories:', error);
+            return { error: { status: 500, error: 'Failed to fetch service categories' } };
         }
     }
 }

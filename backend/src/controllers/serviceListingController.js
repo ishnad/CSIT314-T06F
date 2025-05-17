@@ -12,18 +12,13 @@ class CreateServiceListingController {
      * @param {object} res - Express response object.
      */
     async createServiceListing(req, res) {
-        const { cleanerId } = req.body;
-        if (!cleanerId) {
-            return res.status(400).json({ error: "Cleaner ID is required" });
-        }
-
-        const { name, serviceCatName, description, ratePerHr } = req.body;
-
+        const { name, serviceCatName, description, ratePerHr, cleanerId } = req.body;
+        
         const result = await this.serviceListingEntity.createServiceListing(
-            name, // Added name
+            name,
             serviceCatName,
             description,
-            numericRate,
+            ratePerHr,
             cleanerId
         );
 
@@ -72,6 +67,11 @@ class GetServiceListingController {
      */
     async getListingDetails(req, res) {
         const listingId = req.params.id;
+        if (listingId === 'service-categories') {
+            // Handle case where someone accidentally calls listing details endpoint for categories
+            return res.status(400).json({ error: "Invalid listing ID" });
+        }
+
         const result = await this.serviceListingEntity.getListingDetails(listingId);
 
         if (result.error) {
@@ -96,32 +96,14 @@ class EditServiceListingController {
      */
     async editServiceListing(req, res) {
         const listingId = req.params.id;
-        
-        // Validate required fields exist in request body
-        if (!req.body || typeof req.body !== 'object') {
-            return res.status(400).json({ error: "Invalid request body" });
-        }
+        const { name, serviceCatName, description, ratePerHr } = req.body;
 
-        const { name, serviceCatName, description, ratePerHr: ratePerHrString } = req.body; // Added name
-
-        // Validate required fields
-        if (!name || !serviceCatName || !description || !ratePerHrString) { // Added name validation
-            return res.status(400).json({ error: "All fields (name, serviceCatName, description, ratePerHr) are required" });
-        }
-
-        const numericRate = parseFloat(ratePerHrString);
-        if (isNaN(numericRate)) {
-            return res.status(400).json({ error: "Invalid rate format" });
-        }
-
-        const updateData = {
-            name, // Added name
+        const result = await this.serviceListingEntity.editServiceListing(listingId, {
+            name,
             serviceCatName,
             description,
-            ratePerHr: numericRate
-        };
-
-        const result = await this.serviceListingEntity.editServiceListing(listingId, updateData);
+            ratePerHr
+        });
 
         if (result.error) {
             res.status(result.error.status).json({ error: result.error.error });
@@ -170,7 +152,7 @@ class SearchServiceListingsController {
         const searcherCleanerId = req.user?.id; // ID of the user performing the search
 
         // Extract filters from query parameters
-        const { keyword: queryKeyword, serviceType: queryServiceType, minRate: queryMinRate, maxRate: queryMaxRate } = req.query;
+        const { keyword: queryKeyword, serviceCatName: queryServiceCatName, minRate: queryMinRate, maxRate: queryMaxRate } = req.query;
 
         let numMinRate;
         numMinRate = parseFloat(queryMinRate);
@@ -180,27 +162,54 @@ class SearchServiceListingsController {
         const result = await this.serviceListingEntity.searchListings(
             searcherCleanerId,
             queryKeyword,
-            queryServiceType, // This should likely be serviceCategoryId based on entity method
+            queryServiceCatName,
             numMinRate,
             numMaxRate
         );
 
         if (result.error) {
-            // Only return error if there was an active search
-            if (req.query.keyword || req.query.serviceType || req.query.minRate || req.query.maxRate) {
-                return res.status(result.error.status).json({ error: result.error.error });
+            // Return empty array for 404 errors (no matches)
+            if (result.error.status === 404) {
+                return res.status(200).json([]);
             }
-            return res.status(200).json([]); // Return empty array when no filters
+            return res.status(result.error.status).json({ error: result.error.error });
         }
         res.status(200).json(result);
     }
 }
 
 
+class ServiceCategoriesController {
+    constructor() {
+        this.serviceListingEntity = new ServiceListingEntity();
+    }
+
+    /**
+     * Handles the HTTP request to get all active service categories.
+     * @param {object} req - Express request object.
+     * @param {object} res - Express response object.
+     */
+    async getActiveServiceCategories(req, res) {
+        try {
+            const categories = await this.serviceListingEntity.getActiveServiceCategories();
+            
+            if (!Array.isArray(categories)) {
+                return res.status(500).json({ error: 'Unexpected response format from service' });
+            }
+            
+            return res.status(200).json(categories);
+        } catch (error) {
+            console.error('Error in ServiceCategoriesController:', error);
+            res.status(500).json({ error: 'Failed to fetch service categories', details: error.message });
+        }
+    }
+}
+
 module.exports = {
     CreateServiceListingController,
     GetServiceListingController,
     EditServiceListingController,
     SuspendServiceListingController,
-    SearchServiceListingsController
+    SearchServiceListingsController,
+    ServiceCategoriesController
 };
