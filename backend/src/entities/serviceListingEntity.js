@@ -376,16 +376,17 @@ class ServiceListingEntity {
                     status: true,
                     createdAt: true,
                     updatedAt: true,
+                    cleanerId: true,
                     cleaner: {
                         select: {
                             id: true,
-                            username: true,
+                            username: true
                         }
                     },
                     serviceCategory: {
                         select: {
                             id: true,
-                            serviceCatName: true,
+                            serviceCatName: true
                         }
                     }
                 },
@@ -393,6 +394,7 @@ class ServiceListingEntity {
                     createdAt: 'desc',
                 }
             });
+
             return listings.map(listing => ({
                 id: listing.id,
                 name: listing.name,
@@ -401,7 +403,7 @@ class ServiceListingEntity {
                 status: listing.status,
                 createdAt: listing.createdAt,
                 updatedAt: listing.updatedAt,
-                cleanerId: listing.cleaner?.id,
+                cleanerId: listing.cleanerId,
                 cleanerUsername: listing.cleaner?.username,
                 serviceCategoryId: listing.serviceCategory?.id,
                 serviceCatName: listing.serviceCategory?.serviceCatName,

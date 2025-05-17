@@ -71,11 +71,12 @@ class ReportEntity {
             newListingTrendsByCategory: sortedTrends,
             detailedNewListings: newListings.map(listing => ({
                 id: listing.id,
+                name: listing.name,
                 description: listing.description,
                 ratePerHr: listing.ratePerHr,
                 createdAt: listing.createdAt,
-                cleanerUsername: listing.cleaner?.username || 'N/A',
-                serviceCategoryName: listing.serviceCategory?.serviceCatName || 'Uncategorized',
+                cleanerUsername: listing.cleanerUsername || 'N/A',
+                serviceCategoryName: listing.serviceCatName || 'Uncategorized',
             }))
         };
     }

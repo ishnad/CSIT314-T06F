@@ -36,10 +36,13 @@ class GenerateWeeklyReportController {
 
     async generateWeeklyServiceTrendsReport(req, res) {
         try {
-            const endDate = new Date();
-            endDate.setUTCHours(0, 0, 0, 0);
-            const startDate = new Date(endDate);
+            // Use dates from query params if provided, otherwise calculate default range
+            let endDate = req.query.end ? new Date(req.query.end) : new Date();
+            endDate.setUTCHours(23, 59, 59, 999); // End of day in UTC
+            
+            let startDate = req.query.start ? new Date(req.query.start) : new Date(endDate);
             startDate.setUTCDate(startDate.getUTCDate() - 7);
+            startDate.setUTCHours(0, 0, 0, 0); // Start of day in UTC
             
             const report = await this.reportEntity.generateWeeklyServiceTrendsReport(startDate, endDate);
             return res.status(200).json(report);

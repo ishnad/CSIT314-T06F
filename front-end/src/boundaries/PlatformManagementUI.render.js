@@ -158,19 +158,17 @@ const renderingMethods = {
           {isGeneratingWeeklyReport ? 'Generating Report...' : 'Generate Weekly Report'}
         </button>
         {weeklyReportError && <div style={styles.errorMessage}>{weeklyReportError}</div>}
-        {weeklyReportData && weeklyReportData.length > 0 ? (
-          <div style={styles.searchResultsContainer}>
-            <h3 style={styles.heading}>New Service Listings This Week</h3>
+        {weeklyReportData && (
+          <div style={styles.detailsContainer}>
+            <h3 style={styles.heading}>New Service Listings ({weeklyReportData.length}):</h3>
             <ul style={styles.searchResultList}>
               {weeklyReportData.map(listing => (
                 <li key={listing.id} style={styles.searchResultItem}>
-                  {listing.serviceCatName} - Created At: {new Date(listing.createdAt).toLocaleDateString()}
+                  "{listing.name}" by {listing.cleanerUsername} - {listing.serviceCategoryName} (${listing.ratePerHr}/hr)
                 </li>
               ))}
             </ul>
           </div>
-        ) : (
-          weeklyReportData && <p>No new service listings this week.</p>
         )}
       </div>
     );

@@ -170,14 +170,27 @@ class PlatformManagementUI extends Component {
     const formattedEndDate = endDate.toISOString().split('T')[0];
 
     try {
-      const response = await fetch(`http://localhost:3001/api/reports/weekly-service-trends`, {
+      // Get current time in UTC
+      const endDate = new Date();
+      endDate.setUTCHours(23, 59, 59, 999); // End of current day in UTC
+      
+      // Calculate start date (7 days ago) in UTC
+      const startDate = new Date(endDate);
+      startDate.setUTCDate(startDate.getUTCDate() - 7);
+      startDate.setUTCHours(0, 0, 0, 0); // Start of day 7 days ago in UTC
+      
+      console.log('Fetching weekly report for UTC dates:', startDate.toISOString(), 'to', endDate.toISOString());
+      const response = await fetch(`http://localhost:3001/api/reports/weekly-service-trends?start=${startDate.toISOString()}&end=${endDate.toISOString()}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
       const data = await response.json();
 
       if (response.ok) {
-        this.setState({ weeklyReportData: data.listings });
+        this.setState({ 
+          weeklyReportData: data.detailedNewListings || [],
+          weeklyReportTrends: data.newListingTrendsByCategory || {}
+        });
       } else {
         this.setState({ weeklyReportError: data.error || 'Failed to generate weekly report.' });
       }
