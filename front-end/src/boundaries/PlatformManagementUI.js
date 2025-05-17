@@ -379,24 +379,35 @@ class PlatformManagementUI extends Component {
   }
 
   render() {
+    const { currentPage } = this.props;
+    
     return (
       <div>
         <h1>Platform Management</h1>
-        {renderingMethods.createServiceCategoryUI.call(this)}
-        <hr />
-        {renderingMethods.renderDailyReportSection.call(this)}
-        <hr />
-        {renderingMethods.renderWeeklyReportSection.call(this)}
-        <hr />
-        {renderingMethods.renderMonthlyReportSection.call(this)}
-        <hr />
-        {renderingMethods.renderSearchCategoriesSection.call(this)}
-        <hr />
-        {renderingMethods.renderViewCategoryDetailsSection.call(this)}
-        <hr />
-        {this.state.viewCategoryDetails && this.state.editCategoryId && renderingMethods.renderEditCategorySection.call(this)}
-        <hr />
-        {renderingMethods.renderSuspendCategorySection.call(this)}
+        
+        {currentPage === 'createServiceCategory' && (
+          <>
+            {renderingMethods.createServiceCategoryUI.call(this)}
+          </>
+        )}
+
+        {currentPage === 'generateReport' && (
+          <>
+            {renderingMethods.renderDailyReportSection.call(this)}
+            <hr />
+            {renderingMethods.renderWeeklyReportSection.call(this)}
+            <hr />
+            {renderingMethods.renderMonthlyReportSection.call(this)}
+          </>
+        )}
+
+        {currentPage === 'searchServiceCategories' && (
+          <>
+            {renderingMethods.renderSearchCategoriesSection.call(this)}
+            <hr />
+            {renderingMethods.renderViewCategoryDetailsSection.call(this)}
+          </>
+        )}
       </div>
     );
   }

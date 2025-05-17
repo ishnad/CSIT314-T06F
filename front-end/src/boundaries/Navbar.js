@@ -58,6 +58,33 @@ function Navbar({ currentPage, navigateTo, user, onLogout, activeTab }) {
               </button>
             </li>
           </>
+        ) : user?.profile?.name === 'Platform Management' ? (
+          <>
+            <li className={`nav-item ${currentPage === 'createServiceCategory' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('createServiceCategory')}
+              >
+                Create Service Category
+              </button>
+            </li>
+            <li className={`nav-item ${currentPage === 'generateReport' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('generateReport')}
+              >
+                Generate Report
+              </button>
+            </li>
+            <li className={`nav-item ${currentPage === 'searchServiceCategories' ? 'active' : ''}`}>
+              <button 
+                className="nav-link" 
+                onClick={() => handleTabClick('searchServiceCategories')}
+              >
+                Search Service Categories
+              </button>
+            </li>
+          </>
         ) : user?.profile?.name === 'UserAdmin' ? (
           <>
             <li className={`nav-item ${currentPage === 'create' ? 'active' : ''}`}>

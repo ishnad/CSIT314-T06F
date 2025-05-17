@@ -4,6 +4,7 @@ import Navbar from './boundaries/Navbar';
 import UserAdminUi from './boundaries/UserAdminUI';
 import CleanerUi from './boundaries/CleanerUI';
 import HomeownerUi from './boundaries/HomeownerUI';
+import PlatformManagementUI from './boundaries/PlatformManagementUI';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('create');
@@ -100,6 +101,7 @@ function App() {
             <h1>
               {user?.profile?.name === 'UserAdmin' ? 'User Administration System' : 
                user?.profile?.name === 'Cleaner' ? 'Cleaner Dashboard' : 
+               user?.profile?.name === 'Platform Management' ? 'Platform Management' :
                'Homeowner Dashboard'}
             </h1>
           </header>
@@ -131,6 +133,14 @@ function App() {
                   id: user.id,
                   profile: user.profile || null
                 } : null}
+              />
+            ) : user?.profile?.name === 'Platform Management' ? (
+              <PlatformManagementUI 
+                ref={homeownerUiRef}
+                isAuthenticated={true}
+                onNavigate={navigateTo}
+                currentPage={currentPage}
+                user={user}
               />
             ) : (
               <HomeownerUi 

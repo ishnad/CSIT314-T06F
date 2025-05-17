@@ -253,7 +253,7 @@ const renderingMethods = {
 
     return (
       <div style={styles.container}>
-        <h2 style={styles.heading}>View Service Category Details</h2>
+        <h2 style={styles.heading}>View/Edit Service Category</h2>
         <div>
           <label htmlFor="viewCategoryId" style={styles.label}>Category ID:</label>
           <input
