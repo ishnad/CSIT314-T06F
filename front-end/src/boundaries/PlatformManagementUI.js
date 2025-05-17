@@ -87,24 +87,43 @@ class PlatformManagementUI extends Component {
     const { newCategoryName, newCategoryDescription } = this.state;
 
     try {
-      const response = await fetch('/api/service-categories', {
+      const res = await fetch('http://localhost:3001/api/service-categories', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serviceCatName: newCategoryName, serviceCatDescription: newCategoryDescription }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          serviceCatName: newCategoryName,
+          serviceCatDescription: newCategoryDescription
+        }),
       });
-      const data = await response.json();
 
-      if (response.ok) {
-        this.setState({ creationMessage: data.message, newCategoryName: '', newCategoryDescription: '' });
-      } else {
-        this.setState({ creationError: data.error || 'Failed to create category.' });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
       }
-    } catch (error) {
-      console.error('Error creating category:', error);
-      this.setState({ creationError: 'Server error.' });
+
+      this.setState({
+        newCategoryName: '',
+        newCategoryDescription: '',
+        creationMessage: `Category "${newCategoryName}" created successfully!`
+      });
+
+      // Clear message after 3 seconds
+      setTimeout(() => {
+        this.setState({ creationMessage: null });
+      }, 3000);
+
+    } catch (err) {
+      this.setState({
+        creationError: `Error creating category: ${err.message}`
+      });
+
+      setTimeout(() => {
+        this.setState({ creationError: null });
+      }, 3000);
     } finally {
       this.setState({ isCreating: false });
-      setTimeout(() => this.setState({ creationMessage: null, creationError: null }), 3000);
     }
   }
 

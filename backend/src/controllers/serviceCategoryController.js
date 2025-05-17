@@ -47,9 +47,6 @@ class SearchServiceCatController {
 
     /**
      * Handles HTTP request to search for service categories.
-     * Expects 'keyword' and 'status' as query parameters.
-     * The 'filter' from BCE is interpreted as 'status'.
-     * Corresponds to BCE: SearchServiceCatController's +searchServiceCat (String filter, String keyword): List<ServiceCategory>
      * @param {import('express').Request} req - Express request object.
      * @param {import('express').Response} res - Express response object.
      */

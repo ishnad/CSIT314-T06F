@@ -19,7 +19,6 @@ router.get('/service-categories', (req, res) => getAllServiceCategoriesControlle
 router.get( '/service-categories/search', (req, res) => searchServiceCatController.searchServiceCategories(req, res));
 router.get('/service-categories/:id', (req, res) => viewServiceCatController.getCategoryDetails(req, res));
 router.put('/service-categories/:id', (req, res) => editServiceCatController.updateServiceCategory(req, res));
-router.post('/service-categories/:id/suspend', (req, res) => suspendServiceCatController.suspendServiceCategory(req, res)
-);
+router.post('/service-categories/:id/suspend', (req, res) => suspendServiceCatController.suspendServiceCategory(req, res));
 
 module.exports = router;

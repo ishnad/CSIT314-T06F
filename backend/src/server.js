@@ -14,6 +14,7 @@ const cleanerInsightsRoutes = require('./routes/cleanerInsightsRoutes');
 const confirmedMatchesRoutes = require('./routes/confirmedMatchesRoutes');
 const serviceHistoryRoutes = require('./routes/serviceHistoryRoutes');
 const shortlistRoutes = require('./routes/shortlistRoutes');
+const serviceCategoryRoutes = require('./routes/serviceCategoryRoutes');
 
 app.use(cors({
   origin: 'http://localhost:3000',
@@ -30,6 +31,7 @@ app.use('/api/insights/cleaner', cleanerInsightsRoutes);
 app.use('/api/matches', confirmedMatchesRoutes);
 app.use('/api/history', serviceHistoryRoutes);
 app.use('/api/shortlist', shortlistRoutes);
+app.use('/api', serviceCategoryRoutes);
 
 
 // Health Check Route

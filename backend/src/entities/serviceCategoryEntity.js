@@ -1,4 +1,4 @@
-const { PrismaClient } = require('../generated/prisma');
+const { PrismaClient, ServiceCategoryStatus } = require('../generated/prisma');
 
 class ServiceCategoryEntity {
     constructor() {

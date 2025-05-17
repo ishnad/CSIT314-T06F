@@ -118,7 +118,6 @@ const renderingMethods = {
         <button style={isCreating ? styles.disabledButton : styles.button} onClick={handleCreateCategory} disabled={isCreating}>
           {isCreating ? 'Creating...' : 'Create'}
         </button>
-        <button style={styles.button} onClick={handleBackToDashboard}>Back to Dashboard</button>
       </div>
     );
   },
