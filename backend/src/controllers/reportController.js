@@ -65,15 +65,12 @@ class GenerateMonthlyReportController {
             const currentYear = today.getUTCFullYear();
             const currentMonth = today.getUTCMonth();
 
-            const endDate = new Date(Date.UTC(currentYear, currentMonth, 1));
+            // Set end date to first day of current month at 23:59:59.999
+            // Set end date to current moment
+            const endDate = new Date();
             
-            let prevMonthYear = currentYear;
-            let prevMonth = currentMonth - 1;
-            if (prevMonth < 0) {
-                prevMonth = 11;
-                prevMonthYear -= 1;
-            }
-            const startDate = new Date(Date.UTC(prevMonthYear, prevMonth, 1));
+            // Set start date to first day of current month
+            const startDate = new Date(Date.UTC(currentYear, currentMonth, 1));
             
             const report = await this.reportEntity.generateMonthlyRevenueReport(startDate, endDate);
             return res.status(200).json(report);

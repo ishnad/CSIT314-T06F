@@ -82,16 +82,17 @@ class ReportEntity {
     }
 
     async generateMonthlyRevenueReport(startDate, endDate) {
-        const { totalRevenue, totalBookingsCompleted } = await this.serviceBookingEntity.getRevenueInPeriod(startDate, endDate);
+        const { totalRevenue, totalBookingsCompleted, topCategories } = await this.serviceBookingEntity.getRevenueInPeriod(startDate, endDate);
         
         return {
             reportTitle: "Monthly Revenue Report",
-            periodCovered: `${startDate.toLocaleString('default', { month: 'long', timeZone: 'UTC' })} ${startDate.getUTCFullYear()}`,
+            periodCovered: `${startDate.toLocaleString('default', { month: 'long' })} ${startDate.getFullYear()}`,
             reportGeneratedAt: new Date(),
             dataFromDate: startDate.toISOString().split('T')[0],
             dataToDate: new Date(endDate.getTime() - 1).toISOString().split('T')[0],
             totalRevenue,
-            totalBookingsCompleted
+            totalBookingsCompleted,
+            topCategories: (topCategories || []).sort((a, b) => b.revenue - a.revenue)
         };
     }
 }

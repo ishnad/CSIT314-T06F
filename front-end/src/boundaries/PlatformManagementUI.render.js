@@ -65,12 +65,12 @@ const styles = {
     marginRight: '10px',
   },
   successMessage: {
-    color: 'green',
+    color: '#333',
     marginBottom: '10px',
     fontWeight: 'bold',
   },
   errorMessage: {
-    color: 'red',
+    color: '#333',
     marginBottom: '10px',
     fontWeight: 'bold',
   },
@@ -84,6 +84,7 @@ const styles = {
   searchResultItem: {
     padding: '8px 0',
     borderBottom: '1px solid #eee',
+    color: '#333',
   },
   detailsContainer: {
     marginTop: '15px',
@@ -94,6 +95,7 @@ const styles = {
   },
   detailItem: {
     marginBottom: '8px',
+    color: '#333',
   },
 };
 
@@ -164,7 +166,7 @@ const renderingMethods = {
             <ul style={styles.searchResultList}>
               {weeklyReportData.map(listing => (
                 <li key={listing.id} style={styles.searchResultItem}>
-                  "{listing.name}" by {listing.cleanerUsername} - {listing.serviceCategoryName} (${listing.ratePerHr}/hr)
+                  <span style={styles.detailItem}>"{listing.name}" by {listing.cleanerUsername} - {listing.serviceCategoryName} (${listing.ratePerHr}/hr)</span>
                 </li>
               ))}
             </ul>
@@ -189,8 +191,16 @@ const renderingMethods = {
           <div style={styles.detailsContainer}>
             <h3 style={styles.heading}>Monthly Revenue Report</h3>
             <p style={styles.detailItem}>Total Revenue: ${monthlyReportData.totalRevenue}</p>
-            <p style={styles.detailItem}>Report Date: {monthlyReportData.endDate}</p>
-            {/* Add other relevant monthly revenue data */}
+            <p style={styles.detailItem}>Total Bookings: {monthlyReportData.totalBookingsCompleted}</p>
+            <p style={styles.detailItem}>Report Period: {monthlyReportData.periodCovered}</p>
+            <h4 style={styles.heading}>Top Revenue Categories</h4>
+            <ul style={styles.searchResultList}>
+              {monthlyReportData.topCategories.map((category, index) => (
+                <li key={index} style={styles.searchResultItem}>
+                  {category.category}: ${category.revenue}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>

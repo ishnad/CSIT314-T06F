@@ -218,7 +218,7 @@ class PlatformManagementUI extends Component {
       const data = await response.json();
 
       if (response.ok) {
-        this.setState({ monthlyReportData: data.revenueReport });
+        this.setState({ monthlyReportData: data });
       } else {
         this.setState({ monthlyReportError: data.error || 'Failed to generate monthly revenue report.' });
       }

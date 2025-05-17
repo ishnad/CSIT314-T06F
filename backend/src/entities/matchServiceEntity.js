@@ -552,7 +552,12 @@ class MatchServiceEntity {
      */
     async getRevenueInPeriod(startDate, endDate) {
         try {
-            const bookings = await this.prisma.confirmedMatch.findMany({
+            if (!startDate || !endDate || startDate >= endDate) {
+                throw new Error(`Invalid date range: ${startDate} to ${endDate}`);
+            }
+
+            // Get all confirmed matches in period with their service listing and category
+            const matches = await this.prisma.confirmedMatch.findMany({
                 where: {
                     confirmationDate: {
                         gte: startDate,
@@ -561,21 +566,45 @@ class MatchServiceEntity {
                 },
                 include: {
                     serviceListing: {
-                        select: {
-                            ratePerHr: true
+                        include: {
+                            serviceCategory: true
                         }
                     }
                 }
             });
 
-            const totalBookingsCompleted = bookings.length;
-            const totalRevenue = bookings.reduce((sum, booking) => {
-                return sum + (booking.serviceListing?.ratePerHr || 0);
-            }, 0);
+            // Group matches by category and calculate revenue
+            const categoriesMap = new Map();
+            let totalRevenue = 0;
+            
+            for (const match of matches) {
+                const categoryName = match.serviceListing?.serviceCategory?.serviceCatName || 'Unknown';
+                const rate = match.serviceListing?.ratePerHr || 0;
+                
+                if (categoriesMap.has(categoryName)) {
+                    categoriesMap.get(categoryName).revenue += rate;
+                } else {
+                    categoriesMap.set(categoryName, {
+                        category: categoryName,
+                        revenue: rate
+                    });
+                }
+                totalRevenue += rate;
+            }
+
+            // Convert to sorted array
+            const categories = Array.from(categoriesMap.values())
+                .sort((a, b) => b.revenue - a.revenue)
+                .slice(0, 5); // Top 5 categories
+
+            // Calculate totals
+            totalRevenue = categories.reduce((sum, cat) => sum + cat.revenue, 0);
+            const totalBookingsCompleted = matches.length;
 
             return {
                 totalRevenue,
-                totalBookingsCompleted
+                totalBookingsCompleted,
+                topCategories: categories
             };
         } catch (error) {
             console.error('Error getting revenue data:', error);
