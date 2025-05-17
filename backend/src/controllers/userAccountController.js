@@ -58,7 +58,6 @@ class EditUserAccountController {
      */
     async editUserAccount(req, res) {
         const { id, username, userProfileName, email, status } = req.body;
-
         const result = await this.userEntity.editUserAccount(id, username, userProfileName, email, status);
         if (result.error) {
             res.status(result.error.status).json({ error: result.error.error });

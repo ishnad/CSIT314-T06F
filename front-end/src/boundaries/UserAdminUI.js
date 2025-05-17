@@ -27,6 +27,8 @@ class UserAdminUI extends Component {
         email: '',
         status: ''
       },
+      editDropdownOpen: false,
+      statusDropdownOpen: false,
 
       // CreateUser state
       newUser: {
@@ -616,19 +618,64 @@ handleLoginSubmit = async (e) => {
   };
 
   handleSaveChanges = async (e) => {
-    e.preventDefault(); // Ensure default form submission is prevented
+    e.preventDefault();
     const { selectedUser, editFormData } = this.state;
-    if (!selectedUser) return; // Should not happen if modal is open
+    if (!selectedUser) return;
+
+    // Input validation
+    if (!editFormData.username || editFormData.username.trim().length < 3) {
+      this.setState({
+        error: "Username must be at least 3 characters",
+        message: {
+          text: "Username must be at least 3 characters",
+          type: "error"
+        }
+      });
+      return;
+    }
+
+    if (!editFormData.userProfile) {
+      this.setState({
+        error: "User profile is required",
+        message: {
+          text: "Please select a user profile",
+          type: "error"
+        }
+      });
+      return;
+    }
+
+    if (!editFormData.email || !editFormData.email.includes('@')) {
+      this.setState({
+        error: "Valid email is required",
+        message: {
+          text: "Please enter a valid email address",
+          type: "error"
+        }
+      });
+      return;
+    }
+
+    if (!editFormData.status) {
+      this.setState({
+        error: "Status is required",
+        message: {
+          text: "Please select a status",
+          type: "error"
+        }
+      });
+      return;
+    }
 
     try {
       // Backend expects PUT /api/users and identifies user by ID
       // Backend expects 'userProfileName'
       const payload = {
-        id: selectedUser.id, // Send the original user ID for identification
-        username: editFormData.username, // Send potentially updated username
-        userProfileName: editFormData.userProfile, // Send profile name with correct key
+        id: selectedUser.id,
+        username: editFormData.username,
+        userProfileName: editFormData.userProfile,
         email: editFormData.email,
-        status: editFormData.status // Send status string (e.g., "Active")
+        status: editFormData.status.toUpperCase() // Ensure status is uppercase to match enum
       };
 
       const res = await fetch(`http://localhost:3001/api/users`, { // Use PUT /api/users endpoint
@@ -867,16 +914,53 @@ handleLoginSubmit = async (e) => {
 
   handleCreateUserSubmit = async (e) => {
     e.preventDefault();
-    const { username, password, email, userProfile } = this.state.newUser; // Include email
+    const { username, password, email, userProfile } = this.state.newUser;
+
+    // Input validation
+    if (!username || username.trim().length < 3) {
+      this.setState({
+        error: "Username must be at least 3 characters",
+        message: {
+          text: "Username must be at least 3 characters",
+          type: "error"
+        }
+      });
+      return;
+    }
+
+    if (!password || password.length < 6) {
+      this.setState({
+        error: "Password must be at least 6 characters",
+        message: {
+          text: "Password must be at least 6 characters",
+          type: "error"
+        }
+      });
+      return;
+    }
+
+    if (!email || !email.includes('@')) {
+      this.setState({
+        error: "Valid email is required",
+        message: {
+          text: "Please enter a valid email address",
+          type: "error"
+        }
+      });
+      return;
+    }
+
     if (!userProfile) {
-      alert("Please select a user profile.");
+      this.setState({
+        error: "User profile is required",
+        message: {
+          text: "Please select a user profile",
+          type: "error"
+        }
+      });
       return;
     }
-    if (!email || !email.includes('@')) { // Basic email validation
-      alert("Please enter a valid email address.");
-      return;
-    }
-    // Pass email to createUser
+
     await this.createUser(username, password, userProfile, email);
   };
 

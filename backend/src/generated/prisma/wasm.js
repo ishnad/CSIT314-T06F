@@ -159,6 +159,7 @@ exports.Prisma.ServiceCategoryScalarFieldEnum = {
 
 exports.Prisma.ServiceListingScalarFieldEnum = {
   id: 'id',
+  name: 'name',
   description: 'description',
   ratePerHr: 'ratePerHr',
   createdAt: 'createdAt',

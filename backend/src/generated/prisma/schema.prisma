@@ -91,6 +91,7 @@ model ServiceCategory {
 
 model ServiceListing {
   id                String               @id @default(cuid())
+  name              String               @db.VarChar(100) // Name with length limit
   description       String
   ratePerHr         Float
   createdAt         DateTime             @default(now())
@@ -105,6 +106,7 @@ model ServiceListing {
   @@index([cleanerId])
   @@index([cleanerId, status])
   @@index([serviceCategoryId])
+  @@index([name]) // Add index for name
 }
 
 enum ServiceListingStatus {

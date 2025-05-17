@@ -22,6 +22,7 @@ class CleanerUI extends Component {
       // Create Listing State
       showCreateForm: false,
       newListing: {
+        name: '',
         serviceCatName: 'Basic Cleaning',
         description: '',
         ratePerHr: 30.00
@@ -241,6 +242,31 @@ class CleanerUI extends Component {
 
   handleCreateListingSubmit = async (e) => {
     e.preventDefault();
+    const { name, serviceCatName, description, ratePerHr } = this.state.newListing;
+    
+    // Input validation
+    if (!name || name.trim().length < 2 || name.trim().length > 100) {
+      this.setState({
+        createListingError: 'Name must be 2-100 characters',
+        isCreatingListing: false
+      });
+      return;
+    }
+    if (!description || description.trim().length < 10) {
+      this.setState({
+        createListingError: 'Description must be at least 10 characters',
+        isCreatingListing: false
+      });
+      return;
+    }
+    if (!ratePerHr || isNaN(parseFloat(ratePerHr)) || parseFloat(ratePerHr) <= 0) {
+      this.setState({
+        createListingError: 'Rate must be a positive number',
+        isCreatingListing: false
+      });
+      return;
+    }
+
     this.setState({
       isCreatingListing: true,
       createListingError: null,
@@ -254,8 +280,9 @@ class CleanerUI extends Component {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          name: this.state.newListing.name.trim(),
           serviceCatName: this.state.newListing.serviceCatName,
-          description: this.state.newListing.description,
+          description: this.state.newListing.description.trim(),
           ratePerHr: parseFloat(this.state.newListing.ratePerHr),
           cleanerId: this.props.user?.id
         }),
@@ -413,20 +440,35 @@ class CleanerUI extends Component {
     e.preventDefault();
     if (!this.state.editingListingId) return;
 
-    this.setState({
-      isSavingChanges: true,
-      editError: null
-    });
-
-    const { serviceCatName, description, ratePerHr } = this.state.editFormData;
+    const { name, serviceCatName, description, ratePerHr } = this.state.editFormData;
     
-    if (!serviceCatName || !description || !ratePerHr) {
+    // Input validation
+    if (!name || name.trim().length < 2 || name.trim().length > 100) {
       this.setState({
-        editError: "Please fill in all required fields.",
+        editError: 'Name must be 2-100 characters',
         isSavingChanges: false
       });
       return;
     }
+    if (!description || description.trim().length < 10) {
+      this.setState({
+        editError: 'Description must be at least 10 characters',
+        isSavingChanges: false
+      });
+      return;
+    }
+    if (!ratePerHr || isNaN(parseFloat(ratePerHr)) || parseFloat(ratePerHr) <= 0) {
+      this.setState({
+        editError: 'Rate must be a positive number',
+        isSavingChanges: false
+      });
+      return;
+    }
+
+    this.setState({
+      isSavingChanges: true,
+      editError: null
+    });
 
     try {
       const response = await fetch(`/api/listings/${this.state.editingListingId}`, {

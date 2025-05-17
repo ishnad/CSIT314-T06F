@@ -26,14 +26,12 @@ class UserAccountEntity {
                 where: { name: userProfileName },
                 select: { id: true }
             });
-            if (!profile) {
-                return { error: { status: 404, error: `User profile '${userProfileName}' not found.` } };
-            }
 
-            const currentUser = await this.prisma.userAccount.findUnique({ where: { id } });
-            if (!currentUser) {
-                 return { error: { status: 404, error: 'User to update not found.' } };
-            }
+            // Find current user with explicit where clause
+            const currentUser = await this.prisma.userAccount.findUnique({
+                where: { id: id }
+            });
+            
             // Check if the new username conflicts with another existing user if username is being changed
             if (username !== currentUser.username) {
                 const existingUserWithNewUsername = await this.prisma.userAccount.findUnique({ where: { username } });

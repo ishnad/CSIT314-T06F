@@ -76,14 +76,14 @@ enum ServiceCategoryStatus {
 }
 
 model ServiceCategory {
-  id                    String    @id @default(cuid())
-  serviceCatName        String    @unique // e.g., "Window Cleaning", "Deep Cleaning"
-  serviceCatDescription String?   // Optional description for the category
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  id                    String                @id @default(cuid())
+  serviceCatName        String                @unique // e.g., "Window Cleaning", "Deep Cleaning"
+  serviceCatDescription String? // Optional description for the category
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
   status                ServiceCategoryStatus @default(ACTIVE) // Default to ACTIVE when created
 
-  serviceListings       ServiceListing[]
+  serviceListings ServiceListing[]
 
   @@index([status]) // Add index for status for faster filtering
   @@index([serviceCatName]) // Index for searching by name
@@ -91,6 +91,7 @@ model ServiceCategory {
 
 model ServiceListing {
   id                String               @id @default(cuid())
+  name              String               @db.VarChar(100) // Name with length limit
   description       String
   ratePerHr         Float
   createdAt         DateTime             @default(now())
@@ -105,6 +106,7 @@ model ServiceListing {
   @@index([cleanerId])
   @@index([cleanerId, status])
   @@index([serviceCategoryId])
+  @@index([name]) // Add index for name
 }
 
 enum ServiceListingStatus {
@@ -157,4 +159,3 @@ model ConfirmedMatch {
   @@index([confirmationDate])
   @@index([serviceListingId, confirmationDate])
 }
-

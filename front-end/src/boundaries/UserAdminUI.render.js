@@ -162,15 +162,43 @@ const renderingMethods = {
             </div>
 
             <div className="form-group">
-              <label htmlFor="userProfile">Account Type</label>
-              <input
-                type="text"
-                id="userProfile"
-                name="userProfile"
-                value={this.state.editFormData.userProfile}
-                onChange={this.handleEditFormChange}
-                required
-              />
+              <label>Account Type</label>
+              <div className="dropdown-container">
+                <button
+                  type="button"
+                  className="dropdown-button"
+                  onClick={() => this.setState({ editDropdownOpen: !this.state.editDropdownOpen })}
+                >
+                  <span>{this.state.editFormData.userProfile || "Select Profile"}</span>
+                  <span className="dropdown-arrow">▼</span>
+                </button>
+
+                {this.state.editDropdownOpen && (
+                  <div className="dropdown-menu">
+                    {this.state.profiles.length > 0 ? (
+                      this.state.profiles.map(profile => (
+                        <div
+                          key={profile.id}
+                          className="dropdown-item"
+                          onClick={() => {
+                            this.setState(prevState => ({
+                              editFormData: {
+                                ...prevState.editFormData,
+                                userProfile: profile.name
+                              },
+                              editDropdownOpen: false
+                            }));
+                          }}
+                        >
+                          {profile.name}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="dropdown-item disabled">Loading profiles...</div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="form-group">
@@ -186,15 +214,39 @@ const renderingMethods = {
             </div>
 
             <div className="form-group">
-              <label htmlFor="status">Status</label>
-              <input
-                type="text"
-                id="status"
-                name="status"
-                value={this.state.editFormData.status}
-                onChange={this.handleEditFormChange}
-                required
-              />
+              <label>Status</label>
+              <div className="dropdown-container">
+                <button
+                  type="button"
+                  className="dropdown-button"
+                  onClick={() => this.setState({ statusDropdownOpen: !this.state.statusDropdownOpen })}
+                >
+                  <span>{this.state.editFormData.status || "Select Status"}</span>
+                  <span className="dropdown-arrow">▼</span>
+                </button>
+
+                {this.state.statusDropdownOpen && (
+                  <div className="dropdown-menu">
+                    {['Active', 'Suspended'].map(status => (
+                      <div
+                        key={status}
+                        className="dropdown-item"
+                        onClick={() => {
+                          this.setState(prevState => ({
+                            editFormData: {
+                              ...prevState.editFormData,
+                              status
+                            },
+                            statusDropdownOpen: false
+                          }));
+                        }}
+                      >
+                        {status}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="edit-buttons">

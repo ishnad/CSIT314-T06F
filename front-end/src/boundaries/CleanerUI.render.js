@@ -10,6 +10,21 @@ const renderingMethods = {
           <h2>Create New Service Listing</h2>
           <form onSubmit={this.handleCreateListingSubmit}>
             <div className="form-group">
+              <label htmlFor="name">Listing Name:</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={newListing.name}
+                onChange={this.handleCreateListingInputChange}
+                placeholder="Name your service listing"
+                required
+                minLength="2"
+                maxLength="100"
+              />
+            </div>
+
+            <div className="form-group">
               <label htmlFor="serviceCatName">Service Category:</label>
               <select
                 id="serviceCatName"
@@ -470,6 +485,20 @@ const renderingMethods = {
           <h2>Edit Listing</h2>
           {/* Pass the event to handleSaveListingChanges if it uses e.preventDefault() */}
           <form onSubmit={this.handleSaveListingChanges}>
+            <div className="form-group">
+              <label htmlFor="editName">Listing Name:</label>
+              <input
+                type="text"
+                id="editName"
+                name="name"
+                value={editFormData.name || ''}
+                onChange={this.handleEditInputChange}
+                required
+                minLength="2"
+                maxLength="100"
+              />
+            </div>
+
             <div className="form-group">
               <label htmlFor="editServiceCatName">Service Category:</label> {/* Changed id to avoid conflict if create form is also in DOM */}
               <select

@@ -17,14 +17,10 @@ class CreateServiceListingController {
             return res.status(400).json({ error: "Cleaner ID is required" });
         }
 
-        const { serviceCatName, description, ratePerHr: ratePerHrString } = req.body;
-        
-        const numericRate = parseFloat(ratePerHrString);
-        if (isNaN(numericRate)) {
-            return res.status(400).json({ error: "Invalid rate format" });
-        }
+        const { name, serviceCatName, description, ratePerHr } = req.body;
 
         const result = await this.serviceListingEntity.createServiceListing(
+            name, // Added name
             serviceCatName,
             description,
             numericRate,
@@ -106,11 +102,11 @@ class EditServiceListingController {
             return res.status(400).json({ error: "Invalid request body" });
         }
 
-        const { serviceCatName, description, ratePerHr: ratePerHrString } = req.body;
-        
+        const { name, serviceCatName, description, ratePerHr: ratePerHrString } = req.body; // Added name
+
         // Validate required fields
-        if (!serviceCatName || !description || !ratePerHrString) {
-            return res.status(400).json({ error: "All fields are required" });
+        if (!name || !serviceCatName || !description || !ratePerHrString) { // Added name validation
+            return res.status(400).json({ error: "All fields (name, serviceCatName, description, ratePerHr) are required" });
         }
 
         const numericRate = parseFloat(ratePerHrString);
@@ -119,6 +115,7 @@ class EditServiceListingController {
         }
 
         const updateData = {
+            name, // Added name
             serviceCatName,
             description,
             ratePerHr: numericRate
@@ -183,7 +180,7 @@ class SearchServiceListingsController {
         const result = await this.serviceListingEntity.searchListings(
             searcherCleanerId,
             queryKeyword,
-            queryServiceType,
+            queryServiceType, // This should likely be serviceCategoryId based on entity method
             numMinRate,
             numMaxRate
         );

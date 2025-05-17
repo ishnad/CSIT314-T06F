@@ -13,7 +13,7 @@ class ServiceListingEntity {
      * @param {string} cleanerId - ID of the user creating the listing.
      * @returns {Promise true|{error: {status: number, error: string}}>} The created listing object or an error object.
      */
-    async createServiceListing(serviceCatName, description, ratePerHr, cleanerId) {
+    async createServiceListing(name, serviceCatName, description, ratePerHr, cleanerId) {
         try {
             // First find the service category by name
             const serviceCategory = await this.prisma.serviceCategory.findFirst({
@@ -34,6 +34,7 @@ class ServiceListingEntity {
 
             await this.prisma.serviceListing.create({
                 data: {
+                    name: name.trim(), // Added name
                     description: description.trim(),
                     ratePerHr: ratePerHr,
                     cleaner: { // Connect to the cleaner
@@ -46,6 +47,7 @@ class ServiceListingEntity {
                 },
                 select: { // Select fields for the returned object
                     id: true,
+                    name: true, // Added name
                     description: true,
                     ratePerHr: true,
                     status: true,
@@ -87,6 +89,7 @@ class ServiceListingEntity {
                 },
                 select: {
                     id: true,
+                    name: true, // Added name
                     description: true,
                     ratePerHr: true,
                     status: true,
@@ -111,6 +114,7 @@ class ServiceListingEntity {
 
             const formattedListings = listings.map(listing => ({
                 id: listing.id,
+                name: listing.name, // Added name
                 description: listing.description,
                 ratePerHr: listing.ratePerHr,
                 status: listing.status,
@@ -140,6 +144,7 @@ class ServiceListingEntity {
                 where: { id: listingId },
                 select: {
                     id: true,
+                    name: true, // Added name
                     description: true,
                     ratePerHr: true,
                     status: true,
@@ -163,6 +168,7 @@ class ServiceListingEntity {
             // Format the output
             return {
                 id: listing.id,
+                name: listing.name, // Added name
                 description: listing.description,
                 ratePerHr: listing.ratePerHr,
                 status: listing.status,
@@ -187,7 +193,7 @@ class ServiceListingEntity {
      * @returns {Promise true |{error: {status: number, error: string}}>} The updated listing object or an error object.
      */
     async editServiceListing(listingId, updateData) {
-        const allowedUpdateFields = ['serviceType', 'title', 'description', 'ratePerHr'];
+        const allowedUpdateFields = ['name', 'description', 'ratePerHr']; // Added 'name'
         const actualUpdateData = {};
         for (const field of allowedUpdateFields) {
             if (updateData[field] !== undefined) {
@@ -258,6 +264,7 @@ class ServiceListingEntity {
         const orConditions = [];
         if (keyword && typeof keyword === 'string' && keyword.trim() !== '') {
             const trimmedKeyword = keyword.trim();
+            orConditions.push({ name: { contains: trimmedKeyword, mode: 'insensitive' } }); // Added name search
             orConditions.push({ description: { contains: trimmedKeyword, mode: 'insensitive' } });
             orConditions.push({ serviceCategory: { serviceCatName: { contains: trimmedKeyword, mode: 'insensitive' } } });
         }
@@ -288,6 +295,7 @@ class ServiceListingEntity {
                 where: whereConditions,
                 select: {
                     id: true,
+                    name: true, // Added name
                     description: true,
                     ratePerHr: true,
                     status: true,
@@ -313,9 +321,10 @@ class ServiceListingEntity {
             if (listings.length === 0 && (keyword || serviceCategoryId || minRate !== undefined || maxRate !== undefined)) {
                 return { error: { status: 404, error: "No matching listings found." } };
             }
-            
+
             return listings.map(listing => ({
                 id: listing.id,
+                name: listing.name, // Added name
                 description: listing.description,
                 ratePerHr: listing.ratePerHr,
                 status: listing.status,
@@ -352,6 +361,7 @@ class ServiceListingEntity {
                 },
                 select: {
                     id: true,
+                    name: true, // Added name
                     description: true,
                     ratePerHr: true,
                     status: true,
@@ -376,6 +386,7 @@ class ServiceListingEntity {
             });
             return listings.map(listing => ({
                 id: listing.id,
+                name: listing.name, // Added name
                 description: listing.description,
                 ratePerHr: listing.ratePerHr,
                 status: listing.status,

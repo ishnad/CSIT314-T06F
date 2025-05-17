@@ -154,6 +154,7 @@ async function main() {
 
       await prisma.serviceListing.create({
         data: {
+          name: `${randomCategory.serviceCatName} by ${cleaner.username}`,
           description: `${randomCategory.serviceCatName} service by ${cleaner.username}`,
           ratePerHr: rate,
           cleanerId: cleaner.id,
