@@ -51,10 +51,17 @@ class SearchServiceCatController {
      * @param {import('express').Response} res - Express response object.
      */
     async searchServiceCategories(req, res) {
-        const { keyword, status } = req.query; // Get keyword and status from query params
+        const { keyword, status } = req.query;
 
+        // If no search parameters provided, return all categories
+        if (!keyword && !status) {
+            const allCategories = await this.serviceCategoryEntity.getAllServiceCategories();
+            return res.status(200).json(allCategories);
+        }
+
+        // Otherwise process filters
         let validatedStatus = null;
-        if (status && typeof status === 'string') {
+        if (status) {
             const upperStatus = status.toUpperCase();
             if (Object.values(ServiceCategoryStatus).includes(upperStatus)) {
                 validatedStatus = upperStatus;

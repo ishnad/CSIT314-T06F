@@ -52,7 +52,8 @@ class ServiceCategoryEntity {
             const whereConditions = {};
             const orConditions = [];
 
-            if (keyword && keyword.trim() !== "") {
+            // Always include all categories by default, with optional filters
+            if (keyword) {
                 const trimmedKeyword = keyword.trim();
                 orConditions.push({
                     serviceCatName: {

@@ -74,6 +74,18 @@ class PlatformManagementUI extends Component {
     this.handleSuspendServiceCategory = this.handleSuspendServiceCategory.bind(this);
   }
 
+  componentDidMount() {
+    if (this.props.currentPage === 'searchServiceCategories') {
+      this.handleSearchCategories();
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.currentPage === 'searchServiceCategories' && prevProps.currentPage !== 'searchServiceCategories') {
+      this.handleSearchCategories();
+    }
+  }
+
   handleNameChange(event) {
     this.setState({ newCategoryName: event.target.value });
   }
@@ -243,16 +255,22 @@ class PlatformManagementUI extends Component {
     const { searchFilter, searchKeyword } = this.state;
 
     try {
-      const response = await fetch(`/api/service-categories/search?filter=${searchFilter}&keyword=${searchKeyword}`, {
+      // Always send the search request even with empty params
+      const params = new URLSearchParams();
+      params.append('filter', searchFilter);
+      params.append('keyword', searchKeyword || '');
+      
+      const response = await fetch(`/api/service-categories/search?${params.toString()}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
       const data = await response.json();
 
       if (response.ok) {
-        this.setState({ searchResults: data.categories });
+        this.setState({ searchResults: data }); // Data is already the categories array
       } else {
-        this.setState({ searchError: data.error || 'Failed to search categories.' });
+        const errorText = await response.text();
+        this.setState({ searchError: errorText || 'Failed to search categories.' });
       }
     } catch (error) {
       console.error('Error searching categories:', error);

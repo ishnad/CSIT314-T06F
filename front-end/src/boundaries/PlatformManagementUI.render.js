@@ -236,11 +236,11 @@ const renderingMethods = {
           {isSearching ? 'Searching...' : 'Search'}
         </button>
         {searchError && <div style={styles.errorMessage}>{searchError}</div>}
-        {searchResults && searchResults.length > 0 ? (
+        {searchResults ? (
           <div style={styles.searchResultsContainer}>
-            <h3 style={styles.heading}>Search Results</h3>
+            <h3 style={styles.heading}>{searchResults.length ? 'Search Results' : 'All Service Categories'}</h3>
             <ul style={styles.searchResultList}>
-              {searchResults.map(category => (
+              {(searchResults.length > 0 ? searchResults : []).map(category => (
                 <li key={category.serviceCatID} style={styles.searchResultItem}>
                   {category.serviceCatName} - {category.serviceCatDescription}
                   <button style={styles.button} onClick={() => this.setState({ viewCategoryId: category.serviceCatID })}>View</button>
