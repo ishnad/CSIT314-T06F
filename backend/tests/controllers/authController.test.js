@@ -6,8 +6,13 @@ const UserAccountEntity = require('../../src/entities/userAccountEntity');
 jest.mock('../../src/entities/userAccountEntity');
 
 // --- Mock Express Request/Response ---
-const mockRequest = (body = {}) => ({
+const mockRequest = (body = {}, params = {}, query = {}) => ({
     body,
+    params,
+    query,
+    headers: {}, // Add empty headers object
+    connection: { remoteAddress: '127.0.0.1' }, // Add basic connection object
+    ip: '127.0.0.1' // Also mock ip directly as it's used as a fallback
 });
 
 const mockResponse = () => {
