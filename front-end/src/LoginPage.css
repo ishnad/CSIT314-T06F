@@ -1,0 +1,230 @@
+/* LoginPage.css */
+/* Styles moved from UserAdminUI.css and potentially enhanced for a dedicated login page */
+
+:root { /* Define CSS variables if not already globally available or for overrides */
+    --primary: #5D5CDE;
+    --primary-hover: #4847b8;
+    --danger: #dc3545;
+    --danger-light: #f8d7da;
+    --border-radius-sm: 4px;
+    --border-radius-lg: 12px;
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --gray-600: #6c757d;
+    --gray-800: #343a40;
+}
+
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f9ff; /* Light blueish background */
+    background-image: linear-gradient(135deg, #f5f9ff 0%, #e0e7ff 100%); /* Subtle gradient */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px; /* Slightly wider for better spacing */
+    padding: 40px;
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    animation: zoomin 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Smoother zoom animation */
+}
+
+@keyframes zoomin {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.login-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: var(--primary);
+    transform: scale(1.3); /* Make icon a bit larger */
+}
+
+.login-title {
+    font-size: 28px; /* Larger title */
+    margin-bottom: 10px;
+    color: var(--gray-800);
+    font-weight: 600;
+}
+
+.login-subtitle {
+    font-size: 15px;
+    color: var(--gray-600);
+    margin-bottom: 30px;
+}
+
+.login-error {
+    background-color: var(--danger-light);
+    color: var(--danger);
+    padding: 12px 15px;
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 20px;
+    font-size: 14px;
+    animation: shake 0.5s;
+    border-left: 4px solid var(--danger);
+    text-align: left; /* Align error text to the left */
+}
+
+@keyframes shake {
+    from, to {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+}
+
+.login-form .form-group {
+    display: flex; /* Added for consistency if needed, but column direction is fine */
+    flex-direction: column;
+    align-items: flex-start; /* Align labels and inputs to the start */
+    margin-bottom: 20px; /* Increased margin */
+}
+
+.login-form label {
+    width: 100%; /* Full width label */
+    text-align: left;
+    margin-bottom: 8px; /* Space between label and input */
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    width: 100%;
+    max-width: 100%; /* Ensure it doesn't overflow */
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius-sm);
+    box-sizing: border-box;
+    font-size: 16px; /* Slightly larger font in input */
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.login-form input[type="text"]:focus,
+.login-form input[type="password"]:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.25); /* Focus ring */
+}
+
+
+.login-button {
+    width: 100%;
+    padding: 12px; /* Standard padding */
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: var(--border-radius-sm);
+    margin-top: 10px; /* Space above button */
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.login-button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px); /* Subtle lift on hover */
+}
+
+.login-button:active {
+    transform: translateY(0px); /* Press down effect */
+}
+
+.login-button.loading {
+    opacity: 0.8;
+    cursor: not-allowed;
+    position: relative;
+}
+
+.login-button.loading:after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    right: 15px;
+    margin-top: -10px; /* Center vertically */
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Dark Mode Styles for Login Page */
+@media (prefers-color-scheme: dark) {
+    .login-page {
+        background-color: #121225;
+        background-image: linear-gradient(135deg, #121225 0%, #1a1a2e 100%);
+    }
+
+    .login-card {
+        background-color: #222236; /* Dark card background */
+        color: #e0e0e0; /* Light text for dark mode */
+    }
+
+    .login-title {
+        color: #f1f1f1;
+    }
+
+    .login-subtitle {
+        color: #b9b9c3;
+    }
+
+    .login-form label {
+        color: #d0d0d0; /* Lighter label color for dark mode */
+    }
+
+    .login-form input[type="text"],
+    .login-form input[type="password"] {
+        background-color: #2c2c40; /* Darker input background */
+        border-color: #444464; /* Darker border */
+        color: #e0e0e0; /* Light text in input */
+    }
+
+    .login-form input[type="text"]:focus,
+    .login-form input[type="password"]:focus {
+        border-color: var(--primary); /* Keep primary focus color */
+        box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.3); /* Adjusted focus shadow for dark */
+    }
+
+    .login-error {
+        background-color: #3b1c1e; /* Darker red background */
+        color: #f1a0a8; /* Lighter red text */
+        border-left-color: var(--danger);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 25px 30px;
+  }
+
+  .login-title {
+    font-size: 24px;
+  }
+}

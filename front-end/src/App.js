@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import Navbar from './boundaries/Navbar';
+import LoginPage from './boundaries/LoginPage';
 import UserAdminUi from './boundaries/UserAdminUI';
 import CleanerUi from './boundaries/CleanerUI';
 import HomeownerUi from './boundaries/HomeownerUI';
@@ -163,11 +164,8 @@ function App() {
           </footer>
         </>
       ) : (
-        // Show just the UserAdminUi for login when not authenticated
-        <UserAdminUi
-          onLogin={handleLogin} 
-          isAuthenticated={false}
-        />
+        // Show LoginPage when not authenticated
+        <LoginPage onLogin={handleLogin} />
       )}
     </div>
   );

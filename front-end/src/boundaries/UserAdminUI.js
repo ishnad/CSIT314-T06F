@@ -6,11 +6,6 @@ class UserAdminUI extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      // Login state
-      loginUsername: '',
-      loginPassword: '',
-      loginError: null,
-      isLoading: false,
       currentUser: null,
 
       // ManageUsers state
@@ -107,12 +102,6 @@ class UserAdminUI extends Component {
     if (this.props.isAuthenticated) {
       this.getAllUsers();
       this.getAllProfiles();
-    } else {
-      // If not authenticated, pre-fill login form for convenience
-      this.setState({
-        loginUsername: 'admin',
-        loginPassword: 'admin123'
-      });
     }
 
     // Add event listener for dropdown
@@ -142,63 +131,6 @@ class UserAdminUI extends Component {
     }
   }
 
-  // Login methods
-  handleLoginInputChange = (e) => {
-    const { name, value } = e.target;
-    this.setState({ [name]: value });
-  };
-
-  // In UserAdminUI.js, modify the handleLoginSubmit method:
-handleLoginSubmit = async (e) => {
-  e.preventDefault();
-  this.setState({ isLoading: true, loginError: '' });
-
-  const { loginUsername, loginPassword } = this.state;
-
-  try {
-    const response = await fetch('http://localhost:3001/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ 
-        username: loginUsername, 
-        password: loginPassword 
-      }),
-    });
-      
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Login failed');
-    }
-
-    // Login successful
-    this.setState({ 
-      loginUsername: '',
-      loginPassword: '',
-      loginError: null,
-      isLoading: false,
-      currentUser: data.user,
-      activeTab: 'manage'
-    });
-      
-    // Call the onLogin prop if it exists
-    if (this.props.onLogin) {
-      this.props.onLogin(data.user.username, data.user);
-    }
-
-  } catch (error) {
-    console.error('Login error:', error);
-    this.setState({ 
-      loginError: error.message || 'Login failed', 
-      isLoading: false 
-    });
-  }
-};
-
-
   // Get all profiles
   getAllProfiles = async () => {
     try {
@@ -219,6 +151,7 @@ handleLoginSubmit = async (e) => {
         filteredProfiles: data,
         profilesLoading: false
       });
+      return data;
 
     } catch (err) {
       this.setState({
@@ -313,17 +246,18 @@ handleLoginSubmit = async (e) => {
         throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
       }
 
-      // On success, the API returns true - use the profileName from state since we know it succeeded
+      // On success, the API returns true
+      const createdProfileName = profileName; // Store before clearing
       this.setState({
         profileName: '',
-        permissions: { // Reset permissions object
+        permissions: { 
           MANAGE_SERVICES: false,
           ADMIN_PRIVILEGES: false,
           SEARCH_CLEANERS: false,
           VIEW_REPORTS: false
         },
         profileMessage: {
-          text: `Profile "${profileName}" created successfully!`,
+          text: `Profile "${createdProfileName}" created successfully!`,
           type: "success"
         }
       });
@@ -368,7 +302,7 @@ handleLoginSubmit = async (e) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, permissions: permissionsArray }), // Send name and permissions array
+        body: JSON.stringify({ name, permissions: permissionsArray }), 
       });
 
       if (!res.ok) {
@@ -376,22 +310,27 @@ handleLoginSubmit = async (e) => {
         throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
       }
 
-      // On success, the API returns true - use the name from edit form since we know it succeeded
-      await this.getAllProfiles();
+      // Backend returns true, not the updated object.
+      // We need to refresh the profiles list and update selectedProfile manually.
+      this.setState({
+        message: {
+          text: `Profile ${name} updated successfully!`, // Use name from input
+          type: 'success'
+        },
+        showProfileEditModal: false
+      });
+      
+      const updatedProfilesList = await this.getAllProfiles(); // Re-fetch all profiles and get the list
 
-      // Find the updated profile in the refreshed list
-      const updatedProfile = this.state.profiles.find(profile => profile.id === profileId);
-
-      // Update the selected profile if found
-      if (updatedProfile) {
-        this.setState({ 
-          selectedProfile: updatedProfile,
-          message: {
-            text: `Profile ${updatedProfile.name} updated successfully!`,
-            type: 'success'
-          },
-          showProfileEditModal: false
-        });
+      // After re-fetching, try to find and set the updated selectedProfile
+      // Use the directly returned list for finding the profile
+      if (updatedProfilesList) {
+        const freshlyFetchedProfile = updatedProfilesList.find(p => p.id === profileId);
+        if (freshlyFetchedProfile) {
+          this.setState({ selectedProfile: freshlyFetchedProfile });
+        } else {
+          this.setState({ selectedProfile: null }); // Profile might have been deleted
+        }
       }
 
       // Clear message after 3 seconds
@@ -443,45 +382,49 @@ handleLoginSubmit = async (e) => {
           throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
         }
 
-        const responseData = await res.json(); // Backend returns { message, profile }
+        // Optimistically update selectedProfile with the new status
+        // This will make the UI reflect the change immediately
+        const optimisticallyUpdatedProfile = {
+          ...selectedProfile, // Spread existing selectedProfile data
+          status: newStatus   // Apply the new status
+        };
 
-        // Update selected profile from response data
         this.setState({
-          selectedProfile: responseData,
+          selectedProfile: optimisticallyUpdatedProfile, // Update selectedProfile first
           message: {
-            text: `Profile status updated to ${responseData.status}`,
+            text: `Profile ${optimisticallyUpdatedProfile.name} status updated to ${newStatus}`,
             type: 'success'
           }
         });
 
-        // Refresh profiles list
-        this.getAllProfiles();
+        // Now, refresh the entire list and ensure selectedProfile is fully up-to-date
+        // from the server, in case other details changed or for general consistency.
+        const updatedProfilesList = await this.getAllProfiles();
+
+        // After re-fetching, ensure selectedProfile in state is the one from the (now updated) profiles list
+        // Use the directly returned list for finding the profile
+        if (updatedProfilesList) {
+            const freshlyFetchedProfile = updatedProfilesList.find(p => p.id === profileId);
+            if (freshlyFetchedProfile) {
+              // This second setState for selectedProfile ensures it has all fields from the server
+              this.setState({ selectedProfile: freshlyFetchedProfile });
+            } else {
+              // Profile might have been deleted by another admin in the meantime,
+              // or if the optimistic update was for a profile that got filtered out by getAllProfiles.
+              // If it's not in the main list, it shouldn't be selected.
+              this.setState({ selectedProfile: null });
+            }
+        } else {
+            // If getAllProfiles failed, selectedProfile might be stale but UI showed optimistic update.
+            console.error("Failed to reconcile profile list after status toggle.");
+        }
 
       } catch (apiError) {
-        console.warn("API error, using fallback:", apiError);
-
-        // Fallback if API fails: just update the state directly
-        const updatedProfile = {
-          ...selectedProfile,
-          status: newStatus
-        };
-
-        // Update the profile in the profiles list
-        const updatedProfiles = this.state.profiles.map(profile => {
-          if (profile.id === selectedProfile.id || profile.name === selectedProfile.name) {
-            return updatedProfile;
-          }
-          return profile;
-        });
-
-        // Update state
+        console.error("Error toggling profile status API call:", apiError);
         this.setState({
-          selectedProfile: updatedProfile,
-          profiles: updatedProfiles,
-          filteredProfiles: updatedProfiles, // Update filtered list too
           message: {
-            text: `Profile ${selectedProfile.name} ${newStatus === 'ACTIVE' ? 'activated' : 'suspended'} (local change only)`,
-            type: 'warning'
+            text: `Error updating profile status: ${apiError.message}`,
+            type: 'error'
           }
         });
       }
@@ -522,6 +465,7 @@ handleLoginSubmit = async (e) => {
         filteredUsers: data,
         loading: false
       });
+      return data;
 
     } catch (err) {
       this.setState({
@@ -708,16 +652,26 @@ handleLoginSubmit = async (e) => {
         return user;
       });
 
+      // Instead of mapping manually, we'll re-fetch and then find the user
+      // This ensures consistency if the backend returns slightly different structure
+      // or if other fields were updated by the backend.
       this.setState({
-        users: updatedUsers,
-        filteredUsers: updatedFilteredUsers,
-        selectedUser: data,
         showEditModal: false,
         message: {
-          text: `User ${data.username} updated successfully!`,
+          text: `User ${editFormData.username} updated successfully!`, // Use username from form data for message
           type: 'success'
         }
       });
+
+      const freshUsersList = await this.getAllUsers();
+      if (freshUsersList) {
+        const freshlyUpdatedUser = freshUsersList.find(u => u.id === selectedUser.id);
+        if (freshlyUpdatedUser) {
+          this.setState({ selectedUser: freshlyUpdatedUser });
+        } else {
+          this.setState({ selectedUser: null }); // User might have been deleted
+        }
+      }
 
       // Clear message after 3 seconds
       setTimeout(() => {
@@ -797,16 +751,33 @@ handleLoginSubmit = async (e) => {
         }
         return user;
       });
+      
+      // Optimistically update selectedUser
+      const optimisticallyUpdatedUser = {
+        ...selectedUser,
+        status: data.status // Use status from backend response for the optimistic update
+      };
 
       this.setState({
-        users: updatedUsers,
-        filteredUsers: updatedFilteredUsers,
-        selectedUser: data,
+        selectedUser: optimisticallyUpdatedUser, // Update selectedUser first
         message: {
-          text: `User ${data.username} ${data.status === 'Active' ? 'activated' : 'suspended'} successfully!`,
+          text: `User ${optimisticallyUpdatedUser.username} ${optimisticallyUpdatedUser.status === 'ACTIVE' ? 'activated' : 'suspended'} successfully!`,
           type: 'success'
         }
       });
+
+      // Now, refresh the entire list and ensure selectedUser is fully up-to-date
+      const freshUsersList = await this.getAllUsers();
+      if (freshUsersList) {
+        const freshlyUpdatedUser = freshUsersList.find(u => u.id === selectedUser.id);
+        if (freshlyUpdatedUser) {
+          this.setState({ selectedUser: freshlyUpdatedUser });
+        } else {
+          this.setState({ selectedUser: null });
+        }
+      } else {
+        console.error("Failed to reconcile user list after status toggle.");
+      }
 
       setTimeout(() => {
         this.setState({ message: null });
@@ -897,6 +868,17 @@ handleLoginSubmit = async (e) => {
     this.setState(prevState => ({
       newUser: {
         ...prevState.newUser,
+        [name]: value
+      }
+    }));
+  };
+
+  // Handles changes in the profile edit modal form fields (e.g., name)
+  handleProfileEditFormChange = (e) => {
+    const { name, value } = e.target;
+    this.setState(prevState => ({
+      editProfileFormData: {
+        ...prevState.editProfileFormData,
         [name]: value
       }
     }));
@@ -1041,6 +1023,17 @@ handleLoginSubmit = async (e) => {
     e.preventDefault();
     const { selectedProfile, editProfileFormData } = this.state;
 
+    if (!editProfileFormData.name || editProfileFormData.name.trim() === '') {
+      this.setState({
+        message: {
+          text: "Profile name cannot be empty.",
+          type: "error"
+        }
+      });
+      setTimeout(() => this.setState({ message: null }), 3000);
+      return;
+    }
+
     try {
       // Pass the name and permissions object to editUserProfile
       // editUserProfile will handle converting permissions to an array
@@ -1088,11 +1081,13 @@ handleLoginSubmit = async (e) => {
     if (!selectedProfile) return;
 
     // Convert incoming permissions array to object for checkboxes
+    // Ensure selectedProfile.permissions is an array before calling .includes
+    const permissionsArray = Array.isArray(selectedProfile.permissions) ? selectedProfile.permissions : [];
     const permissionsObject = {
-      MANAGE_SERVICES: selectedProfile.permissions.includes('MANAGE_SERVICES'),
-      ADMIN_PRIVILEGES: selectedProfile.permissions.includes('ADMIN_PRIVILEGES'),
-      SEARCH_CLEANERS: selectedProfile.permissions.includes('SEARCH_CLEANERS'),
-      VIEW_REPORTS: selectedProfile.permissions.includes('VIEW_REPORTS')
+      MANAGE_SERVICES: permissionsArray.includes('MANAGE_SERVICES'),
+      ADMIN_PRIVILEGES: permissionsArray.includes('ADMIN_PRIVILEGES'),
+      SEARCH_CLEANERS: permissionsArray.includes('SEARCH_CLEANERS'),
+      VIEW_REPORTS: permissionsArray.includes('VIEW_REPORTS')
     };
 
     // Set the edit form data with the selected profile data
@@ -1165,10 +1160,14 @@ handleLoginSubmit = async (e) => {
   render() {
     const { message, error, activeTab } = this.state;
 
-    // Check explicitly for isAuthenticated being true
+    // UserAdminUI should only be rendered when authenticated, as per App.js logic.
+    // If somehow rendered without authentication, show a fallback.
     if (this.props.isAuthenticated !== true) {
-      // If not authenticated, call the renderLogin method (bound from external file)
-      return this.renderLogin();
+      return (
+        <div className="user-admin-ui-container">
+          <p>Loading or not authenticated...</p>
+        </div>
+      );
     }
 
     // If authenticated, show admin UI with the appropriate tab

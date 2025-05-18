@@ -70,7 +70,7 @@ class EditUserProfileController {
         if (result.error) {
             // If the entity returned an error object, use its status and message
             res.status(result.error.status).json({ error: result.error.error });
-        } else if (result === true) {
+        } else {
             res.status(200).json(result);
         }
     }
@@ -88,11 +88,6 @@ class SimulateUserProfileController {
      */
     async simulateProfile(req, res) {
         const { profileName } = req.params; // Extract profile name from URL parameter
-
-        // Basic check: profileName must be present (entity layer does more thorough validation)
-        if (!profileName) {
-            return res.status(400).json({ error: 'Profile name is required in the URL for simulation.' });
-        }
 
         try {
             const result = await this.userProfileEntity.simulateProfile(profileName);
@@ -131,7 +126,7 @@ class UpdateUserProfileStatusController {
 
         if (result.error) {
             res.status(result.error.status).json({ error: result.error.error });
-        } else if (result === true) {
+        } else {
             res.status(200).json(result);
         }
     }
@@ -148,9 +143,10 @@ class SearchUserProfileController {
      * @param {object} res - Express response object.
      */
     async searchUserProfiles(req, res) {
-        const { filter, keyword } = req.query;
+        const { keyword } = req.query; // Only keyword is needed from query for this route
 
-        const result = await this.userProfileEntity.searchUserProfiles({ filter, keyword });
+        // This controller action is specifically for searching by name.
+        const result = await this.userProfileEntity.searchUserProfiles({ filter: 'name', keyword });
 
         if (result.error) {
             return res.status(result.error.status).json({ error: result.error.error });

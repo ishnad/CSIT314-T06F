@@ -27,10 +27,18 @@ class UserAccountEntity {
                 select: { id: true }
             });
 
+            if (!profile) {
+                return { error: { status: 400, error: `User profile '${userProfileName}' not found.` } };
+            }
+
             // Find current user with explicit where clause
             const currentUser = await this.prisma.userAccount.findUnique({
                 where: { id: id }
             });
+
+            if (!currentUser) {
+                return { error: { status: 404, error: `User with ID '${id}' not found.` } };
+            }
             
             // Check if the new username conflicts with another existing user if username is being changed
             if (username !== currentUser.username) {
@@ -59,6 +67,7 @@ class UserAccountEntity {
             });
 
             return {
+                id: updatedUser.id,
                 username: updatedUser.username,
                 userProfile: updatedUser.userProfile.name,
                 permissions: updatedUser.userProfile.permissions,
@@ -119,6 +128,7 @@ async createUserAccount({ username, password, email, userProfileName }) {
 
             return true; // Account successfully created
         } catch (error) {
+            console.error("Error during user account creation in entity:", error);
             return { error: { status: 500, message: 'An unexpected error occurred during user account creation.' } };
         }
     }

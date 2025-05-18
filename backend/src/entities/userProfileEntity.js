@@ -6,28 +6,6 @@ class UserProfileEntity {
     }
 
     /**
-     * Validates the input for creating or updating a user profile.
-     * @param {string} name - The name of the profile.
-     * @param {string[]} [permissions] - Optional array of permission strings.
-     * @returns {object|null} Error object or null if valid.
-     */
-    validateUserProfileInput(name, permissions) {
-        if (!name || typeof name !== 'string' || name.trim() === '') {
-            return { status: 400, error: 'Profile name is required and cannot be empty.' };
-        }
-        // Validate permissions if provided
-        if (permissions !== undefined) {
-            if (!Array.isArray(permissions)) {
-                return { status: 400, error: 'Permissions must be an array of strings.' };
-            }
-            if (!permissions.every(p => typeof p === 'string')) {
-                 return { status: 400, error: 'Each permission must be a string.' };
-            }
-        }
-        return null; // Input is valid
-    }
-
-    /**
      * Creates a new user profile.
      * @param {object} profileData - Data for the new profile.
      * @param {string} profileData.name - The name of the profile.
@@ -35,15 +13,12 @@ class UserProfileEntity {
      * @returns {Promise<boolean|{error: {status: number, error: string}}>} True on successful creation, or an error object on failure.
      */
     async createUserProfile({ name, permissions = [] }) { // Default to empty array if not provided
-        const validationError = this.validateUserProfileInput(name, permissions);
-        if (validationError) {
-            return { error: validationError };
-        }
+        const trimmedName = name ? name.trim() : '';
 
         try {
             // Check if profile name already exists
             const existingProfile = await this.prisma.userProfile.findUnique({
-                where: { name: name.trim() },
+                where: { name: trimmedName },
             });
 
             if (existingProfile) {
@@ -53,16 +28,14 @@ class UserProfileEntity {
             // Create the new profile
             await this.prisma.userProfile.create({
                 data: {
-                    name: name.trim(),
+                    name: trimmedName,
                     permissions: permissions,
                     status: UserProfileStatus.ACTIVE, // Default status
                 },
-                select: { // Select the fields to return
+                // Select clause is useful for Prisma to know what to process,
+                // even if we only return true.
+                select: { 
                     id: true,
-                    name: true,
-                    permissions: true,
-                    status: true,
-                    createdAt: true
                 }
             });
 
@@ -131,7 +104,7 @@ class UserProfileEntity {
      * @returns {Promise<boolean|{error: {status: number, error: string}}>} True on successful update, or an error object on failure.
      */
     async updateUserProfile(profileId, { name, permissions }) {
-        const trimmedName = name.trim();
+        const trimmedName = name ? name.trim() : undefined; // Trim if name is provided
 
         try {
             // Check if the target profile exists
@@ -157,20 +130,19 @@ class UserProfileEntity {
 
             // Prepare data for update
             const dataToUpdate = {};
-            dataToUpdate.name = trimmedName;
-            dataToUpdate.permissions = permissions;
+            if (trimmedName !== undefined) {
+                dataToUpdate.name = trimmedName;
+            }
+            if (permissions !== undefined) {
+                dataToUpdate.permissions = permissions;
+            }
 
             // Update the profile
             await this.prisma.userProfile.update({
                 where: { id: profileId },
                 data: dataToUpdate,
-                select: { // Select the fields to return
+                select: { // Select clause for Prisma
                     id: true,
-                    name: true,
-                    permissions: true,
-                    status: true,
-                    createdAt: true,
-                    updatedAt: true
                 }
             });
 
@@ -200,16 +172,8 @@ class UserProfileEntity {
             await this.prisma.userProfile.update({
                 where: { id: profileId },
                 data: { status: newStatus },
-                select: {
+                select: { // Select clause for Prisma
                     id: true,
-                    name: true,
-                    permissions: true,
-                    status: true,
-                    createdAt: true,
-                    updatedAt: true,
-                     _count: {
-                        select: { userAccounts: true },
-                    },
                 }
             });
             
@@ -227,12 +191,13 @@ class UserProfileEntity {
      * @returns {Promise<object>} The profile object or an error object.
      */
     async simulateProfile(profileName) {
-        // Basic validation
-        if (!profileName || typeof profileName !== 'string' || profileName.trim() === '') {
-            return { error: { status: 400, error: 'Profile name is required for simulation.' } };
-        }
+        // Basic validation (empty name) is assumed to be done by the front-end.
+        const trimmedName = profileName ? profileName.trim() : '';
 
-        const trimmedName = profileName.trim();
+        if (!trimmedName) {
+            // Safeguard, or remove if strict "no validation in entity"
+            return { error: { status: 400, error: 'Profile name cannot be empty for simulation.' } };
+        }
 
         try {
             const profile = await this.prisma.userProfile.findUnique({
@@ -265,11 +230,11 @@ class UserProfileEntity {
      * @returns {Promise<object>} The UserProfile object with associated userAccounts, or an error object.
      */
     async searchUserProfiles({ filter, keyword }) {
-        const trimmedKeyword = keyword.trim();
-
+        const trimmedKeyword = keyword ? keyword.trim() : '';
+        
         try {
             const profile = await this.prisma.userProfile.findUnique({
-                where: { name: trimmedKeyword },
+                where: { name: trimmedKeyword }, // Assumes filter is 'name'
                 include: {
                     userAccounts: {
                         select: {

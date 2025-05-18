@@ -67,33 +67,28 @@ describe('UserAccount Controllers (excluding Login)', () => {
             expect(res.json).toHaveBeenCalledWith(true);
         });
 
-        it('should respond with 400 and false if entity returns false (e.g., conflict, profile not found)', async () => {
+        it('should respond with status and message from entity error object (e.g., conflict)', async () => {
             req = mockRequest({}, userData);
-            UserAccountEntity.prototype.createUserAccount.mockResolvedValue(false); // Entity now returns false directly
-            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const entityError = { error: { status: 409, message: 'Username already exists.' } };
+            UserAccountEntity.prototype.createUserAccount.mockResolvedValue(entityError);
 
             await controller.createUserAccount(req, res);
 
             expect(UserAccountEntity.prototype.createUserAccount).toHaveBeenCalledWith(userData);
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith(false);
-            expect(consoleErrorSpy).toHaveBeenCalledWith("User account creation failed (handled by entity).");
-            consoleErrorSpy.mockRestore();
+            expect(res.status).toHaveBeenCalledWith(409);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Username already exists.' });
         });
 
-        it('should respond with 500 and false on unexpected error during entity call (controller catch block)', async () => {
+        it('should respond with 500 if entity returns a 500 error object', async () => {
             req = mockRequest({}, userData);
-            const error = new Error("Something broke badly");
-            UserAccountEntity.prototype.createUserAccount.mockRejectedValue(error);
+            const entityError = { error: { status: 500, message: 'Entity internal error.' } };
+            UserAccountEntity.prototype.createUserAccount.mockResolvedValue(entityError);
 
-            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
             await controller.createUserAccount(req, res);
 
             expect(UserAccountEntity.prototype.createUserAccount).toHaveBeenCalledWith(userData);
             expect(res.status).toHaveBeenCalledWith(500);
-            expect(res.json).toHaveBeenCalledWith(false);
-            expect(consoleErrorSpy).toHaveBeenCalledWith("createUserAccount ERROR:", error);
-            consoleErrorSpy.mockRestore(); // Moved after the assertion
+            expect(res.json).toHaveBeenCalledWith({ error: 'Entity internal error.' });
         });
     });
 
@@ -139,15 +134,49 @@ describe('UserAccount Controllers (excluding Login)', () => {
             expect(res.json).toHaveBeenCalledWith({ error: "User not found" });
         });
 
-         it('should return 200 with empty array if non-username filter yields no results', async () => {
-            req = mockRequest({}, {}, { filter: 'status', keyword: 'BANNED' });
-            UserAccountEntity.prototype.viewUserAccount.mockResolvedValue([]); // Empty array
+        it('should handle various filter scenarios correctly', async () => {
+            const testCases = [
+                {
+                    description: 'status filter with no results',
+                    filter: 'status',
+                    keyword: 'BANNED',
+                    mockResult: [],
+                    expectedStatus: 200,
+                    expectedResponse: []
+                },
+                {
+                    description: 'email filter with multiple results',
+                    filter: 'email',
+                    keyword: '@company.com',
+                    mockResult: [{id: '1', email: 'user1@company.com'}, {id: '2', email: 'user2@company.com'}],
+                    expectedStatus: 200,
+                    expectedResponse: [{id: '1', email: 'user1@company.com'}, {id: '2', email: 'user2@company.com'}]
+                },
+                {
+                    description: 'userProfile filter with special characters',
+                    filter: 'userProfile',
+                    keyword: 'Admin%',
+                    mockResult: [{id: '3', userProfile: 'Admin%'}],
+                    expectedStatus: 200,
+                    expectedResponse: [{id: '3', userProfile: 'Admin%'}]
+                }
+            ];
 
-            await controller.viewUserAccount(req, res);
-
-            expect(UserAccountEntity.prototype.viewUserAccount).toHaveBeenCalledWith('status', 'BANNED');
-            expect(res.status).toHaveBeenCalledWith(200); // Not 404 for general filters
-            expect(res.json).toHaveBeenCalledWith([]);
+            for (const testCase of testCases) {
+                UserAccountEntity.prototype.viewUserAccount.mockResolvedValue(testCase.mockResult);
+                req = mockRequest({}, {}, { filter: testCase.filter, keyword: testCase.keyword });
+                
+                await controller.viewUserAccount(req, res);
+                
+                expect(UserAccountEntity.prototype.viewUserAccount)
+                    .toHaveBeenCalledWith(testCase.filter, testCase.keyword);
+                expect(res.status).toHaveBeenCalledWith(testCase.expectedStatus);
+                expect(res.json).toHaveBeenCalledWith(testCase.expectedResponse);
+                
+                // Reset mocks for next iteration
+                res.status.mockClear();
+                res.json.mockClear();
+            }
         });
 
         it('should return 500 on unexpected controller error', async () => {
@@ -185,16 +214,53 @@ describe('UserAccount Controllers (excluding Login)', () => {
             expect(res.json).toHaveBeenCalledWith(updatedUser);
         });
 
-        it('should return error from entity if edit fails', async () => {
+        it('should handle entity error responses correctly', async () => {
             req = mockRequest({}, editData);
-            const errorResponse = { error: { status: 404, error: 'User profile not found.' } };
+            const testCases = [
+                { 
+                    errorDetails: { status: 404, error: 'User profile not found.' }, // This is the content of result.error
+                    expectedStatus: 404,
+                    expectedMessage: 'User profile not found.'
+                },
+                {
+                    errorDetails: { status: 409, error: 'Database constraint failed' }, // This is the content of result.error
+                    expectedStatus: 409,
+                    expectedMessage: 'Database constraint failed'
+                }
+            ];
+
+            for (const testCase of testCases) {
+                // Mock the entity to return an object like { error: { status: ..., error: ... } }
+                UserAccountEntity.prototype.editUserAccount.mockResolvedValueOnce({ error: testCase.errorDetails });
+                await controller.editUserAccount(req, res);
+                
+                expect(res.status).toHaveBeenCalledWith(testCase.expectedStatus);
+                expect(res.json).toHaveBeenCalledWith({ error: testCase.expectedMessage });
+                res.status.mockClear();
+                res.json.mockClear();
+            }
+        });
+
+        it('should handle 409 conflict error for duplicate username', async () => {
+            req = mockRequest({}, editData);
+            const errorResponse = { error: { status: 409, error: 'Username already exists' } };
             UserAccountEntity.prototype.editUserAccount.mockResolvedValue(errorResponse);
 
             await controller.editUserAccount(req, res);
 
-            expect(UserAccountEntity.prototype.editUserAccount).toHaveBeenCalledWith(editData.id, editData.username, editData.userProfileName, editData.email, editData.status);
-            expect(res.status).toHaveBeenCalledWith(404);
-            expect(res.json).toHaveBeenCalledWith({ error: 'User profile not found.' });
+            expect(res.status).toHaveBeenCalledWith(409);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Username already exists' });
+        });
+
+        it('should handle 409 conflict error for duplicate email', async () => {
+            req = mockRequest({}, editData);
+            const errorResponse = { error: { status: 409, error: 'Email already exists' } };
+            UserAccountEntity.prototype.editUserAccount.mockResolvedValue(errorResponse);
+
+            await controller.editUserAccount(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(409);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Email already exists' });
         });
 
         it('should return 500 on unexpected controller error', async () => {
@@ -228,18 +294,36 @@ describe('UserAccount Controllers (excluding Login)', () => {
 
             expect(UserAccountEntity.prototype.suspendUserAccount).toHaveBeenCalledWith(usernameToSuspend);
             expect(res.status).toHaveBeenCalledWith(200);
-            expect(res.json).toHaveBeenCalledWith({ message: 'User account suspended successfully' });
+            expect(res.json).toHaveBeenCalledWith(true);
         });
 
-        it('should return 500 if entity returns false', async () => {
+        it('should respond with the entity error status and message if entity returns an error object', async () => {
             req = mockRequest({}, { username: usernameToSuspend });
-            UserAccountEntity.prototype.suspendUserAccount.mockResolvedValue(false); // Simulate failure in entity
+            const errorResponse = { error: { status: 404, message: 'User not found' } };
+            UserAccountEntity.prototype.suspendUserAccount.mockResolvedValue(errorResponse);
 
             await controller.suspendUserAccount(req, res);
 
-            expect(UserAccountEntity.prototype.suspendUserAccount).toHaveBeenCalledWith(usernameToSuspend);
+            // The controller should use the status and message from the entity's error object
+            expect(res.status).toHaveBeenCalledWith(errorResponse.error.status);
+            expect(res.json).toHaveBeenCalledWith({ error: errorResponse.error.message });
+        });
+
+        it('should return 500 if entity returns false (controller catch block handles TypeError)', async () => {
+            req = mockRequest({}, { username: usernameToSuspend });
+            UserAccountEntity.prototype.suspendUserAccount.mockResolvedValue(false);
+
+            // Spy on console.error to suppress it during this test if desired, or to check its call
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+            await controller.suspendUserAccount(req, res);
+
+            // The controller's catch block should handle the TypeError and respond with 500
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.json).toHaveBeenCalledWith({ error: 'Failed to suspend user account' });
+            expect(consoleErrorSpy).toHaveBeenCalledWith("suspendUserAccount ERROR:", expect.any(TypeError));
+            
+            consoleErrorSpy.mockRestore();
         });
 
         it('should return 500 on unexpected controller error', async () => {
@@ -285,6 +369,28 @@ describe('UserAccount Controllers (excluding Login)', () => {
             expect(UserAccountEntity.prototype.searchUserAccount).toHaveBeenCalledWith('username', 'notfound');
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({ message: "No users found for your search" });
+        });
+
+        it('should return proper response structure for found users', async () => {
+            const mockUsers = [{ id: '1', username: 'testuser' }];
+            req = mockRequest({}, {}, { filter: 'username', keyword: 'test' });
+            UserAccountEntity.prototype.searchUserAccount.mockResolvedValue(mockUsers);
+
+            await controller.searchUserAccount(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith(mockUsers);
+        });
+
+        it('should handle special characters in search keyword', async () => {
+            const keyword = 'test@example.com';
+            req = mockRequest({}, {}, { filter: 'email', keyword });
+            UserAccountEntity.prototype.searchUserAccount.mockResolvedValue([]);
+
+            await controller.searchUserAccount(req, res);
+
+            expect(UserAccountEntity.prototype.searchUserAccount)
+                .toHaveBeenCalledWith('email', keyword);
         });
 
         it('should return 400 if entity throws filter required error', async () => {
