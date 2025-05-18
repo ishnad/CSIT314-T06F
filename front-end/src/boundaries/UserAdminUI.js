@@ -447,9 +447,9 @@ handleLoginSubmit = async (e) => {
 
         // Update selected profile from response data
         this.setState({
-          selectedProfile: responseData,
+          selectedProfile: null,  // Clear selected profile
           message: {
-            text: `Profile status updated to ${responseData.status}`,
+            text: `Profile status updated to ${newStatus}`,
             type: 'success'
           }
         });
@@ -476,9 +476,9 @@ handleLoginSubmit = async (e) => {
 
         // Update state
         this.setState({
-          selectedProfile: updatedProfile,
+          selectedProfile: null,  // Clear selected profile
           profiles: updatedProfiles,
-          filteredProfiles: updatedProfiles, // Update filtered list too
+          filteredProfiles: updatedProfiles,
           message: {
             text: `Profile ${selectedProfile.name} ${newStatus === 'ACTIVE' ? 'activated' : 'suspended'} (local change only)`,
             type: 'warning'
@@ -1046,7 +1046,12 @@ handleLoginSubmit = async (e) => {
       // editUserProfile will handle converting permissions to an array
       await this.editUserProfile(selectedProfile.id, {
         name: editProfileFormData.name,
-        permissions: editProfileFormData.permissions // Pass the object
+        permissions: editProfileFormData.permissions
+      }).then(() => {
+        this.setState({ 
+          showProfileEditModal: false,
+          selectedProfile: null  // Clear selected profile after save
+        });
       });
 
     } catch (err) {
@@ -1060,7 +1065,17 @@ handleLoginSubmit = async (e) => {
     e.stopPropagation();
 
     const { selectedProfile } = this.state;
-    if (!selectedProfile) return;
+    
+    if (!selectedProfile || !selectedProfile.id) {
+      this.setState({
+        message: {
+          text: "Please select a profile first",
+          type: "error"
+        }
+      });
+      setTimeout(() => this.setState({ message: null }), 3000);
+      return;
+    }
 
     const action = selectedProfile.status === 'ACTIVE' ? 'suspend' : 'activate';
 

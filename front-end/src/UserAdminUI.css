@@ -827,7 +827,7 @@ body {
 
 .save-button {
     background-color: var(--success);
-    color: white;
+    color: black !important;
     border: none;
     padding: 10px 16px;
     border-radius: var(--border-radius-sm);

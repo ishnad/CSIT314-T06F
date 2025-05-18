@@ -650,7 +650,7 @@ const renderingMethods = {
             className={status === 'ACTIVE' ? 'suspend-button' : 'activate-button'}
             onClick={this.handleToggleProfileStatus}
           >
-            {status === 'ACTIVE' ? 'Suspend Profile' : 'Activate Profile'}
+            {selectedProfile.status === 'ACTIVE' ? 'Suspend Profile' : 'Activate Profile'}
           </button>
         </div>
       </div>

@@ -59,6 +59,7 @@ class UserAccountEntity {
             });
 
             return {
+                id: updatedUser.id,
                 username: updatedUser.username,
                 userProfile: updatedUser.userProfile.name,
                 permissions: updatedUser.userProfile.permissions,
