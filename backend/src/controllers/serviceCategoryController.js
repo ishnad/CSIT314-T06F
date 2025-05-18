@@ -165,9 +165,15 @@ class SuspendServiceCatController {
         const result = await this.serviceCategoryEntity.suspendServiceCategory(categoryId);
 
         if (result.error) {
-            return res.status(result.error.status || 500).json({ success: false, message: result.error.message });
+            return res.status(result.error.status || 500).json({ 
+                success: false, 
+                message: result.error.message 
+            });
         }
-        return res.status(200).json(result);
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Category status toggled successfully' 
+        });
     }
 }
 

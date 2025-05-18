@@ -1,4 +1,4 @@
-const { PrismaClient, ServiceCategoryStatus } = require('../generated/prisma');
+const { PrismaClient, ServiceCategoryStatus, ServiceListingStatus } = require('../generated/prisma');
 
 class ServiceCategoryEntity {
     constructor() {
@@ -85,9 +85,20 @@ class ServiceCategoryEntity {
             const categories = await this.prisma.serviceCategory.findMany({
                 where: whereConditions,
                 orderBy: {
-                    serviceCatName: 'asc', // Optional: order results
+                    serviceCatName: 'asc',
+                },
+                include: {
+                    _count: {
+                        select: { serviceListings: true }
+                    }
                 }
             });
+
+            // Map results to include the count
+            return categories.map(category => ({
+                ...category,
+                numOfServiceListings: category._count.serviceListings
+            }));
 
             return categories;
         } catch (error) {
@@ -104,9 +115,19 @@ class ServiceCategoryEntity {
         try {
             const categories = await this.prisma.serviceCategory.findMany({
                 orderBy: {
-                    serviceCatName: 'asc' // Optional: order by name
+                    serviceCatName: 'asc'
+                },
+                include: {
+                    _count: {
+                        select: { serviceListings: true }
+                    }
                 }
             });
+
+            return categories.map(category => ({
+                ...category,
+                numOfServiceListings: category._count.serviceListings
+            }));
             return categories;
         } catch (error) {
             console.error("Error retrieving service categories in entity:", error);
@@ -122,28 +143,30 @@ class ServiceCategoryEntity {
     async getCategoryDetailsById(categoryId) {
         try {
             const category = await this.prisma.serviceCategory.findUnique({
-                where: { id: categoryId },
-                include: {
-                    _count: { // Include the count of related service listings
-                        select: { serviceListings: true },
-                    },
-                },
+                where: { id: categoryId }
             });
 
             if (!category) {
                 return { error: { status: 404, message: 'Service category not found.' } };
             }
 
+            // Get active listings count for this category
+            const listingsCount = await this.prisma.serviceListing.count({
+                where: {
+                    serviceCategoryId: categoryId,
+                    status: ServiceListingStatus.ACTIVE // Use enum from Prisma schema
+                }
+            });
+
             // Transform the Prisma result to match the BCE's expected structure
-            // where numOfServiceListings is a direct attribute.
             const categoryDetails = {
-                serviceCatID: category.id, // Matches BCE's serviceCatID (though it's a string)
+                serviceCatID: category.id,
                 serviceCatName: category.serviceCatName,
                 serviceCatDescription: category.serviceCatDescription,
-                status: category.status, // Include status as it's part of the model
+                status: category.status,
                 createdAt: category.createdAt,
                 updatedAt: category.updatedAt,
-                numOfServiceListings: category._count?.serviceListings || 0,
+                numOfServiceListings: listingsCount,
             };
 
             return categoryDetails;
@@ -226,11 +249,9 @@ class ServiceCategoryEntity {
     }
 
     /**
-     * Suspends a service category if all preconditions are met.
-     * @param {string} categoryId - The ID of the service category to suspend.
+     * Toggles a service category status between ACTIVE and INACTIVE if preconditions are met.
+     * @param {string} categoryId - The ID of the service category to toggle
      * @returns {Promise true|{error: {status: number, message: string}}>}
-     * An object indicating success or failure with a message, or the updated category.
-     * The controller will translate this to a boolean if strictly required by BCE API response.
      */
     async suspendServiceCategory(categoryId) {
         try {
@@ -239,34 +260,43 @@ class ServiceCategoryEntity {
                 where: { id: categoryId },
             });
 
-            // 2. Precondition: The chosen Service Category must be "Active"
-            if (category.status !== ServiceCategoryStatus.ACTIVE) {
-                return { error: { status: 400, message: `Service category is not ACTIVE. Current status: ${category.status}.` } };
+            if (!category) {
+                return { error: { status: 404, message: 'Service category not found.' } };
             }
 
-            // 3. Precondition: Category must not be in use by any *active* service listings.
-            const activeListingsCount = await this.prisma.serviceListing.count({
-                where: {
-                    serviceCategoryId: categoryId,
-                    status: ServiceListingStatus.ACTIVE,
-                },
-            });
+            // Determine new status
+            const newStatus = category.status === ServiceCategoryStatus.ACTIVE 
+                ? ServiceCategoryStatus.INACTIVE 
+                : ServiceCategoryStatus.ACTIVE;
 
-            if (activeListingsCount > 0) {
-                return { error: { status: 400, message: `Cannot suspend category: It is currently used by ${activeListingsCount} active service listing(s).` } };
+            // If transitioning to INACTIVE, check for active listings
+            if (newStatus === ServiceCategoryStatus.INACTIVE) {
+                const activeListingsCount = await this.prisma.serviceListing.count({
+                    where: {
+                        serviceCategoryId: categoryId,
+                        status: ServiceListingStatus.ACTIVE,
+                    },
+                });
+
+                if (activeListingsCount > 0) {
+                    return { error: { 
+                        status: 400, 
+                        message: `Cannot deactivate category: Used by ${activeListingsCount} active service listing(s).` 
+                    } };
+                }
             }
 
-            // All preconditions met, proceed to suspend (set status to INACTIVE)
+            // Update status
             await this.prisma.serviceCategory.update({
                 where: { id: categoryId },
-                data: { status: ServiceCategoryStatus.INACTIVE },
+                data: { status: newStatus },
             });
 
             return true;
 
         } catch (error) {
-            console.error(`Error suspending service category ${categoryId}:`, error);
-            return { error: { status: 500, message: 'System error while suspending service category.' } };
+            console.error(`Error toggling status for category ${categoryId}:`, error);
+            return { error: { status: 500, message: 'System error while toggling category status.' } };
         }
     }
 }

@@ -38,6 +38,9 @@ class PlatformManagementUI extends Component {
       // View Category Details
       viewCategoryId: '',
       viewCategoryDetails: null,
+      selectedCategory: null,
+      editingCategory: null,
+      editedCategoryData: null,
       isViewingCategory: false,
       viewCategoryError: null,
 
@@ -302,7 +305,10 @@ class PlatformManagementUI extends Component {
       const data = await response.json();
 
       if (response.ok) {
-        this.setState({ viewCategoryDetails: data.category });
+        this.setState({ 
+          viewCategoryDetails: data,
+          selectedCategory: data 
+        });
       } else if (response.status === 404) {
         this.setState({ viewCategoryError: 'Category not found.' });
       } else {
@@ -358,21 +364,36 @@ class PlatformManagementUI extends Component {
     }
   }
 
-  async handleEditCategorySubmit() {
+  async handleEditCategorySubmit(categoryData) {
     this.setState({ isEditingCategory: true, editCategoryMessage: null, editCategoryError: null });
     const { editCategoryId, editCategoryName, editCategoryDescription } = this.state;
 
     try {
-      const response = await fetch(`/api/service-categories/${editCategoryId}`, {
+      const response = await fetch(`/api/service-categories/${categoryData.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serviceCatName: editCategoryName, serviceCatDescription: editCategoryDescription }),
+        body: JSON.stringify({ 
+          serviceCatName: categoryData.serviceCatName,
+          serviceCatDescription: categoryData.serviceCatDescription,
+          status: categoryData.status
+        }),
       });
       const data = await response.json();
 
       if (response.ok) {
-        this.setState({ editCategoryMessage: data.message || 'Category updated successfully.', viewCategoryDetails: data.category });
-        // Optionally refresh category list
+        this.setState({ 
+          editCategoryMessage: data.message || 'Category updated successfully.', 
+          viewCategoryDetails: data.category,
+          searchResults: this.state.searchResults?.map(cat => 
+            cat.id === data.serviceCatID ? { 
+              ...cat,
+              serviceCatName: data.serviceCatName,
+              serviceCatDescription: data.serviceCatDescription,
+              status: data.status,
+              numOfServiceListings: cat.numOfServiceListings
+            } : cat
+          )
+        });
       } else if (response.status === 400) {
         this.setState({ editCategoryError: data.error || 'Invalid input for category update.' });
       } else if (response.status === 409) {
