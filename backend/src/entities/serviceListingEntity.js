@@ -202,7 +202,7 @@ class ServiceListingEntity {
         try {
             await this.prisma.serviceListing.update({
                 where: { id: listingId },
-                data: actualUpdateData,
+                data: updateData,
             });
 
             return true;

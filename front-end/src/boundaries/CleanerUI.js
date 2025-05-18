@@ -113,9 +113,15 @@ class CleanerUI extends Component {
         this.fetchInitialData(this.props.user.id);
     }
     
-    // Check if we switched to the matches tab
-    if (this.props.currentPage === 'matches' && prevProps.currentPage !== 'matches') {
-        this.fetchAllConfirmedMatches();
+    // Refresh data when changing tabs
+    if (this.props.currentPage !== prevProps.currentPage) {
+        if (this.props.currentPage === 'matches') {
+            this.fetchAllConfirmedMatches();
+        } else if (this.props.currentPage === 'myListings') {
+            this.fetchServiceListings();
+        } else if (this.props.currentPage === 'search') {
+            this.handleSearchSubmit();
+        }
     }
   }
 
@@ -482,7 +488,7 @@ class CleanerUI extends Component {
         name: listing.name || '',
         serviceCatName: listing.serviceCatName || 'Basic Cleaning',
         description: listing.description || '',
-        ratePerHr: listing.ratePerHr ? listing.ratePerHr.toString() : '0',
+        ratePerHr: listing.ratePerHr || 0,
         status: listing.status || 'ACTIVE'
       },
       showEditModal: true
@@ -501,10 +507,16 @@ class CleanerUI extends Component {
 
   handleEditInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Convert ratePerHr to number
+    const parsedValue = name === 'ratePerHr' ? 
+      value === '' ? 0 : Number(value) : 
+      value;
+
     this.setState(prevState => ({
       editFormData: {
         ...prevState.editFormData,
-        [name]: value
+        [name]: parsedValue
       }
     }));
   };
@@ -568,6 +580,10 @@ class CleanerUI extends Component {
       });
       this.closeEditModal();
       this.fetchServiceListings();
+      // Also refresh search results if we're on that tab
+      if (this.props.currentPage === 'search') {
+          this.handleSearchSubmit();
+      }
     } catch (error) {
       console.error('Error updating listing:', error);
       this.setState({
