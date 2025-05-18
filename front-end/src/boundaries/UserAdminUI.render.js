@@ -16,9 +16,9 @@ const renderingMethods = {
             </svg>
           </div>
 
-          <h1 className="login-title">Admin Login</h1>
+          <h1 className="login-title">Login Page</h1>
 
-          <p className="login-subtitle">Enter your credentials to access the admin panel</p>
+          <p className="login-subtitle">Enter your credentials to access the system</p>
 
           {loginError && <div className="login-error">{loginError}</div>}
 
