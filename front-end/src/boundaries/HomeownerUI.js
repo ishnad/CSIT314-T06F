@@ -44,6 +44,8 @@ class HomeownerUI extends Component {
     
     // Bind API call methods
     this.bookService = this.bookService.bind(this);
+    // Ensure saveCleaner is bound if not using arrow function property
+    this.saveCleaner = this.saveCleaner.bind(this);
   }
 
   componentDidMount() {
@@ -58,7 +60,6 @@ class HomeownerUI extends Component {
     try {
       this.setState({ loading: true, error: null });
 
-      // Call the endpoint to get all active cleaners
       const response = await fetch('http://localhost:3001/api/users/cleaners/active', {
         method: 'GET',
         headers: {
@@ -72,18 +73,17 @@ class HomeownerUI extends Component {
 
       const data = await response.json();
 
-      // Transform the API response to match what the UI expects
       const cleaners = data.map(cleaner => ({
         id: cleaner.id,
         username: cleaner.username,
-        name: cleaner.username, // Using username as name if no name field exists
+        name: cleaner.username, 
         email: cleaner.email,
         description: cleaner.serviceListings?.[0]?.description || 'Professional cleaning services',
         services: cleaner.serviceListings?.map(listing => 
           listing.serviceCategory?.serviceCatName || 'Cleaning'
         ) || ['House Cleaning'],
         availability: 'Available',
-        price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}` // Default to $20 if no rate
+        price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}`
       }));
 
       this.setState({
@@ -93,7 +93,6 @@ class HomeownerUI extends Component {
       });
     } catch (err) {
       console.error('Error loading cleaners:', err);
-
       this.setState({
         error: err.message,
         loading: false,
@@ -102,7 +101,6 @@ class HomeownerUI extends Component {
           type: 'error'
         }
       });
-
       setTimeout(() => {
         this.setState({ message: null });
       }, 3000);
@@ -111,7 +109,6 @@ class HomeownerUI extends Component {
 
   // Method for navigation
   componentDidUpdate(prevProps) {
-    // Sync active tab with props when changed from parent
     if (this.props.currentPage !== prevProps.currentPage) {
       this.setState({ activeTab: this.props.currentPage }, () => {
         this.refreshData();
@@ -120,11 +117,9 @@ class HomeownerUI extends Component {
   }
 
   navigateTo = (tab) => {
-    // Notify parent component of tab change
     if (this.props.onNavigate) {
       this.props.onNavigate(tab);
     }
-    // Update local state
     this.setState({ activeTab: tab }, () => {
       this.refreshData();
     });
@@ -149,565 +144,243 @@ class HomeownerUI extends Component {
     }
   };
 
-  // Method to refresh data
-  refreshData = () => {
-    const { activeTab } = this.state;
-
-    switch(activeTab) {
-      case 'browseCleaners':
-        this.fetchCleaners();
-        break;
-      case 'saved':
-        this.loadSavedCleaners();
-        break;
-      case 'history':
-        this.loadCleaningHistory();
-        break;
-      default:
-        this.fetchCleaners();
-    }
-  };
-
   // Method to load cleaning history from the backend
   loadCleaningHistory = async () => {
     try {
       this.setState({ historyLoading: true, error: null });
-
       const response = await fetch('http://localhost:3001/api/matches/homeowner/past', {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', },
         credentials: 'include'
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch cleaning history: ${response.statusText}`);
-      }
-
+      if (!response.ok) throw new Error(`Failed to fetch cleaning history: ${response.statusText}`);
       const data = await response.json();
-
-      // Transform API response to match history card format
       const history = data.map(item => {
         try {
-          // Parse ISO date string or fallback to current date
-          const confirmationDate = item.confirmationDate ? 
-            new Date(item.confirmationDate) : 
-            new Date();
-          
-          // Format date consistently (MM/DD/YYYY)
-          const formattedDate = confirmationDate.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-          });
-
-          // Format time consistently (HH:MM AM/PM)
-          const formattedTime = confirmationDate.toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true
-          });
-
+          const confirmationDate = item.confirmationDate ? new Date(item.confirmationDate) : new Date();
+          const formattedDate = confirmationDate.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+          const formattedTime = confirmationDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
           return {
-            id: item.matchId,
-            date: formattedDate,
-            time: formattedTime,
-            cleanerName: item.cleanerUsername,
-            cleanerUsername: item.cleanerUsername,
-            serviceName: item.serviceName,
-            serviceType: item.serviceType,
-            ratePerHr: item.ratePerHr,
-            status: item.status || 'COMPLETED',
-            // Keep original date object for filtering
+            id: item.matchId, date: formattedDate, time: formattedTime,
+            cleanerName: item.cleanerUsername, cleanerUsername: item.cleanerUsername,
+            serviceName: item.serviceName, serviceType: item.serviceType,
+            ratePerHr: item.ratePerHr, status: item.status || 'COMPLETED',
             originalDate: confirmationDate
           };
-        } catch (error) {
-          console.error('Error formatting history item:', error);
-          return null;
-        }
-      }).filter(Boolean); // Remove any null items from mapping errors
-
-      this.setState({
-        history: history,
-        filteredHistory: history, // Initialize with all history
-        historyLoading: false
-      });
+        } catch (error) { console.error('Error formatting history item:', error); return null; }
+      }).filter(Boolean);
+      this.setState({ history: history, filteredHistory: history, historyLoading: false });
     } catch (err) {
       console.error('Error loading cleaning history:', err);
-
       this.setState({
-        error: err.message,
-        historyLoading: false,
-        message: {
-          text: `Error loading cleaning history: ${err.message}`,
-          type: 'error'
-        }
+        error: err.message, historyLoading: false,
+        message: { text: `Error loading cleaning history: ${err.message}`, type: 'error' }
       });
-
-      setTimeout(() => {
-        this.setState({ message: null });
-      }, 3000);
+      setTimeout(() => this.setState({ message: null }), 3000);
     }
   };
 
-  // Handler for history search input change
-  handleHistorySearchChange = (e) => {
-    this.setState({ historySearchTerm: e.target.value });
-  };
+  handleHistorySearchChange = (e) => this.setState({ historySearchTerm: e.target.value });
+  handleHistorySearchSubmit = (e) => { e.preventDefault(); this.searchCleaningHistory(); };
 
-  // Handler for history search form submission
-  handleHistorySearchSubmit = (e) => {
-    e.preventDefault();
-    this.searchCleaningHistory();
-  };
-
-  // Method to search cleaning history from the backend
   searchCleaningHistory = async () => {
     const { history, historySearchTerm } = this.state;
-
-    if (!historySearchTerm.trim()) {
-      // If search term is empty, show all history
-      this.setState({ filteredHistory: history });
-      return;
-    }
-
+    if (!historySearchTerm.trim()) { this.setState({ filteredHistory: history }); return; }
     try {
       this.setState({ historyLoading: true });
-
-      // First try to parse as date in different formats
-      let searchDate;
-      const dateFormats = [
-        'MM/dd/yyyy', 
-        'yyyy-MM-dd',
-        'dd-MM-yyyy',
-        'MM-dd-yyyy'
-      ];
-      
-      let isDateSearch = false;
-      for (const format of dateFormats) {
-        searchDate = new Date(historySearchTerm);
-        if (!isNaN(searchDate.getTime())) {
-          isDateSearch = true;
-          break;
-        }
-      }
-
+      let searchDate; let isDateSearch = false;
+      const dateFormats = ['MM/dd/yyyy', 'yyyy-MM-dd', 'dd-MM-yyyy', 'MM-dd-yyyy'];
+      for (const format of dateFormats) { searchDate = new Date(historySearchTerm); if (!isNaN(searchDate.getTime())) { isDateSearch = true; break; } }
       let filtered = history;
       if (isDateSearch) {
-        // Filter by date match (any time on that day)
         filtered = history.filter(item => {
           const itemDate = item.originalDate;
-          return (
-            itemDate.getFullYear() === searchDate.getFullYear() &&
-            itemDate.getMonth() === searchDate.getMonth() &&
-            itemDate.getDate() === searchDate.getDate()
-          );
+          return itemDate.getFullYear() === searchDate.getFullYear() && itemDate.getMonth() === searchDate.getMonth() && itemDate.getDate() === searchDate.getDate();
         });
       } else {
-        // Filter by text search (case insensitive)
         const searchLower = historySearchTerm.toLowerCase();
         filtered = history.filter(item => {
-          // Check all searchable fields with more flexible matching
-          const fieldsToSearch = [
-            item.serviceName,
-            item.serviceType,
-            item.cleanerName,
-            item.cleanerUsername,
-            item.status
-          ];
-          
-          // Handle numeric searches - match any numeric part in cleaner username
-          if (!isNaN(historySearchTerm)) {
-            // Check if search term appears in cleaner username
-            return item.cleanerUsername && 
-                   item.cleanerUsername.toString().includes(historySearchTerm);
-          }
-          
-          // Normal text search - case insensitive match in all fields
-          return fieldsToSearch.some(
-            field => field && field.toString().toLowerCase().includes(searchLower)
-          );
+          const fieldsToSearch = [item.serviceName, item.serviceType, item.cleanerName, item.cleanerUsername, item.status];
+          if (!isNaN(historySearchTerm)) return item.cleanerUsername && item.cleanerUsername.toString().includes(historySearchTerm);
+          return fieldsToSearch.some(field => field && field.toString().toLowerCase().includes(searchLower));
         });
       }
-
-      this.setState({
-        filteredHistory: filtered,
-        historyLoading: false,
-        message: filtered.length === 0 ? {
-          text: "No history found matching your search",
-          type: "info"
-        } : null
-      });
+      this.setState({ filteredHistory: filtered, historyLoading: false, message: filtered.length === 0 ? { text: "No history found matching your search", type: "info" } : null });
     } catch (err) {
       console.error('Error searching cleaning history:', err);
-
-      this.setState({
-        error: err.message,
-        historyLoading: false,
-        message: {
-          text: `Error searching cleaning history: ${err.message}`,
-          type: 'error'
-        }
-      });
-
-      setTimeout(() => {
-        this.setState({ message: null });
-      }, 3000);
+      this.setState({ error: err.message, historyLoading: false, message: { text: `Error searching cleaning history: ${err.message}`, type: 'error' } });
+      setTimeout(() => this.setState({ message: null }), 3000);
     }
   };
 
-  // Method to load saved cleaners from the backend
   loadSavedCleaners = async () => {
     try {
       this.setState({ savedCleanersLoading: true, error: null });
-
-      const response = await fetch('http://localhost:3000/api/shortlist/all', {
-        headers: {
-          'Content-Type': 'application/json',
-        }
+      // Assuming this endpoint requires authentication or is specific to the logged-in homeowner implicitly
+      const response = await fetch('http://localhost:3001/api/shortlist/all', { // Corrected port to 3001 as per other calls
+        headers: { 'Content-Type': 'application/json', /* Add Authorization if needed */ },
+        credentials: 'include' // Or remove if not needed / handled by Authorization header
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch saved cleaners: ${response.statusText}`);
-      }
-
+      if (!response.ok) throw new Error(`Failed to fetch saved cleaners: ${response.statusText}`);
       const data = await response.json();
-
-      // Transform API response to match cleaner card format
       const savedCleaners = data.map(cleaner => {
-        // Get unique service category names from all service listings
-        const serviceCategories = [...new Set(
-          cleaner.serviceListings
-            ?.map(listing => listing.serviceCategory?.serviceCatName)
-            .filter(name => name)
-        )] || ['House Cleaning'];
-
+        const serviceCategories = [...new Set(cleaner.serviceListings?.map(listing => listing.serviceCategory?.serviceCatName).filter(name => name))] || ['House Cleaning'];
         return {
-          id: cleaner.id,
-          name: cleaner.username,
-          username: cleaner.username,
-          email: cleaner.email,
+          id: cleaner.id, name: cleaner.username, username: cleaner.username, email: cleaner.email,
           description: cleaner.serviceListings?.[0]?.description || 'Professional cleaning services',
-          services: serviceCategories,
+          services: serviceCategories.length > 0 ? serviceCategories : ['House Cleaning'], // Ensure services is not empty
           price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}`,
-          availability: 'Available',
-          shortlistedAt: cleaner.shortlistedAt
+          availability: 'Available', shortlistedAt: cleaner.shortlistedAt
         };
       });
-
-      this.setState({
-        savedCleaners: savedCleaners,
-        filteredSavedCleaners: savedCleaners,
-        savedCleanersLoading: false
-      });
+      this.setState({ savedCleaners: savedCleaners, filteredSavedCleaners: savedCleaners, savedCleanersLoading: false });
     } catch (err) {
       console.error('Error loading saved cleaners:', err);
-
-      this.setState({
-        error: err.message,
-        savedCleanersLoading: false,
-        message: {
-          text: `Error loading saved cleaners: ${err.message}`,
-          type: 'error'
-        }
-      });
-
-      setTimeout(() => {
-        this.setState({ message: null });
-      }, 3000);
+      this.setState({ error: err.message, savedCleanersLoading: false, message: { text: `Error loading saved cleaners: ${err.message}`, type: 'error' } });
+      setTimeout(() => this.setState({ message: null }), 3000);
     }
   };
+  
+  handleSavedSearchChange = (e) => this.setState({ savedSearchTerm: e.target.value });
+  handleSavedSearchSubmit = (e) => { e.preventDefault(); this.searchSavedCleaners(); };
 
-  // Load booked cleaners from the backend
-
-  // Handler for saved cleaners search input change
-  handleSavedSearchChange = (e) => {
-    this.setState({ savedSearchTerm: e.target.value });
-  };
-
-  // Handler for saved cleaners search form submission
-  handleSavedSearchSubmit = (e) => {
-    e.preventDefault();
-    this.searchSavedCleaners();
-  };
-
-  // Method to search saved cleaners from the backend
   searchSavedCleaners = async () => {
     const { savedSearchTerm, savedCleaners } = this.state;
-
-    if (!savedSearchTerm.trim()) {
-      // If search term is empty, show all saved cleaners
-      this.setState({
-        filteredSavedCleaners: savedCleaners,
-        savedCleanersLoading: false
-      });
-      return;
-    }
-
+    if (!savedSearchTerm.trim()) { this.setState({ filteredSavedCleaners: savedCleaners, savedCleanersLoading: false }); return; }
     try {
       this.setState({ savedCleanersLoading: true, error: null });
-
+      // Assuming this endpoint requires authentication for user-specific search
       const response = await fetch(`http://localhost:3001/api/shortlist/search?keyword=${encodeURIComponent(savedSearchTerm)}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        headers: { 'Content-Type': 'application/json', /* Add Authorization if needed */ },
+        credentials: 'include' // Or remove
       });
-
-      if (!response.ok) {
-        throw new Error(`Search failed: ${response.statusText}`);
-      }
-
+      if (!response.ok) throw new Error(`Search failed: ${response.statusText}`);
       const data = await response.json();
-
-      // Ensure data is an array before mapping
-      if (!Array.isArray(data)) {
-        this.setState({
-          filteredSavedCleaners: [],
-          savedCleanersLoading: false,
-          message: {
-            text: "No cleaners found matching your search",
-            type: "info"
-          }
-        });
-        return;
-      }
-
-      // Transform API response to match cleaner card format
+      if (!Array.isArray(data)) { this.setState({ filteredSavedCleaners: [], savedCleanersLoading: false, message: { text: "No cleaners found matching your search", type: "info" } }); return; }
       const filteredCleaners = data.map(cleaner => ({
-        id: cleaner.id,
-        name: cleaner.username,
-        username: cleaner.username,
-        email: cleaner.email,
+        id: cleaner.id, name: cleaner.username, username: cleaner.username, email: cleaner.email,
         description: cleaner.serviceListings?.[0]?.description || 'Professional cleaning services',
-        services: cleaner.serviceListings?.map(listing => 
-          listing.serviceCategory?.serviceCatName || 'Cleaning'
-        ) || ['House Cleaning'],
-        price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}`,
-        availability: 'Available',
+        services: cleaner.serviceListings?.map(listing => listing.serviceCategory?.serviceCatName || 'Cleaning') || ['House Cleaning'],
+        price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}`, availability: 'Available',
         shortlistedAt: cleaner.shortlistedAt
       }));
-
-      this.setState({
-        filteredSavedCleaners: filteredCleaners.length > 0 ? filteredCleaners : [],
-        savedCleanersLoading: false,
-        message: filteredCleaners.length === 0 ? {
-          text: "No cleaners found matching your search",
-          type: "info"
-        } : null
-      });
+      this.setState({ filteredSavedCleaners: filteredCleaners.length > 0 ? filteredCleaners : [], savedCleanersLoading: false, message: filteredCleaners.length === 0 ? { text: "No cleaners found matching your search", type: "info" } : null });
     } catch (err) {
       console.error('Error searching saved cleaners:', err);
-
-      this.setState({
-        error: err.message,
-        savedCleanersLoading: false,
-        message: {
-          text: `Error searching saved cleaners: ${err.message}`,
-          type: 'error'
-        }
-      });
-
-      setTimeout(() => {
-        this.setState({ message: null });
-      }, 3000);
+      this.setState({ error: err.message, savedCleanersLoading: false, message: { text: `Error searching saved cleaners: ${err.message}`, type: 'error' } });
+      setTimeout(() => this.setState({ message: null }), 3000);
     }
   };
 
-  // Handler for booked cleaners search input change
-  handleBookingSearchChange = (e) => {
-    this.setState({ bookingSearchTerm: e.target.value });
-  };
+  handleSearchChange = (e) => this.setState({ searchTerm: e.target.value });
+  handleSearchSubmit = (e) => { e.preventDefault(); this.searchCleaners(); };
 
-  // Handler for booked cleaners search form submission
-  handleBookingSearchSubmit = (e) => {
-    e.preventDefault();
-    this.searchBookedCleaners();
-  };
-
-  // Method to search booked cleaners
-  searchBookedCleaners = async () => {
-    const { bookingSearchTerm } = this.state;
-
-    if (!bookingSearchTerm.trim()) {
-      // If search term is empty, load all booked cleaners
-      this.loadBookedCleaners();
-      return;
-    }
-
-    try {
-      this.setState({ bookingsLoading: true, error: null });
-
-      const response = await fetch(`http://localhost:3000/api/matches/cleaner/confirmed/search?query=${encodeURIComponent(bookingSearchTerm)}`);
-
-      if (!response.ok) {
-        throw new Error(`Search failed: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      this.setState({
-        filteredBookings: data,
-        bookingsLoading: false
-      });
-    } catch (err) {
-      console.error('Error searching booked cleaners:', err);
-
-      this.setState({
-        error: err.message,
-        bookingsLoading: false,
-        message: {
-          text: `Error searching booked cleaners: ${err.message}`,
-          type: 'error'
-        }
-      });
-
-      setTimeout(() => {
-        this.setState({ message: null });
-      }, 3000);
-    }
-  };
-
-  // Methods for browse cleaners
-  handleSearchChange = (e) => {
-    this.setState({ searchTerm: e.target.value });
-  };
-
-  handleSearchSubmit = (e) => {
-    e.preventDefault();
-    this.searchCleaners();
-  };
-
-  // Method to search cleaners using backend API
   searchCleaners = async () => {
     const { searchTerm } = this.state;
-
-    if (!searchTerm.trim()) {
-      // If search term is empty, load all cleaners
-      this.fetchCleaners();
-      return;
-    }
-
+    if (!searchTerm.trim()) { this.fetchCleaners(); return; }
     try {
       this.setState({ loading: true, error: null });
-
-      // Call the cleaner-specific search endpoint
-      const response = await fetch(`http://localhost:3000/api/users/cleaners/search?keyword=${encodeURIComponent(searchTerm)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
+      const response = await fetch(`http://localhost:3001/api/users/cleaners/search?keyword=${encodeURIComponent(searchTerm)}`, { // Corrected port to 3001
+        method: 'GET', headers: { 'Content-Type': 'application/json', }
       });
-
-      if (!response.ok) {
-        throw new Error(`Search failed: ${response.statusText}`);
-      }
-
+      if (!response.ok) throw new Error(`Search failed: ${response.statusText}`);
       const data = await response.json();
-
-      // Ensure data is an array before mapping
-      if (!Array.isArray(data)) {
-        this.setState({
-          filteredCleaners: [],
-          loading: false,
-          message: {
-            text: "No cleaners found matching your search",
-            type: "info"
-          }
-        });
-        return;
-      }
-
-      // Transform the API response
+      if (!Array.isArray(data)) { this.setState({ filteredCleaners: [], loading: false, message: { text: "No cleaners found matching your search", type: "info" } }); return; }
       const filteredCleaners = data.map(cleaner => ({
-        id: cleaner.id,
-        username: cleaner.username,
-        name: cleaner.username,
-        email: cleaner.email,
+        id: cleaner.id, username: cleaner.username, name: cleaner.username, email: cleaner.email,
         description: cleaner.serviceListings?.[0]?.description || 'Professional cleaning services',
-        services: cleaner.serviceListings?.map(listing => 
-          listing.serviceCategory?.serviceCatName || 'Cleaning'
-        ) || ['House Cleaning'],
-        availability: 'Available',
-        price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}` // Default to $20 if no rate
+        services: cleaner.serviceListings?.map(listing => listing.serviceCategory?.serviceCatName || 'Cleaning') || ['House Cleaning'],
+        availability: 'Available', price: `$${cleaner.serviceListings?.[0]?.ratePerHr || 20}`
       }));
-
-      this.setState({
-        filteredCleaners: filteredCleaners.length > 0 ? filteredCleaners : [],
-        loading: false,
-        message: filteredCleaners.length === 0 ? {
-          text: "No cleaners found matching your search",
-          type: "info"
-        } : null
-      });
+      this.setState({ filteredCleaners: filteredCleaners.length > 0 ? filteredCleaners : [], loading: false, message: filteredCleaners.length === 0 ? { text: "No cleaners found matching your search", type: "info" } : null });
     } catch (err) {
       console.error('Error searching cleaners:', err);
-
-      this.setState({
-        error: err.message,
-        loading: false,
-        message: {
-          text: `Error searching cleaners: ${err.message}`,
-          type: 'error'
-        }
-      });
-
-      setTimeout(() => {
-        this.setState({ message: null });
-      }, 3000);
+      this.setState({ error: err.message, loading: false, message: { text: `Error searching cleaners: ${err.message}`, type: 'error' } });
+      setTimeout(() => this.setState({ message: null }), 3000);
     }
   };
 
-  // Save cleaner
+  // Save cleaner - MODIFIED FOR REAL-TIME UI UPDATE
   saveCleaner = async (cleanerId) => {
-    const { savedCleaners, cleaners } = this.state;
+    const { cleaners } = this.state; // Get current list of all cleaners.
 
+    // Find the full cleaner object from the main 'cleaners' list.
+    // This object already has the structure used for display and for the 'id' comparison in 'isSaved'.
+    const cleanerObjectToSave = cleaners.find(c => c.id === cleanerId);
+
+    if (!cleanerObjectToSave) {
+      console.error("Cleaner not found in the main list with ID:", cleanerId);
+      this.setState({
+        message: { text: "Error: Cleaner data not found to shortlist.", type: 'error' }
+      });
+      setTimeout(() => this.setState({ message: null }), 3000);
+      return;
+    }
+
+    // Optimistically check if already saved in current state to prevent multiple adds from rapid clicks
+    // The button in render should also be disabled, but this is a safeguard.
+    if (this.state.savedCleaners.some(savedCleaner => savedCleaner.id === cleanerId)) {
+        this.setState({
+            message: { text: `${cleanerObjectToSave.name} is already shortlisted.`, type: 'info' }
+        });
+        setTimeout(() => this.setState({ message: null }), 3000);
+        return;
+    }
+    
     try {
       this.setState({ loading: true });
 
-      // Find the cleaner to save
-      const cleanerToSave = cleaners.find(cleaner => cleaner.id === cleanerId);
-
-      if (!cleanerToSave) {
-        throw new Error("Cleaner not found");
+      // TODO: Ensure `this.props.user.id` is available and correct.
+      // If `this.props.user` is not passed or `id` is missing, this will fail.
+      if (!this.props.user || !this.props.user.id) {
+          throw new Error("User information is missing. Cannot shortlist cleaner.");
       }
 
-      // Call API to add cleaner to shortlist
       const response = await fetch('http://localhost:3001/api/shortlist/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          // Include Authorization header if your API requires it
+          // 'Authorization': `Bearer ${your_auth_token_here}`
         },
         body: JSON.stringify({
-          homeownerId: this.props.user.id,
+          homeownerId: this.props.user.id, 
           cleanerId: cleanerId
         }),
+        // credentials: 'include' // Use if cookies are needed for auth, otherwise rely on Authorization header
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to save cleaner: ${response.statusText}`);
+        let errorMessage = `Failed to save cleaner: ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.message) errorMessage = errorData.message;
+          else if (errorData.error) errorMessage = errorData.error;
+        } catch (e) { /* Failed to parse error JSON, stick with statusText */ }
+        throw new Error(errorMessage);
       }
 
-      // Get the saved cleaner from response
-      const savedCleaner = await response.json();
-
-      // Update local state
-      this.setState({
-        savedCleaners: [...savedCleaners, savedCleaner],
-        filteredSavedCleaners: [...this.state.filteredSavedCleaners, savedCleaner],
+      // const savedShortlistEntry = await response.json(); // API might return the entry or the cleaner
+      // For UI update, we add the `cleanerObjectToSave` which has the correct structure.
+      
+      this.setState(prevState => ({
+        // Add the cleaner (which has the correct structure from the 'cleaners' list)
+        // to 'savedCleaners'. This will make the `isSaved` check in `renderBrowseCleaners` true.
+        savedCleaners: [...prevState.savedCleaners, cleanerObjectToSave],
+        // Also update filteredSavedCleaners if the "Saved" tab might be active or for consistency.
+        filteredSavedCleaners: [...prevState.filteredSavedCleaners, cleanerObjectToSave],
         loading: false,
         message: {
-          text: "Cleaner saved successfully",
+          text: `${cleanerObjectToSave.name} saved successfully!`,
           type: "success"
         }
-      });
+      }));
     } catch (err) {
       console.error('Error saving cleaner:', err);
-
       this.setState({
         loading: false,
-        error: err.message,
+        error: err.message, // Store the error message
         message: {
-          text: `Error: ${err.message}`,
+          text: `Error saving cleaner: ${err.message}`,
           type: 'error'
         }
       });
@@ -718,180 +391,55 @@ class HomeownerUI extends Component {
     }, 3000);
   };
 
-  // Book a service from cleaner profile
   bookService = async (cleanerId, serviceListingId) => {
     try {
       this.setState({ loading: true });
-      
+      // TODO: Ensure `this.props.user.id` is available and correct.
+      if (!this.props.user || !this.props.user.id) {
+        throw new Error("User information is missing. Cannot book service.");
+      }
       const response = await fetch('http://localhost:3001/api/matches/cleaner/confirmed', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', },
         body: JSON.stringify({
           serviceListingId,
-          homeownerId: this.props.user.id
+          homeownerId: this.props.user.id 
         }),
         credentials: 'include'
       });
-
       if (!response.ok) {
         let errorMessage = `Failed to book service (${response.status})`;
-        try {
-          const errorData = await response.json();
-          if (errorData.error) {
-            errorMessage += `: ${errorData.error}`;
-          }
-        } catch (e) {
-          errorMessage += `: ${response.statusText}`;
-        }
+        try { const errorData = await response.json(); if (errorData.error) errorMessage += `: ${errorData.error}`; } 
+        catch (e) { errorMessage += `: ${response.statusText}`; }
         throw new Error(errorMessage);
       }
-
-      const data = await response.json();
-      
-      this.setState({
-        loading: false,
-        showCleanerProfile: false,
-        message: {
-          text: "Service booked successfully!",
-          type: "success"
-        }
-      });
-
-
+      // const data = await response.json(); // Use data if needed
+      this.setState({ loading: false, showCleanerProfile: false, message: { text: "Service booked successfully!", type: "success" } });
+      this.loadCleaningHistory(); // Refresh history after booking
     } catch (err) {
       console.error('Error booking service:', err);
-      this.setState({
-        loading: false,
-        message: {
-          text: `Booking failed: ${err.message}`,
-          type: 'error'
-        }
-      });
+      this.setState({ loading: false, message: { text: `Booking failed: ${err.message}`, type: 'error' } });
     }
+    setTimeout(() => this.setState({ message: null }), 3000);
   };
 
-  // View cleaner profile
   viewCleanerProfile = async (cleanerId) => {
     try {
       this.setState({ loading: true });
-      
-      const response = await fetch(`http://localhost:3000/api/users/${cleanerId}/profile`, {
+      const response = await fetch(`http://localhost:3001/api/users/${cleanerId}/profile`, {
+         headers: { /* Add Authorization if needed */ }
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch cleaner profile: ${response.statusText}`);
-      }
-
+      if (!response.ok) throw new Error(`Failed to fetch cleaner profile: ${response.statusText}`);
       const profileData = await response.json();
-      
-      this.setState({
-        loading: false,
-        showCleanerProfile: true,
-        selectedCleaner: {
-          ...profileData,
-          id: cleanerId
-        }
-      });
-
+      this.setState({ loading: false, showCleanerProfile: true, selectedCleaner: { ...profileData, id: cleanerId } });
     } catch (err) {
       console.error('Error viewing cleaner profile:', err);
-      this.setState({
-        loading: false,
-        message: {
-          text: `Error: ${err.message}`,
-          type: 'error'
-        }
-      });
+      this.setState({ loading: false, message: { text: `Error: ${err.message}`, type: 'error' } });
+      setTimeout(() => this.setState({ message: null }), 3000);
     }
   };
 
-  // Close cleaner profile modal
-  closeCleanerProfile = () => {
-    this.setState({
-      showCleanerProfile: false,
-      selectedCleaner: null
-    });
-  };
-
-  // View booking details
-  viewBookingDetails = (bookingId) => {
-    const { bookings } = this.state;
-    const booking = bookings.find(b => b.id === bookingId);
-
-    if (!booking) return;
-
-    // Format booking details for display based on available fields
-    const cleanerName = booking.cleaner?.name || booking.cleanerName || 'Unknown';
-    const service = booking.service || booking.serviceType || 'Standard Service';
-    const date = booking.date || (booking.scheduledTime ? new Date(booking.scheduledTime).toLocaleDateString() : 'Unknown');
-    const time = booking.time || (booking.scheduledTime ? new Date(booking.scheduledTime).toLocaleTimeString() : 'Unknown');
-    const status = booking.status || booking.matchStatus || 'Confirmed';
-
-    const details = `
-      Booking Details:
-      Cleaner: ${cleanerName}
-      Service: ${service}
-      Date: ${date}
-      Time: ${time}
-      Status: ${status}
-    `;
-
-    alert(details);
-  };
-
-  // Cancel booking
-  cancelBooking = async (bookingId) => {
-    const { bookings } = this.state;
-    const booking = bookings.find(b => b.id === bookingId);
-
-    if (!booking) return;
-
-    const cleanerName = booking.cleaner?.name || booking.cleanerName || 'this cleaner';
-    const confirmCancel = window.confirm(`Are you sure you want to cancel your booking with ${cleanerName}?`);
-
-    if (confirmCancel) {
-      try {
-        this.setState({ loading: true });
-
-        // Call API to cancel booking
-        const response = await fetch(`http://localhost:3000/api/matches/cleaner/${bookingId}/cancel`, {
-          method: 'PUT',
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to cancel booking: ${response.statusText}`);
-        }
-
-        // Refresh bookings list
-        await this.loadBookedCleaners();
-
-        this.setState({
-          loading: false,
-          message: {
-            text: "Booking cancelled successfully",
-            type: "success"
-          }
-        });
-      } catch (err) {
-        console.error('Error cancelling booking:', err);
-
-        this.setState({
-          loading: false,
-          error: err.message,
-          message: {
-            text: `Error cancelling booking: ${err.message}`,
-            type: 'error'
-          }
-        });
-      }
-
-      setTimeout(() => {
-        this.setState({ message: null });
-      }, 3000);
-    }
-  };
+  closeCleanerProfile = () => this.setState({ showCleanerProfile: false, selectedCleaner: null });
 
   render() {
     // Use the renderHomeowner method from imported rendering methods
