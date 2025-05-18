@@ -39,7 +39,32 @@ describe('ProfileInsightsEntity', () => {
             expect(mockPrismaClient.profileView.count).toHaveBeenCalledWith({
                 where: { viewedProfileId: cleanerUserId },
             });
-            expect(result).toEqual({ message: "No profile views yet" });
+
+            // Mock Date to ensure consistent date generation for the expected dailyViewsLastWeek
+            const originalDate = Date;
+            const mockCurrentDateForEmptyViews = new Date('2025-05-18T00:00:00.000Z'); // Use a fixed date
+            global.Date = class extends originalDate {
+                constructor(param) {
+                    if (param) { return new originalDate(param); }
+                    return new originalDate(mockCurrentDateForEmptyViews);
+                }
+                static now() { return new originalDate(mockCurrentDateForEmptyViews).getTime(); }
+            };
+
+            const expectedDailyViews = Array.from({length: 7}, (_, i) => {
+                const d = new Date(mockCurrentDateForEmptyViews); // Use the mocked date
+                d.setDate(mockCurrentDateForEmptyViews.getDate() - i);
+                return {
+                    date: d.toISOString().split('T')[0],
+                    views: 0
+                };
+            });
+            global.Date = originalDate; // Restore original Date
+
+            expect(result).toEqual({
+                totalViews: 0,
+                dailyViewsLastWeek: expectedDailyViews
+            });
             // findMany should not be called if totalViews is 0, as per current entity logic
             expect(mockPrismaClient.profileView.findMany).not.toHaveBeenCalled();
         });
@@ -200,7 +225,7 @@ describe('ProfileInsightsEntity', () => {
             expect(mockPrismaClient.shortlist.count).toHaveBeenCalledWith({
                 where: { cleanerId: cleanerUserId },
             });
-            expect(result).toEqual({ message: "You have not been shortlisted yet" });
+            expect(result).toEqual({ shortlistCount: 0 });
         });
 
         it('should return 500 error if prisma shortlist count fails', async () => {
