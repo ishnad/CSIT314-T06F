@@ -6,6 +6,7 @@ class PlatformManagementUI extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      currentPage: 'generateReport', // Set default page
       // Service Category Creation
       newCategoryName: '',
       newCategoryDescription: '',
@@ -78,14 +79,24 @@ class PlatformManagementUI extends Component {
   }
 
   componentDidMount() {
-    if (this.props.currentPage === 'searchServiceCategories') {
+    // Initial load logic based on the default state.currentPage
+    if (this.state.currentPage === 'searchServiceCategories') {
       this.handleSearchCategories();
     }
   }
 
-  componentDidUpdate(prevProps) {
-    if (this.props.currentPage === 'searchServiceCategories' && prevProps.currentPage !== 'searchServiceCategories') {
-      this.handleSearchCategories();
+  componentDidUpdate(prevProps, prevState) {
+    // Sync state with prop if prop changes and is different from current state
+    if (prevProps.currentPage !== this.props.currentPage &&
+        this.props.currentPage !== this.state.currentPage) {
+      this.setState({ currentPage: this.props.currentPage });
+    }
+
+    // Handle actions based on internal currentPage changes
+    if (prevState.currentPage !== this.state.currentPage) {
+      if (this.state.currentPage === 'searchServiceCategories') {
+        this.handleSearchCategories();
+      }
     }
   }
 
@@ -454,7 +465,7 @@ class PlatformManagementUI extends Component {
   }
 
   render() {
-    const { currentPage } = this.props;
+    const { currentPage } = this.state;
     
     return (
       <div>

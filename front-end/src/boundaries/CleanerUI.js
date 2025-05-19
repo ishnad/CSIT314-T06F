@@ -114,14 +114,24 @@ class CleanerUI extends Component {
     }
     
     // Refresh data when changing tabs
-    if (this.props.currentPage !== prevProps.currentPage) {
-        if (this.props.currentPage === 'matches') {
-            this.fetchAllConfirmedMatches();
-        } else if (this.props.currentPage === 'myListings') {
-            this.fetchServiceListings();
-        } else if (this.props.currentPage === 'search') {
-            this.handleSearchSubmit();
-        }
+    // If parent changes the page, update our state to reflect the prop
+    if (this.props.currentPage !== prevProps.currentPage && 
+        this.props.currentPage !== this.state.currentPage) {
+      this.setState({ currentPage: this.props.currentPage });
+    }
+
+    // Fetch data based on changes to our internal state.currentPage
+    if (this.state.currentPage !== prevState.currentPage) {
+      if (this.state.currentPage === 'matches') {
+        this.fetchAllConfirmedMatches();
+      } else if (this.state.currentPage === 'myListings') {
+        this.fetchServiceListings();
+      } else if (this.state.currentPage === 'search') {
+        // Ensure search results are loaded/reloaded if navigating to search
+        // componentDidMount already calls handleSearchSubmit for initial load.
+        // This handles subsequent navigations to 'search'.
+        this.handleSearchSubmit();
+      }
     }
   }
 
@@ -852,7 +862,7 @@ class CleanerUI extends Component {
   };
 
   render() {
-    const { currentPage } = this.props;
+    const { currentPage } = this.state;
 
     return (
       <div className="cleaner-ui-container">
