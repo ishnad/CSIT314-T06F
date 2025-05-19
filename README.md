@@ -16,7 +16,7 @@ Refer to /front-end/README.md for more detailed instructions
 You have to start backend server before starting frontend
 
 
-## Doagrams Folder
+## Diagrams Folder
 Consists of Data Persistent Diagram and Use Case, Use Case Description, Wireframe, BCE Class and Sequence Diagram for all 4 Sprints
 
 ## Data Persistent Diagram
