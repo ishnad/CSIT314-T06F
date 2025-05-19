@@ -172,42 +172,40 @@ class UserAdminUI extends Component {
 
   // Search profiles
   searchProfiles = async (keyword) => {
-    if (!keyword.trim()) {
-      this.setState({ filteredProfiles: this.state.profiles });
+    const trimmedKeyword = keyword.trim(); // Trim keyword once
+
+    if (!trimmedKeyword) {
+      // If keyword is empty, fetch all profiles
+      this.getAllProfiles(); // This already sets loading states and handles errors
       return;
     }
 
     try {
-      this.setState({ profilesLoading: true });
+      this.setState({ profilesLoading: true, profileError: null }); // Ensure profileError is cleared
 
-      // Call the API to search profiles
-      const res = await fetch(`http://localhost:3001/api/profiles/search?keyword=${keyword}`);
+      // Call the API to search profiles using the /api/profiles endpoint
+      const res = await fetch(`http://localhost:3001/api/profiles?keyword=${trimmedKeyword}`);
 
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
       }
 
-      const data = await res.json();
-
-      // Handle backend message for no profiles found
-      const profiles = data.message ? [] : data; // If message exists, it means no profiles found
+      const profilesData = await res.json(); // This will be an array of profiles
 
       this.setState({
-        filteredProfiles: profiles,
+        filteredProfiles: profilesData, // profilesData is the array
         profilesLoading: false,
-        message: data.message ? { // Display backend message if present
-          text: data.message,
-          type: "info"
-        } : (profiles.length === 0 ? { // Fallback message if no profiles and no backend message
+        profileError: null, // Clear profileError on success
+        message: profilesData.length === 0 ? {
           text: "No profiles found matching your search criteria",
           type: "info"
-        } : null)
+        } : null // Clear message if profiles are found
       });
 
     } catch (err) {
       this.setState({
-        profileError: err.message,
+        profileError: err.message, // Use profileError for consistency with getAllProfiles
         profilesLoading: false,
         message: {
           text: `Error searching profiles: ${err.message}`,
@@ -216,7 +214,7 @@ class UserAdminUI extends Component {
       });
 
       setTimeout(() => {
-        this.setState({ message: null });
+        this.setState({ message: null, profileError: null }); // Clear profileError as well
       }, 3000);
     }
   };
