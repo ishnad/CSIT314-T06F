@@ -1,4 +1,4 @@
-const { PrismaClient } = require('../generated/prisma');
+const prisma = require('../lib/prismaClient');
 const UserAccountEntity = require('./userAccountEntity');
 const UserLoginLogEntity = require('./userLoginLogEntity');
 const MatchServiceEntity = require('./matchServiceEntity');
@@ -6,7 +6,7 @@ const ServiceListingEntity = require('./serviceListingEntity');
 
 class ReportEntity {
     constructor() {
-        this.prisma = new PrismaClient();
+        this.prisma = prisma;
         this.userAccountEntity = new UserAccountEntity();
         this.userLoginLogEntity = new UserLoginLogEntity();
         this.serviceBookingEntity = new MatchServiceEntity(); // Using MatchServiceEntity for bookings

@@ -10,20 +10,32 @@ const ServiceListingEntity = require('../../src/entities/serviceListingEntity');
 
 // Mock Prisma for the controller test environment
 jest.mock('../../src/generated/prisma', () => {
+    const actualGeneratedPrisma = jest.requireActual('../../src/generated/prisma');
+
     class MockPrismaClientValidationError extends Error {
         constructor(message) { super(message); this.name = "PrismaClientValidationError"; }
     }
     class MockPrismaClientKnownRequestError extends Error {
         constructor(message, code) { super(message); this.name = "PrismaClientKnownRequestError"; this.code = code; }
     }
-    const mockPrismaNamespace = {
+
+    // Use actual Prisma namespace for errors if available, otherwise use mocks
+    const PrismaNamespace = actualGeneratedPrisma.Prisma || {
         PrismaClientKnownRequestError: MockPrismaClientKnownRequestError,
         PrismaClientValidationError: MockPrismaClientValidationError,
     };
+    
+    // This is the mock instance that `new PrismaClient()` will return.
+    // It can be an empty object if no methods are called on it by src/lib/prismaClient.js
+    // after instantiation, or you can mock specific methods if needed by lib/prismaClient.js itself.
+    const mockPrismaClientInstance = {}; 
+
     return {
-        Prisma: mockPrismaNamespace, // Used by serviceListingController.js
-        // ServiceListingStatus: { ACTIVE: 'ACTIVE', SUSPENDED: 'SUSPENDED' }, // Not directly used by controller, but entity mock might need it
-        // PrismaClient: jest.fn() // Not directly instantiated by controller
+        ...actualGeneratedPrisma, // Spread this to get all other exports like enums
+        Prisma: PrismaNamespace, 
+        PrismaClient: jest.fn(() => mockPrismaClientInstance), // Mock constructor
+        // Ensure ServiceListingStatus is correctly provided if used by the entity or lib/prismaClient
+        ServiceListingStatus: actualGeneratedPrisma.ServiceListingStatus || { ACTIVE: 'ACTIVE', SUSPENDED: 'SUSPENDED' },
     };
 });
 

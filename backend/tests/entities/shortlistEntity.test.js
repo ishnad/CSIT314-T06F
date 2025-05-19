@@ -1,24 +1,26 @@
 const ShortlistEntity = require('../../src/entities/shortlistEntity');
 const { PrismaClient, UserStatus } = require('../../src/generated/prisma');
 
-// Mock PrismaClient
+// Mock lib/prismaClient by defining the mock object within the factory
+jest.mock('../../src/lib/prismaClient', () => ({
+    userAccount: {
+        findUnique: jest.fn(),
+    },
+    shortlist: {
+        findFirst: jest.fn(),
+        create: jest.fn(),
+        findMany: jest.fn(),
+    },
+    userProfile: {
+        findUnique: jest.fn(),
+    }
+}));
+
 jest.mock('../../src/generated/prisma', () => {
-    const actualPrisma = jest.requireActual('../../src/generated/prisma');
+    const actualGeneratedPrisma = jest.requireActual('../../src/generated/prisma');
     return {
-        ...actualPrisma,
-        PrismaClient: jest.fn().mockImplementation(() => ({
-            userAccount: {
-                findUnique: jest.fn(),
-            },
-            shortlist: {
-                findFirst: jest.fn(),
-                create: jest.fn(),
-                findMany: jest.fn(),
-            },
-            userProfile: {
-                findUnique: jest.fn(),
-            }
-        })),
+        ...actualGeneratedPrisma, 
+        PrismaClient: jest.fn(() => require('../../src/lib/prismaClient')), // Return the same mock
     };
 });
 
@@ -29,13 +31,11 @@ describe('ShortlistEntity', () => {
     let consoleErrorSpy;
 
     beforeEach(() => {
+        jest.clearAllMocks(); // Ensure mocks are cleared
         // Suppress console.error for expected error handling tests
         consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-        // Create a new instance of PrismaClient for each test to ensure mock methods are fresh
-        mockPrisma = new PrismaClient();
+        mockPrisma = require('../../src/lib/prismaClient');
         shortlistEntity = new ShortlistEntity();
-        // Assign the mocked prisma instance to the entity
-        shortlistEntity.prisma = mockPrisma;
     });
 
     afterEach(() => {

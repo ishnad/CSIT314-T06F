@@ -1,8 +1,9 @@
-const { PrismaClient, Prisma } = require('../generated/prisma');
+const { Prisma } = require('../generated/prisma');
+const prisma = require('../lib/prismaClient');
 
 class MatchServiceEntity {
     constructor() {
-        this.prisma = new PrismaClient();
+        this.prisma = prisma;
     }
 
     /**

@@ -1,18 +1,24 @@
 const ProfileInsightsEntity = require('../../src/entities/profileInsightsEntity');
 const { PrismaClient } = require('../../src/generated/prisma');
 
+// Mock lib/prismaClient by defining the mock object within the factory
+jest.mock('../../src/lib/prismaClient', () => ({
+    profileView: {
+        findMany: jest.fn(),
+        count: jest.fn(),
+    },
+    shortlist: { 
+        count: jest.fn(),
+    }
+}));
+
 jest.mock('../../src/generated/prisma', () => {
-    const mockPrisma = {
-        profileView: {
-            findMany: jest.fn(),
-            count: jest.fn(),
-        },
-        shortlist: { // Add mock for shortlist
-            count: jest.fn(),
-        }
-    };
+    const actualGeneratedPrisma = jest.requireActual('../../src/generated/prisma');
+    // This mock for PrismaClient from generated/prisma is a fallback.
+    // Entities should get their client from the mocked lib/prismaClient.
     return {
-        PrismaClient: jest.fn(() => mockPrisma),
+        ...actualGeneratedPrisma,
+        PrismaClient: jest.fn(() => require('../../src/lib/prismaClient')), // Return the same mock
     };
 });
 
@@ -22,8 +28,9 @@ describe('ProfileInsightsEntity', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        entity = new ProfileInsightsEntity();
-        mockPrismaClient = new PrismaClient();
+        // Get a reference to the mocked prisma client from lib/prismaClient
+        mockPrismaClient = require('../../src/lib/prismaClient');
+        entity = new ProfileInsightsEntity(); 
     });
 
     describe('fetchViewStats', () => {

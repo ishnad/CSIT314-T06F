@@ -1,8 +1,8 @@
-const { PrismaClient } = require('../generated/prisma');
+const prisma = require('../lib/prismaClient');
 
 class ProfileInsightsEntity {
     constructor() {
-        this.prisma = new PrismaClient();
+        this.prisma = prisma;
     }
 
     /**

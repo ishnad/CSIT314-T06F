@@ -1,17 +1,21 @@
 const MatchServiceEntity = require('../../src/entities/matchServiceEntity');
-const { PrismaClient, Prisma } = require('../../src/generated/prisma'); // Import Prisma for error instance check
+// Prisma (namespace) is still imported from generated/prisma by the entity
+const { Prisma } = require('../../src/generated/prisma'); 
+
+// Mock lib/prismaClient by defining the mock object within the factory
+jest.mock('../../src/lib/prismaClient', () => ({
+    confirmedMatch: {
+        findMany: jest.fn(),
+        create: jest.fn(), 
+        count: jest.fn(),  
+    },
+    serviceListing: { 
+        findUnique: jest.fn(),
+    }
+}));
 
 jest.mock('../../src/generated/prisma', () => {
-    const mockPrismaClientInstance = {
-        confirmedMatch: {
-            findMany: jest.fn(),
-            // Add other model methods if needed by the entity
-        },
-        serviceListing: { // Add other models if the entity interacts with them directly in tested methods
-            findUnique: jest.fn(),
-        }
-    };
-    // Define a mock PrismaClientValidationError class for testing purposes
+    const actualGeneratedPrisma = jest.requireActual('../../src/generated/prisma');
     class MockPrismaClientValidationError extends Error {
         constructor(message) {
             super(message);
@@ -26,10 +30,12 @@ jest.mock('../../src/generated/prisma', () => {
         }
     }
     return {
-        PrismaClient: jest.fn(() => mockPrismaClientInstance),
-        Prisma: { // Mock the Prisma namespace
-            PrismaClientValidationError: MockPrismaClientValidationError,
-            PrismaClientKnownRequestError: MockPrismaClientKnownRequestError,
+        ...actualGeneratedPrisma,
+        PrismaClient: jest.fn(() => require('../../src/lib/prismaClient')), // Return the same mock
+        Prisma: {
+            ...(actualGeneratedPrisma.Prisma || {}), // Spread actual Prisma namespace first
+            PrismaClientValidationError: MockPrismaClientValidationError, // Then override with our mock
+            PrismaClientKnownRequestError: MockPrismaClientKnownRequestError // Then override with our mock
         }
     };
 });
@@ -40,11 +46,9 @@ describe('MatchServiceEntity', () => {
     let mockPrismaClient;
 
     beforeEach(() => {
-        jest.clearAllMocks(); // Clears call counts and resolved/rejected states for mocks created with jest.fn()
-        entity = new MatchServiceEntity();
-        mockPrismaClient = new PrismaClient(); // Gets the mocked instance
-        // Reset specific mock behaviors if they were set in a way not cleared by clearAllMocks
-        // For jest.fn(), clearAllMocks is usually enough. If using mockImplementationOnce etc., more care might be needed.
+        jest.clearAllMocks(); 
+        mockPrismaClient = require('../../src/lib/prismaClient');
+        entity = new MatchServiceEntity(); 
     });
 
     describe('fetchConfirmedMatches', () => {

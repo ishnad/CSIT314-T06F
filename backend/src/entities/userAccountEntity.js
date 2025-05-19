@@ -1,9 +1,10 @@
-const { Prisma, PrismaClient, UserStatus } = require('../generated/prisma');
+const { Prisma, UserStatus } = require('../generated/prisma');
+const prisma = require('../lib/prismaClient');
 const bcrypt = require('bcrypt');
 
 class UserAccountEntity {
     constructor() {
-        this.prisma = new PrismaClient();
+        this.prisma = prisma;
         this.SALT_ROUNDS = 10;
     }
 
@@ -464,10 +465,11 @@ async createUserAccount({ username, password, email, userProfileName }) {
             if (!cleanerProfile) {
                 throw new Error("Cleaner profile not found in database");
             }
+            const cleanerProfileId = cleanerProfile.id;
 
             const cleaners = await this.prisma.userAccount.findMany({
                 where: {
-                    userProfileId: cleanerProfile.id, // Filter by cleaner profile
+                    userProfileId: cleanerProfileId, // Filter by cleaner profile
                     status: UserStatus.ACTIVE,        // Only search for active cleaners
                     OR: keyword ? [ // Only apply OR filters if keyword is provided
                         { username: { contains: keyword, mode: 'insensitive' } },
@@ -539,11 +541,12 @@ async createUserAccount({ username, password, email, userProfileName }) {
             if (!cleanerProfile) {
                 throw new Error("Cleaner profile not found in database");
             }
+            const cleanerProfileId = cleanerProfile.id;
 
             // Find all active cleaners with their service listings
             const cleaners = await this.prisma.userAccount.findMany({
                 where: {
-                    userProfileId: cleanerProfile.id,
+                    userProfileId: cleanerProfileId,
                     status: UserStatus.ACTIVE
                 },
                 select: {

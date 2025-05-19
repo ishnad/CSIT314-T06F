@@ -1,17 +1,19 @@
 const UserLoginLogEntity = require('../../src/entities/userLoginLogEntity');
 const { PrismaClient } = require('../../src/generated/prisma');
 
-// Mock PrismaClient
+// Mock lib/prismaClient by defining the mock object within the factory
+jest.mock('../../src/lib/prismaClient', () => ({
+    userLoginLog: {
+        create: jest.fn(),
+        count: jest.fn(),
+    },
+}));
+
 jest.mock('../../src/generated/prisma', () => {
-    const actualPrisma = jest.requireActual('../../src/generated/prisma');
+    const actualGeneratedPrisma = jest.requireActual('../../src/generated/prisma');
     return {
-        ...actualPrisma,
-        PrismaClient: jest.fn().mockImplementation(() => ({
-            userLoginLog: {
-                create: jest.fn(),
-                count: jest.fn(),
-            },
-        })),
+        ...actualGeneratedPrisma,
+        PrismaClient: jest.fn(() => require('../../src/lib/prismaClient')), // Return the same mock
     };
 });
 
@@ -21,13 +23,12 @@ describe('UserLoginLogEntity', () => {
     let consoleErrorSpy;
 
     beforeEach(() => {
+        jest.clearAllMocks(); // Ensure mocks are cleared
         // Suppress console.error for expected error handling tests
         consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-        // Create a new instance of PrismaClient for each test to ensure mock methods are fresh
-        mockPrisma = new PrismaClient();
+        // Get a reference to the mocked prisma client from lib/prismaClient
+        mockPrisma = require('../../src/lib/prismaClient');
         userLoginLogEntity = new UserLoginLogEntity();
-        // Assign the mocked prisma instance to the entity
-        userLoginLogEntity.prisma = mockPrisma;
     });
 
     afterEach(() => {

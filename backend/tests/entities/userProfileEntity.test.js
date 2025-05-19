@@ -2,23 +2,26 @@ const UserProfileEntity = require('../../src/entities/userProfileEntity');
 const { PrismaClient } = require('../../src/generated/prisma');
 
 // --- Mock Dependencies ---
+// Mock lib/prismaClient by defining the mock object within the factory
+jest.mock('../../src/lib/prismaClient', () => ({
+    userProfile: {
+        findUnique: jest.fn(),
+        create: jest.fn(),
+        findMany: jest.fn(),
+        update: jest.fn(),
+    },
+}));
+
 jest.mock('../../src/generated/prisma', () => {
-    const mockPrisma = {
-        userProfile: {
-            findUnique: jest.fn(),
-            create: jest.fn(),
-            findMany: jest.fn(),
-            update: jest.fn(),
-        },
-    };
-    // Define mockUserStatus INSIDE the factory function, similar to userAccountEntity.test.js
-    const mockUserProfileStatus = {
+    const actualGeneratedPrisma = jest.requireActual('../../src/generated/prisma');
+    const mockUserProfileStatusEnum = actualGeneratedPrisma.UserProfileStatus || {
         ACTIVE: 'ACTIVE',
         SUSPENDED: 'SUSPENDED',
     };
     return {
-        PrismaClient: jest.fn(() => mockPrisma),
-        UserProfileStatus: mockUserProfileStatus, // Provide the mocked enum
+        ...actualGeneratedPrisma,
+        PrismaClient: jest.fn(() => require('../../src/lib/prismaClient')), // Return the same mock
+        UserProfileStatus: mockUserProfileStatusEnum, 
     };
 });
 
@@ -30,8 +33,8 @@ describe('UserProfileEntity', () => {
     beforeEach(() => {
         // Reset mocks and get fresh instances before each test
         jest.clearAllMocks();
-        userProfileEntity = new UserProfileEntity();
-        mockPrismaClient = new PrismaClient(); // Get reference to the mocked instance
+        mockPrismaClient = require('../../src/lib/prismaClient');
+        userProfileEntity = new UserProfileEntity(); 
     });
 
     // --- Test createUserProfile ---

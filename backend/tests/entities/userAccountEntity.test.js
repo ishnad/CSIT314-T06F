@@ -4,28 +4,31 @@ const { PrismaClient, UserStatus: mockUserStatus } = require('../../src/generate
 const bcrypt = require('bcrypt');
 
 // --- Mock Dependencies ---
+// Mock lib/prismaClient by defining the mock object within the factory
+jest.mock('../../src/lib/prismaClient', () => ({
+    userAccount: {
+        findUnique: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+    },
+    userProfile: {
+        findUnique: jest.fn(),
+    },
+}));
+
 jest.mock('../../src/generated/prisma', () => {
-    // Define mockUserStatus INSIDE the factory function
-    const mockUserStatus = {
+    const actualGeneratedPrisma = jest.requireActual('../../src/generated/prisma');
+    const mockUserStatusEnum = actualGeneratedPrisma.UserStatus || { 
         ACTIVE: 'ACTIVE',
         INACTIVE: 'INACTIVE',
         SUSPENDED: 'SUSPENDED',
         BANNED: 'BANNED',
     };
-    const mockPrisma = {
-        userAccount: {
-            findUnique: jest.fn(),
-            findMany: jest.fn(),
-            create: jest.fn(),
-            update: jest.fn(),
-        },
-        userProfile: {
-            findUnique: jest.fn(),
-        },
-    };
     return {
-        PrismaClient: jest.fn(() => mockPrisma),
-        UserStatus: mockUserStatus, // Provide the mocked enum
+        ...actualGeneratedPrisma,
+        PrismaClient: jest.fn(() => require('../../src/lib/prismaClient')), // Return the same mock
+        UserStatus: mockUserStatusEnum, 
     };
 });
 
@@ -42,8 +45,8 @@ describe('UserAccountEntity', () => {
     beforeEach(() => {
         // Reset mocks and get fresh instances before each test
         jest.clearAllMocks();
+        mockPrismaClient = require('../../src/lib/prismaClient');
         userAccountEntity = new UserAccountEntity();
-        mockPrismaClient = new PrismaClient(); // Get reference to the mocked instance
         bcrypt.hash.mockClear();
         bcrypt.compare.mockClear();
     });

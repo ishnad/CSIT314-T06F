@@ -1,8 +1,9 @@
-const { PrismaClient, UserStatus } = require('../generated/prisma');
+const { UserStatus } = require('../generated/prisma');
+const prisma = require('../lib/prismaClient');
 
 class ShortlistEntity {
     constructor() {
-        this.prisma = new PrismaClient();
+        this.prisma = prisma;
     }
 
     /**
@@ -72,6 +73,7 @@ class ShortlistEntity {
             if (!cleanerProfile) {
                 throw new Error("Cleaner profile not found in database");
             }
+            const cleanerProfileId = cleanerProfile.id;
 
             // Define search conditions if a keyword is provided
             const keywordSearchConditions = keyword ? {
@@ -98,7 +100,7 @@ class ShortlistEntity {
                 where: {
                     homeownerId: homeownerId,
                     cleaner: { // Conditions on the related cleaner
-                        userProfileId: cleanerProfile.id,
+                        userProfileId: cleanerProfileId, // Use the fetched/cached ID
                         status: UserStatus.ACTIVE, // Only include active cleaners
                         ...keywordSearchConditions, // Apply keyword search if provided
                     },
@@ -160,12 +162,13 @@ class ShortlistEntity {
             if (!cleanerUserProfile) {
                 throw new Error("Cleaner profile not found in database");
             }
+            const cleanerProfileId = cleanerUserProfile.id;
 
             const shortlistEntries = await this.prisma.shortlist.findMany({
                 where: {
                     homeownerId: homeownerId,
                     cleaner: {
-                        userProfileId: cleanerUserProfile.id,
+                        userProfileId: cleanerProfileId,
                         status: UserStatus.ACTIVE,
                     },
                 },
@@ -222,11 +225,16 @@ class ShortlistEntity {
                 select: { id: true }
             });
 
+            if (!cleanerProfile) {
+                throw new Error("Cleaner profile not found in database");
+            }
+            const cleanerProfileId = cleanerProfile.id;
+
             const shortlistEntries = await this.prisma.shortlist.findMany({
                 where: {
                     homeownerId: homeownerId,
                     cleaner: {
-                        userProfileId: cleanerProfile.id,
+                        userProfileId: cleanerProfileId,
                         status: 'ACTIVE'
                     }
                 },

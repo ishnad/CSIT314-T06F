@@ -1,25 +1,26 @@
 const ServiceCategoryEntity = require('../../src/entities/serviceCategoryEntity');
 const { PrismaClient, ServiceCategoryStatus, ServiceListingStatus } = require('../../src/generated/prisma');
 
-// Mock PrismaClient
+// Mock lib/prismaClient by defining the mock object within the factory
+jest.mock('../../src/lib/prismaClient', () => ({
+    serviceCategory: {
+        findFirst: jest.fn(),
+        create: jest.fn(),
+        findMany: jest.fn(),
+        findUnique: jest.fn(),
+        update: jest.fn(),
+        count: jest.fn(),
+    },
+    serviceListing: { 
+        count: jest.fn(),
+    },
+}));
+
 jest.mock('../../src/generated/prisma', () => {
-    const actualPrisma = jest.requireActual('../../src/generated/prisma');
+    const actualGeneratedPrisma = jest.requireActual('../../src/generated/prisma');
     return {
-        ...actualPrisma, // Import actual enums
-        PrismaClient: jest.fn().mockImplementation(() => ({
-            serviceCategory: {
-                findFirst: jest.fn(),
-                create: jest.fn(),
-                findMany: jest.fn(),
-                findUnique: jest.fn(),
-                update: jest.fn(),
-                count: jest.fn(), // Though not directly used on serviceCategory, it's good practice if it were
-            },
-            serviceListing: { // Mock this for counting active listings
-                count: jest.fn(),
-            },
-            // Mock other models if they become relevant
-        })),
+        ...actualGeneratedPrisma, 
+        PrismaClient: jest.fn(() => require('../../src/lib/prismaClient')), // Return the same mock
     };
 });
 
@@ -29,12 +30,11 @@ describe('ServiceCategoryEntity', () => {
     let mockPrisma;
 
     beforeEach(() => {
-        // Create a new instance of the entity, which will get a fresh mockPrisma instance
-        serviceCategoryEntity = new ServiceCategoryEntity();
-        // Directly access the mocked prisma instance used by the entity
-        mockPrisma = serviceCategoryEntity.prisma;
+        jest.clearAllMocks(); // Moved clearAllMocks to the top
+        mockPrisma = require('../../src/lib/prismaClient');
+        serviceCategoryEntity = new ServiceCategoryEntity(); 
 
-        // Reset all mocks before each test
+        // Reset specific mock behaviors if needed, though clearAllMocks handles jest.fn()
         mockPrisma.serviceCategory.findFirst.mockReset();
         mockPrisma.serviceCategory.create.mockReset();
         mockPrisma.serviceCategory.findMany.mockReset();

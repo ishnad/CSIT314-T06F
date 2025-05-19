@@ -2,23 +2,25 @@ const ServiceListingEntity = require('../../src/entities/serviceListingEntity');
 const { PrismaClient } = require('../../src/generated/prisma');
 
 // --- Mock Dependencies ---
+// Mock lib/prismaClient by defining the mock object within the factory
+jest.mock('../../src/lib/prismaClient', () => ({
+    serviceListing: {
+        create: jest.fn(),
+        findUnique: jest.fn(),
+        update: jest.fn(),
+        findMany: jest.fn(),
+    },
+    userAccount: {
+        findUnique: jest.fn(),
+    },
+    serviceCategory: { 
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+    }
+}));
+
 jest.mock('../../src/generated/prisma', () => {
-    const mockPrisma = {
-        serviceListing: {
-            create: jest.fn(),
-            findUnique: jest.fn(),
-            update: jest.fn(), 
-            findMany: jest.fn(),
-        },
-        userAccount: { 
-            findUnique: jest.fn(),
-        },
-        serviceCategory: { // Added mock for serviceCategory
-            findFirst: jest.fn(),
-            findMany: jest.fn(),
-        }
-    };
-    // Define mock Prisma error classes
+    const actualGeneratedPrisma = jest.requireActual('../../src/generated/prisma');
     class MockPrismaClientValidationError extends Error {
         constructor(message) { super(message); this.name = "PrismaClientValidationError"; }
     }
@@ -28,12 +30,12 @@ jest.mock('../../src/generated/prisma', () => {
     const mockPrismaNamespace = {
         PrismaClientKnownRequestError: MockPrismaClientKnownRequestError,
         PrismaClientValidationError: MockPrismaClientValidationError,
-        // Add other specific error types if the entity uses them directly via Prisma.XXXError
     };
     return {
-        PrismaClient: jest.fn(() => mockPrisma),
+        ...actualGeneratedPrisma,
+        PrismaClient: jest.fn(() => require('../../src/lib/prismaClient')), // Return the same mock
         Prisma: mockPrismaNamespace,
-        ServiceListingStatus: { ACTIVE: 'ACTIVE', SUSPENDED: 'SUSPENDED' } // Added mock for ServiceListingStatus
+        ServiceListingStatus: actualGeneratedPrisma.ServiceListingStatus || { ACTIVE: 'ACTIVE', SUSPENDED: 'SUSPENDED' }
     };
 });
 
@@ -44,8 +46,8 @@ describe('ServiceListingEntity', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        serviceListingEntity = new ServiceListingEntity();
-        mockPrismaClient = new PrismaClient();
+        mockPrismaClient = require('../../src/lib/prismaClient');
+        serviceListingEntity = new ServiceListingEntity(); 
     });
 
     // --- Test createServiceListing ---

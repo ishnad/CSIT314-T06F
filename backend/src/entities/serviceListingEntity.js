@@ -1,8 +1,9 @@
-const { PrismaClient, Prisma, ServiceListingStatus } = require('../generated/prisma');
+const { Prisma, ServiceListingStatus } = require('../generated/prisma');
+const prisma = require('../lib/prismaClient');
 
 class ServiceListingEntity {
     constructor() {
-        this.prisma = new PrismaClient();
+        this.prisma = prisma;
     }
 
     /**
