@@ -34,39 +34,33 @@ describe('ProfileInsightsEntity', () => {
             // findMany might not be called if count is 0, but good to mock it returning empty
             mockPrismaClient.profileView.findMany.mockResolvedValue([]);
 
+            // Mock Date using Jest's fake timers BEFORE calling the function under test
+            jest.useFakeTimers();
+            const mockCurrentDateForEmptyViews = new Date('2025-05-18T00:00:00.000Z');
+            jest.setSystemTime(mockCurrentDateForEmptyViews);
+
             const result = await entity.fetchViewStats(cleanerUserId);
 
             expect(mockPrismaClient.profileView.count).toHaveBeenCalledWith({
                 where: { viewedProfileId: cleanerUserId },
             });
 
-            // Mock Date to ensure consistent date generation for the expected dailyViewsLastWeek
-            const originalDate = Date;
-            const mockCurrentDateForEmptyViews = new Date('2025-05-18T00:00:00.000Z'); // Use a fixed date
-            global.Date = class extends originalDate {
-                constructor(param) {
-                    if (param) { return new originalDate(param); }
-                    return new originalDate(mockCurrentDateForEmptyViews);
-                }
-                static now() { return new originalDate(mockCurrentDateForEmptyViews).getTime(); }
-            };
-
             const expectedDailyViews = Array.from({length: 7}, (_, i) => {
-                const d = new Date(mockCurrentDateForEmptyViews); // Use the mocked date
+                const d = new Date(mockCurrentDateForEmptyViews); // Use the mocked date for expectation
                 d.setDate(mockCurrentDateForEmptyViews.getDate() - i);
                 return {
                     date: d.toISOString().split('T')[0],
                     views: 0
                 };
             });
-            global.Date = originalDate; // Restore original Date
-
+            
             expect(result).toEqual({
                 totalViews: 0,
                 dailyViewsLastWeek: expectedDailyViews
             });
             // findMany should not be called if totalViews is 0, as per current entity logic
             expect(mockPrismaClient.profileView.findMany).not.toHaveBeenCalled();
+            jest.useRealTimers();
         });
 
         it('should return total views and daily breakdown for the last 7 days', async () => {
@@ -90,25 +84,13 @@ describe('ProfileInsightsEntity', () => {
             mockPrismaClient.profileView.count.mockResolvedValue(mockTotalViews);
             mockPrismaClient.profileView.findMany.mockResolvedValue(mockDbViews);
             
-            // Mock Date constructor to control 'new Date()' inside the loop for map initialization
-            const originalDate = Date;
+            // Mock Date using Jest's fake timers
+            jest.useFakeTimers();
             const mockCurrentDate = new Date(baseDate); // This is "today" for the map generation
-            global.Date = class extends originalDate {
-                constructor(param) {
-                    if (param) {
-                        return new originalDate(param);
-                    }
-                    return new originalDate(mockCurrentDate);
-                }
-                static now() {
-                    return new originalDate(mockCurrentDate).getTime();
-                }
-            };
-
+            jest.setSystemTime(mockCurrentDate);
 
             const result = await entity.fetchViewStats(cleanerUserId);
-            global.Date = originalDate; // Restore original Date
-
+            
             expect(mockPrismaClient.profileView.count).toHaveBeenCalledWith({
                 where: { viewedProfileId: cleanerUserId },
             });
@@ -156,6 +138,7 @@ describe('ProfileInsightsEntity', () => {
                     if(isExpectedZero) expect(day.views).toBe(0);
                 }
             });
+            jest.useRealTimers();
         });
         
         it('should handle cases where there are total views but no views in the last 7 days', async () => {
@@ -164,18 +147,17 @@ describe('ProfileInsightsEntity', () => {
             mockPrismaClient.profileView.findMany.mockResolvedValue([]);
 
             const baseDate = new Date('2025-05-07T12:00:00.000Z');
-            const originalDate = Date;
-            global.Date = class extends originalDate { constructor(p) { return p ? new originalDate(p) : new originalDate(baseDate); } static now() { return new originalDate(baseDate).getTime(); } };
+            jest.useFakeTimers();
+            jest.setSystemTime(baseDate);
 
             const result = await entity.fetchViewStats(cleanerUserId);
-            global.Date = originalDate;
-
 
             expect(result.totalViews).toBe(mockTotalViews);
             expect(result.dailyViewsLastWeek.length).toBe(7);
             result.dailyViewsLastWeek.forEach(day => {
                 expect(day.views).toBe(0);
             });
+            jest.useRealTimers();
         });
 
         it('should return 500 error if prisma count fails', async () => {

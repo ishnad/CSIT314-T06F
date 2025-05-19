@@ -1,8 +1,8 @@
-const { SaveShortlistController, SearchShortlistCleanerController, ViewShortlistController } = require('./shortlistController');
-const ShortlistEntity = require('../entities/shortlistEntity');
+const { SaveShortlistController, SearchShortlistCleanerController, ViewShortlistController } = require('../../src/controllers/shortlistController');
+const ShortlistEntity = require('../../src/entities/shortlistEntity');
 
 // Mock the ShortlistEntity
-jest.mock('../entities/shortlistEntity');
+jest.mock('../../src/entities/shortlistEntity');
 
 describe('Shortlist Controllers', () => {
     let mockReq, mockRes;

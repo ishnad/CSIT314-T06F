@@ -1,9 +1,9 @@
-const ShortlistEntity = require('./shortlistEntity');
-const { PrismaClient, UserStatus } = require('../generated/prisma');
+const ShortlistEntity = require('../../src/entities/shortlistEntity');
+const { PrismaClient, UserStatus } = require('../../src/generated/prisma');
 
 // Mock PrismaClient
-jest.mock('../generated/prisma', () => {
-    const actualPrisma = jest.requireActual('../generated/prisma');
+jest.mock('../../src/generated/prisma', () => {
+    const actualPrisma = jest.requireActual('../../src/generated/prisma');
     return {
         ...actualPrisma,
         PrismaClient: jest.fn().mockImplementation(() => ({
