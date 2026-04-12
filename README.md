@@ -12,6 +12,7 @@ A role-based marketplace that helps homeowners discover and book cleaners, gives
 - [Core Tech Stack](#core-tech-stack)
 - [Key Features and Technical Impact](#key-features-and-technical-impact)
 - [System Architecture Diagram](#system-architecture-diagram)
+- [Database Schema](#database-schema)
 - [Project Structure](#project-structure)
 - [Seeded Demo Accounts](#seeded-demo-accounts)
 - [Quick Start Guide](#quick-start-guide)
@@ -106,6 +107,41 @@ flowchart LR
 ```
 
 At a high level, the React frontend handles role-based navigation and workflow screens, the Express backend exposes API endpoints and application rules, and Prisma connects those services to PostgreSQL for persistence, reporting, and analytics.
+
+## Database Schema
+
+The current database structure comes from [backend/prisma/schema.prisma](backend/prisma/schema.prisma). These are the physical tables the application persists today:
+
+```mermaid
+erDiagram
+    UserProfile ||--o{ UserAccount : assigns
+    UserAccount ||--o{ UserLoginLog : logs
+    UserAccount ||--o{ ServiceListing : publishes
+    ServiceCategory ||--o{ ServiceListing : categorizes
+    UserAccount ||--o{ ProfileView : viewed_profile
+    UserAccount o|--o{ ProfileView : viewer
+    UserAccount ||--o{ Shortlist : homeowner
+    UserAccount ||--o{ Shortlist : cleaner
+    ServiceListing ||--o{ ConfirmedMatch : booked
+    UserAccount ||--o{ ConfirmedMatch : homeowner
+```
+
+| Table | Columns | Keys and relationships |
+| --- | --- | --- |
+| `UserProfile` | `id`, `name`, `permissions`, `status`, `createdAt`, `updatedAt` | PK `id`; unique `name`; `permissions` is stored as a PostgreSQL enum array, so there is no separate permissions table. |
+| `UserAccount` | `id`, `username`, `email`, `password`, `status`, `userProfileId`, `createdAt`, `updatedAt` | PK `id`; unique `username`; unique `email`; optional FK `userProfileId -> UserProfile.id`. |
+| `UserLoginLog` | `id`, `userId`, `loginTime`, `ipAddress`, `userAgent` | PK `id`; FK `userId -> UserAccount.id`; login history table used for admin reporting. |
+| `ServiceCategory` | `id`, `serviceCatName`, `serviceCatDescription`, `status`, `createdAt`, `updatedAt` | PK `id`; unique `serviceCatName`; parent table for listing categories. |
+| `ServiceListing` | `id`, `name`, `description`, `ratePerHr`, `cleanerId`, `serviceCategoryId`, `status`, `createdAt`, `updatedAt` | PK `id`; FK `cleanerId -> UserAccount.id`; optional FK `serviceCategoryId -> ServiceCategory.id`; one cleaner can publish many listings. |
+| `ProfileView` | `id`, `viewedProfileId`, `viewerId`, `viewedAt` | PK `id`; FK `viewedProfileId -> UserAccount.id`; optional FK `viewerId -> UserAccount.id`; tracks cleaner profile engagement. |
+| `Shortlist` | `id`, `homeownerId`, `cleanerId`, `createdAt` | PK `id`; FK `homeownerId -> UserAccount.id`; FK `cleanerId -> UserAccount.id`; unique pair on `homeownerId + cleanerId` so the same cleaner can only be shortlisted once per homeowner. |
+| `ConfirmedMatch` | `id`, `serviceListingId`, `homeownerId`, `confirmationDate` | PK `id`; FK `serviceListingId -> ServiceListing.id`; FK `homeownerId -> UserAccount.id`; stores confirmed bookings/service history. |
+
+Notes from the codebase:
+
+- `ReportEntity`, `ProfileInsightsEntity`, and parts of `MatchServiceEntity` produce analytics from existing tables; they do not map to their own standalone database tables.
+- Status values such as `UserStatus`, `UserProfileStatus`, `ServiceCategoryStatus`, and `ServiceListingStatus` are implemented as PostgreSQL enums through Prisma.
+- Important integrity rules include unique usernames/emails, unique category names, and the composite unique constraint on `Shortlist(homeownerId, cleanerId)`.
 
 ## Project Structure
 
